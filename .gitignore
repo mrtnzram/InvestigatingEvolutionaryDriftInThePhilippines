@@ -15,6 +15,7 @@ credentials/
 
 # --- Archived legacy scripts (superseded by R/) ---
 _archive/
+python/optimal_path.ipynb
 
 # --- Cognate analysis: excluded from the paper for now ---
 R/cognate_analysis/
