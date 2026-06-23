@@ -12,6 +12,7 @@ library(patchwork)
 library(igraph)
 library(sfheaders)
 library(here)
+library(ggridges)
 
 
 # ---- Prepping Globals --------------------------------------------------------------------------
@@ -312,7 +313,7 @@ comparison_results2 %>%
 
 calculate_weighted_cosine_similarity <- function(PHOIBLEdf, phoneme_freq, phoneme_cols, id_col = "language") {
   
-  # Step 1: Extract and align the binary data and IDF weights
+  # Extract and align the binary data and IDF weights
   # Ensure the phoneme frequencies are in the same order as the phoneme columns
   aligned_freq <- phoneme_freq %>%
     dplyr::filter(phoneme %in% phoneme_cols) %>%
@@ -441,23 +442,49 @@ combined_scores_summary <- combined_scores %>%
   group_by(Language) %>%
   summarize(mean_score = mean(Similarity_Score))
 
-
-ggplot(combined_scores, aes(x = Similarity_Score, fill = Language)) +
-  geom_density(alpha = 0.5) +
-  geom_vline(
+cossim_phoneme_density_ridge <- ggplot(combined_scores, aes(x = Similarity_Score, y = Language, fill = Language)) +
+  # Changed to geom_density_ridges
+  geom_density_ridges(alpha = 0.5, scale = 1.2, color = "black") + 
+  
+  # Replaced geom_vline with geom_segment to keep lines contained within each ridge
+  geom_segment(
     data = combined_scores_summary,
-    aes(xintercept = mean_score, color = Language),
+    aes(
+      x = mean_score, 
+      xend = mean_score, 
+      y = as.numeric(factor(Language)), 
+      yend = as.numeric(factor(Language)) + 0.9, # Adjust height of the line
+      color = Language
+    ),
     linetype = "dashed",
-    size = 1.2
+    size = 1.2,
+    inherit.aes = FALSE # Prevents conflicting with the main plot's y aesthetic mapping
   ) +
   labs(
-    title = "Cosine Similarity Distribution",
+    title = "Phoneme Cosine Similarity Distribution",
     x = "Similarity Score",
-    y = "Density"
+    y = "Language"
   ) +
-  theme_bw() +
-  scale_x_continuous(breaks = seq(0, 0.4, by = 0.05))
+  theme_minimal() +
+  scale_x_continuous(breaks = seq(0, 0.4, by = 0.05)) +
+  scale_y_discrete(expand = c(0.01,0)) +
+  theme(legend.position = "none")
 
+#---
+cossim_phoneme_density_ridge
+#---
+
+ggsave(
+  filename = here("figures", "phoneme", "distributions", "phoneme_ridgeplot.png"),
+  plot = cossim_phoneme_density_ridge,
+  width = 7,
+  height = 4.5,
+  units = "in",
+  dpi = 300
+)
+
+
+# Individual Plots ---- 
 phoneme_cos_s <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','Spanish')), aes(x = Similarity_Score, fill = Language)) +
   geom_density(alpha = 0.5) +
   geom_vline(
@@ -507,6 +534,10 @@ phoneme_cos_j <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','
   scale_x_continuous(breaks = seq(0, 0.4, by = 0.02))
 
 phoneme_cos_s + phoneme_cos_e + phoneme_cos_j
+
+
+# ---- non-independent non-parametric statistical tests for similarity distributions --------------
+
 
 
 
@@ -1100,7 +1131,7 @@ b <- round(coefs["b"], 5)
 exp_eq <- paste0("μ = ", a, " * exp(-", b, " * x)")
 print(exp_eq)
 
-# ----- spline regression
+# ----- spline regression --------
 
 library(splines)
 
