@@ -87,12 +87,6 @@ tiles_masked$y <- coords[, "X"]
 world_map <- map_data("world")
 map_subset <- world_map %>% filter(region %in% c("Philippines", "Malaysia"))
 
-# Top languages by Spanish similarity (for labelling)
-label_df <- GRAMFEATURE_match_df %>%
-  arrange(desc(cossim_span)) %>%
-  distinct(language, .keep_all = TRUE) %>%
-  slice_head(n = 10)
-
 base_plot <- ggplot() +
   geom_tile(data = data_pts, aes(x = y, y = x, fill = z_log), alpha = 0.6) +
   geom_polygon(data = map_subset, aes(x = long, y = lat, group = group),
@@ -149,8 +143,8 @@ tiles_masked$y <- coords[, "X"]
 world_map <- map_data("world")
 map_subset <- world_map %>% filter(region %in% c("Philippines", "Malaysia"))
 
-label_df <- GRAMFEATURE_match_df %>%
-  arrange(desc(zscore_span)) %>%
+label_df <- GRAMMAR_cossim %>%
+  arrange(desc(cossim_span)) %>%
   distinct(language, .keep_all = TRUE) %>%
   slice_head(n = 10)
 
@@ -158,8 +152,8 @@ ggplot() +
   geom_tile(data = tiles_masked, aes(x = y, y = x, fill = z_log), alpha = 0.6) +
   geom_polygon(data = map_subset, aes(x = long, y = lat, group = group),
                fill = NA, color = "black") +
-  geom_point(data = GRAMFEATURE_match_df,
-             aes(x = longitude, y = latitude, color = match_score_span),
+  geom_point(data = GRAMMAR_cossim,
+             aes(x = longitude, y = latitude, color = cossim_span),
              size = 10, alpha = 0.7) +
   geom_point(data = label_df, aes(x = longitude, y = latitude),
              size = 10, shape = 21, color = "black") +
@@ -175,13 +169,13 @@ ggplot() +
   scale_color_gradient(low = "white", high = "navy") +
   guides(
     fill = guide_colorbar(title = "log(Diversity Rate)", title.position = "top", title.hjust = 0.5),
-    color = guide_colorbar(title = "Match Score (Spanish)", title.position = "top", title.hjust = 0.5)
+    color = guide_colorbar(title = "Cosine Similarity (Spanish)", title.position = "top", title.hjust = 0.5)
   ) +
   coord_fixed(xlim = c(115, 130), ylim = c(4, 22)) +
   scale_x_continuous(breaks = seq(115, 130, by = 2)) +
   scale_y_continuous(breaks = seq(4, 22, by = 2)) +
   labs(
-    title = "Linguistic Z-Scores Over Diversity Surface",
+    title = "Cosine Similarity Over Diversity Surface",
     x = "Longitude",
     y = "Latitude"
   ) +

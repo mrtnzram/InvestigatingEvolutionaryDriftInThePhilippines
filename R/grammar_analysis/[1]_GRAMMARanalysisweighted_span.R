@@ -10,6 +10,7 @@ library(ggplot2)
 library(purrr)
 library(here)
 library(ggridges)
+library(fastDummies)
 
 
 # ---- Prepping Globals --------------------------------------------------------------------------
@@ -39,7 +40,44 @@ feature_cols
 
 gramfeature_freq <- read_csv(here("data", "gramfeature_freq.csv"))
 
+# ---- one-hot encode categorical columns ----------
 
+# Classify feature_cols by cardinality
+n_levels <- map_int(
+  feature_cols,
+  \(col) GRAMBANKdf_PH[[col]] |> na.omit() |> unique() |> length()
+)
+
+binary_cols      <- feature_cols[n_levels <= 2]   # 0/1  → already valid; keep
+categorical_cols <- feature_cols[n_levels >  2]   # 0/1/2 → expand to 3 dummies
+
+cat(sprintf(
+  "Binary (kept):       %d cols\nCategorical (OHE'd): %d cols\n",
+  length(binary_cols), length(categorical_cols)
+))
+
+# One-hot encode the 3-level columns
+GRAMBANKdf_PH_ohe <- GRAMBANKdf_PH |>
+  dummy_cols(
+    select_columns          = categorical_cols,
+    remove_selected_columns = TRUE,   # drop original integer column
+    remove_first_dummy      = FALSE,  # full OHE — keep all 3 levels
+    ignore_na               = TRUE    # NA row → NA across all 3 dummies
+  )
+
+# Reconstruct updated feature_cols vector
+# fastDummies names dummies as <col>_<value> (e.g. CONJ_COORD_0, _1, _2)
+ohe_pattern  <- str_c("^(", str_c(categorical_cols, collapse = "|"), ")_")
+ohe_cols     <- str_subset(names(GRAMBANKdf_PH_ohe), ohe_pattern)
+
+feature_cols_ohe <- c(binary_cols, ohe_cols)
+
+cat(sprintf(
+  "Feature matrix: %d binary + %d OHE cols = %d total features\n",
+  length(binary_cols), length(ohe_cols), length(feature_cols_ohe)
+))
+
+GRAMBANKdf_PH <- GRAMBANKdf_PH_ohe
 
 # ----- cosine similarity ------------------------
 
@@ -111,12 +149,12 @@ calculate_weighted_cosine_similarity <- function(GRAMBANKdf_PH, gramfeature_freq
   return(cosine_matrix_grammar)
 }
 
-
+feature
 
 cosine_matrix_grammar <- calculate_weighted_cosine_similarity(
   GRAMBANKdf_PH, 
   gramfeature_freq, 
-  feature_cols, 
+  feature_cols_ohe, 
   id_col = "language")
 
 
@@ -224,7 +262,7 @@ cossim_grammar_density_ridge <- ggplot(combined_scores, aes(x = Similarity_Score
     y = "Language"
   ) +
   theme_minimal() +
-  scale_x_continuous(breaks = seq(0, 0.4, by = 0.05)) +
+  scale_x_continuous(breaks = seq(0, 0.8, by = 0.05)) +
   scale_y_discrete(expand = c(0.01,0)) +
   theme(legend.position = "none")
 
@@ -623,6 +661,8 @@ compute_shortest_path_df <- function(df, ref_coords1, nodes, edges, land_penalty
 
 GRAMMAR_cossim <- compute_shortest_path_df(GRAMMAR_cossim, ref_coords1, nodes, edges, land_penalty = 44.18)
 
+df <- GRAMMAR_cossim 
+
 # ------- ROUTE PLOTTING ----------------
 world_map <- map_data("world") %>%
   filter(region %in% c("Philippines", "Malaysia"))
@@ -668,92 +708,45 @@ print(GRAMMAR_cossim$plot[[12]])
 
 land_segments_sf$crosses_land <- TRUE
 sea_segments_sf$crosses_land  <- FALSE
-
 main_path_sf <- rbind(land_segments_sf, sea_segments_sf)
 
-
-geom_list <- list()
-land_flag <- logical()
+# Build arrow_sf and connector_sf from a single loop
+arrow_geom_list <- list()
+arrow_land_flag <- logical()
 
 for (i in seq_len(nrow(df))) {
   if (!is.null(df$land_geom_start[[i]])) {
-    geom_list <- append(geom_list, list(df$land_geom_start[[i]]))
-    land_flag <- append(land_flag, TRUE)
+    arrow_geom_list <- append(arrow_geom_list, list(df$land_geom_start[[i]]))
+    arrow_land_flag <- append(arrow_land_flag, TRUE)
   }
   if (!is.null(df$sea_geom_start[[i]])) {
-    geom_list <- append(geom_list, list(df$sea_geom_start[[i]]))
-    land_flag <- append(land_flag, FALSE)
+    arrow_geom_list <- append(arrow_geom_list, list(df$sea_geom_start[[i]]))
+    arrow_land_flag <- append(arrow_land_flag, FALSE)
   }
   if (!is.null(df$land_geom_end[[i]])) {
-    geom_list <- append(geom_list, list(df$land_geom_end[[i]]))
-    land_flag <- append(land_flag, TRUE)
+    arrow_geom_list <- append(arrow_geom_list, list(df$land_geom_end[[i]]))
+    arrow_land_flag <- append(arrow_land_flag, TRUE)
   }
   if (!is.null(df$sea_geom_end[[i]])) {
-    geom_list <- append(geom_list, list(df$sea_geom_end[[i]]))
-    land_flag <- append(land_flag, FALSE)
+    arrow_geom_list <- append(arrow_geom_list, list(df$sea_geom_end[[i]]))
+    arrow_land_flag <- append(arrow_land_flag, FALSE)
   }
 }
 
-connector_sf <- st_sf(
-  crosses_land = land_flag,
-  geometry = st_sfc(geom_list, crs = 4326)
+arrow_sf <- st_sf(
+  crosses_land = arrow_land_flag,
+  geometry     = st_sfc(arrow_geom_list, crs = 4326)
 )
 
+connector_sf <- arrow_sf
 
+# Tag and combine
+main_path_sf$source <- "main"
+connector_sf$source <- "connector"
+main_path_sf        <- st_set_crs(main_path_sf, 4326)
+full_tree_sf        <- rbind(main_path_sf, connector_sf)
 
-arrow_segments <- list()
-
-for (i in seq_len(nrow(df))) {
-  if (!is.null(df$land_geom_start[[i]])) {
-    arrow_segments <- append(arrow_segments, list(
-      st_sf(geometry = st_sfc(df$land_geom_start[[i]], crs = 4326), crosses_land = TRUE)
-    ))
-  }
-  if (!is.null(df$sea_geom_start[[i]])) {
-    arrow_segments <- append(arrow_segments, list(
-      st_sf(geometry = st_sfc(df$sea_geom_start[[i]], crs = 4326), crosses_land = FALSE)
-    ))
-  }
-  if (!is.null(df$land_geom_end[[i]])) {
-    arrow_segments <- append(arrow_segments, list(
-      st_sf(geometry = st_sfc(df$land_geom_end[[i]], crs = 4326), crosses_land = TRUE)
-    ))
-  }
-  if (!is.null(df$sea_geom_end[[i]])) {
-    arrow_segments <- append(arrow_segments, list(
-      st_sf(geometry = st_sfc(df$sea_geom_end[[i]], crs = 4326), crosses_land = FALSE)
-    ))
-  }
-}
-
-arrow_sf <- do.call(rbind, arrow_segments)
-
-
-full_tree_sf <- rbind(main_path_sf, connector_sf)
-
-full_tree_lines <- st_cast(full_tree_sf, "LINESTRING")
-arrow_main <- do.call(rbind, lapply(1:nrow(full_tree_lines), function(i) {
-  coords <- st_coordinates(full_tree_lines[i, ])
-  start <- coords[1, c("X", "Y")]
-  end <- coords[nrow(coords), c("X", "Y")]
-  st_sf(
-    geometry = st_sfc(st_linestring(rbind(start, end)), crs = st_crs(full_tree_lines))
-  )
-}))
-
-
-arrow_main <- full_tree_sf %>%
-  mutate(
-    start = st_coordinates(.)[1, ],
-    end = st_coordinates(.)[nrow(st_coordinates(.)), ]
-  ) %>%
-  rowwise() %>%
-  mutate(
-    geometry = st_sfc(st_linestring(rbind(start, end)), crs = st_crs(full_tree_sf))
-  ) %>%
-  st_as_sf()
-
-
+# Diagnostic plot
 ggplot() +
   geom_polygon(data = world_map, aes(x = long, y = lat, group = group),
                fill = "gray95", color = "gray70") +
@@ -761,34 +754,27 @@ ggplot() +
   geom_sf(data = arrow_sf,
           arrow = arrow(length = unit(0.2, "cm"), type = "closed"),
           color = "black") +
-  geom_sf(data = arrow_main,
-          arrow = arrow(length = unit(0.25, "cm"), type = "closed"),
-          color = "black") +
-  geom_point(data = GRAMMAR_cossim,aes(x = longitude, y = latitude), 
+  geom_point(data = GRAMMAR_cossim, aes(x = longitude, y = latitude),
              size = 3, shape = 21) +
   coord_sf(xlim = c(116, 127), ylim = c(4, 21)) +
   theme_minimal() +
   labs(title = "Grammatic Historical Routes Waypoint System",
-       color = "Travel Mode",
-       x = 'Longitude',
-       y = 'Latitude')
+       x = "Longitude", y = "Latitude")
 
-
+# Arrow overlay plot (saved)
 arrow_plot_GRAMMAR <- ggplot() +
+  geom_sf(data = full_tree_sf,
+          mapping = aes(geometry = geometry),
+          color = "black", linewidth = 0.7) +
   geom_sf(data = arrow_sf,
+          mapping = aes(geometry = geometry),
           arrow = arrow(length = unit(0.2, "cm"), type = "closed"),
-          color = "black",linewidth = 0.7) +
-  geom_sf(data = arrow_main,
-          arrow = arrow(length = unit(0.25, "cm"), type = "closed"),
-          color = "black",linewidth = 0.7) +
+          color = "black", linewidth = 0.7) +
   coord_sf(xlim = c(116, 127), ylim = c(4, 21)) +
   theme_minimal()
 
 arrow_plot_GRAMMAR
-
 saveRDS(arrow_plot_GRAMMAR, file = here("data", "grammar_waypoint_plot.rds"))
-
-
 
 # ----- linear model -------------------------------------------
 

@@ -541,7 +541,7 @@ phoneme_cos_s + phoneme_cos_e + phoneme_cos_j
 
 
 
-# ---- linear regression analysis cossim -------------------
+# ---- distance metric -------------------
 
 df_span<- df_span %>% 
   mutate(latitude = lat.lang(language),
@@ -552,13 +552,6 @@ df_jap<- df_jap %>%
 df_eng<- df_eng %>% 
   mutate(latitude = lat.lang(language),
          longitude = long.lang(language))
-
-
-
-
-df_span_lr <- find_optimal_ref_coords(df = df_span, y_var = "cossim")
-df_jap_lr <- find_optimal_ref_coords(df = df_jap, y_var = "cossim")
-df_eng_lr <- find_optimal_ref_coords(df = df_eng, y_var = "cossim")
 
 
 # ---- weighted geo_distance from capital using waypoints -------
@@ -990,29 +983,29 @@ for (i in seq_len(nrow(df))) {
 arrow_sf <- do.call(rbind, arrow_segments)
 
 
-full_tree_sf <- rbind(main_sf, connector_sf)
+main_path_sf$source   <- "main"
+connector_sf$source   <- "connector"
 
-full_tree_lines <- st_cast(full_tree_sf, "LINESTRING")
+full_tree_sf <- rbind(main_path_sf, connector_sf)
 
-arrow_main <- do.call(rbind, lapply(1:nrow(full_tree_lines), function(i) {
-  coords <- st_coordinates(full_tree_lines[i, ])
-  start <- coords[1, c("X", "Y")]
-  end <- coords[nrow(coords), c("X", "Y")]
-  st_sf(
-    geometry = st_sfc(st_linestring(rbind(start, end)), crs = st_crs(full_tree_lines))
-  )
-}))
+full_tree_lines <- full_tree_sf %>%
+  st_cast("MULTILINESTRING") %>%
+  st_cast("LINESTRING")
 
-
-arrow_main <- full_tree_sf %>%
-  mutate(
-    start = st_coordinates(.)[1, ],
-    end = st_coordinates(.)[nrow(st_coordinates(.)), ]
-  ) %>%
-  rowwise() %>%
-  mutate(
-    geometry = st_sfc(st_linestring(rbind(start, end)), crs = st_crs(full_tree_sf))
-  ) %>%
+arrow_main <- full_tree_lines %>%
+  filter(source == "main") %>%          # ← only main path, not connectors
+  mutate(row_id = row_number()) %>%
+  group_by(row_id) %>%
+  group_modify(~ {
+    coords <- st_coordinates(.x)
+    if (nrow(coords) < 2) return(.x)
+    start_coord <- coords[1, c("X", "Y")]
+    end_coord   <- coords[nrow(coords), c("X", "Y")]
+    new_geom <- st_sfc(st_linestring(rbind(start_coord, end_coord)), crs = st_crs(.x))
+    st_set_geometry(.x, new_geom)
+  }) %>%
+  ungroup() %>%
+  select(-row_id) %>%
   st_as_sf()
 
 
@@ -1041,17 +1034,22 @@ ggplot() +
 
 
 arrow_plot <- ggplot() +
+  # Main path lines — no arrows
+  geom_sf(data = full_tree_sf,
+          mapping = aes(geometry = geometry),
+          color = "black", linewidth = 1) +
+  
+  # Connector segments — with arrows only
   geom_sf(data = arrow_sf,
+          mapping = aes(geometry = geometry),
           arrow = arrow(length = unit(0.2, "cm"), type = "closed"),
-          color = "black",linewidth = 1) +
-  geom_sf(data = arrow_main,
-          arrow = arrow(length = unit(0.25, "cm"), type = "closed"),
-          color = "black",linewidth = 1) +
+          color = "black", linewidth = 1) +
+  
   coord_sf(xlim = c(116, 127), ylim = c(4, 21)) +
   theme_minimal()
+
 print(arrow_plot)
 saveRDS(arrow_plot, file = here("data", "phoneme_waypoint_plot.rds"))
-
 
 
 # ----- linear model -------------------------------------------
@@ -1072,7 +1070,7 @@ ggplot(data = PHONEME_cossim, aes(x = geodist_H1_span, y = cossim_span)) +
        x = 'Relative Migration Distance (km)',
        y = 'Cosine Similarity')
 
-# ---- exponential case -------------------------------------
+# ---- exponential model -------------------------------------
 
 library(rethinking)
 

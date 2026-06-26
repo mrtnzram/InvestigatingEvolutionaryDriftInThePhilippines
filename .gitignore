@@ -31,3 +31,4 @@ data/logicalTLI_grammar_densified_large.csv
 
 # --- EEMS MCMC run outputs (large/generated; re-run MATLAB EEMS to recreate) ---
 matlab/**/datapath-*simno*/
+.positai
