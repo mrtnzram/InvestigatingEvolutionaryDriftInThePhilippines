@@ -117,7 +117,7 @@ repeat {
 # Inspect NA counts per snapshot and select the most stable iteration
 colSums(is.na(GRAMBANK_snapshots$iter_1))
 colSums(is.na(GRAMBANK_snapshots$iter_2))
-colSums(is.na(GRAMBANK_snapshots$iter_3))
+colSums(is.na(GRAMBANK_snapshots$iter_200))
 
 GRAMBANKdf_PH_maximized <- GRAMBANK_snapshots$iter_2
 
@@ -135,7 +135,7 @@ GRAMBANKdf_query_with_familyname <- GRAMBANK_query %>%
 
 # Keep languages outside the related families but within the same macroareas
 GRAMBANKdf_unrelated <- GRAMBANKdf_query_with_familyname %>%
-  filter(!Family_name %in% relatedfamilies) %>%
+  filter(!Family_name %in% c('Austronesian')) %>%
   filter(Macroarea %in% relatedmacroareas) %>%
   select(glottocode,GB020,GB021,GB022,GB023,GB028,GB030,GB031,GB035,GB036,GB037,GB042,GB043,GB044,GB051,GB052,GB053,
          GB054,GB065,GB070,GB071,GB072,GB073,GB079,GB080,GB082,GB083,GB084,GB086,GB089,GB090,GB091,GB092,GB093,GB094,GB107,

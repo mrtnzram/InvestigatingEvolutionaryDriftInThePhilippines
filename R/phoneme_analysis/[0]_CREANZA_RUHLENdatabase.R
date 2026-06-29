@@ -41,6 +41,15 @@ ruhlen_raw <- read_tsv(
 message("Loaded Ruhlen data: ", nrow(ruhlen_raw), " languages × ",
         length(phoneme_cols), " phoneme features")
 
+# filter duplicate English and Spanish
+
+ruhlen_raw <- ruhlen_raw |>
+  filter(
+    !(language == "Spanish" & region != "Europe"),
+    !(language == "English" & region != "AmericasNorthCentral")
+  ) |>
+  slice_max(population, by = language, n = 1, with_ties = FALSE)
+
 # ---- 3. Define the study language set ----
 # Philippine languages: derived from the Ruhlen lat/lon coordinates.
 # Bounding box covers the Philippine archipelago (no hardcoded name list needed).
@@ -55,13 +64,47 @@ message("Philippine languages detected by bounding box (n = ", length(Ph_Languag
         paste0("  ", Ph_Languages, collapse = "\n"))
 
 Interest_Languages <- c("English", "Spanish", "Japanese")
-UnrelatedLangs <- c(
-  "Basque", "Hungarian", "Finnish", "South Saami", "Gagauz", "Estonian",
-  "Turkish", "Moksha", "Ugaritic", "Liv", "Korean", "Mandarin Chinese",
-  "Udihe", "Halh Mongolian", "Sedang"
-)
 
-Languages <- c(Ph_Languages, Interest_Languages, UnrelatedLangs)
+# --- Derive unrelated languages set ----------
+
+# Get Philippine families and regions directly from ruhlen
+ph_families <- ruhlen_raw |>
+  filter(language %in% ph_lang) |>
+  pull(language_family) |>
+  unique()
+
+ph_regions <- ruhlen_raw |>
+  filter(language %in% ph_lang) |>
+  pull(region) |>
+  unique()
+
+# Ruhlen candidates — same region, different family, not already in study set
+ruhlen_candidates <- ruhlen_raw |>
+  filter(
+    region           %in% ph_regions,
+    !language_family %in% ph_families,
+    !language        %in% Languages
+  )
+
+# Bridge Grambank glottocodes to ISO via lingtypology::languages
+grambank_iso <- GRAMBANKdf_unrelated |>
+  mutate(iso6393 = iso.gltc(glottocode))
+
+# Inner join on ISO — only keep ruhlen languages with full Grambank coverage
+Unrelated_Langauges <- ruhlen_candidates |>
+  inner_join(
+    grambank_iso |> select(glottocode, iso6393),
+    by = join_by(iso6393 == iso6393)
+  ) |>
+  pull(language)
+
+message("Unrelated languages (n = ", length(unr_lang), "):\n",
+        paste0("  ", unr_lang, collapse = "\n"))
+
+
+# -- All Languages
+
+Languages <- c(Ph_Languages, Interest_Languages, Unrelated_Langauges)
 
 # ---- 4. Filter to study languages and build output schema ----
 # No source deduplication needed: Ruhlen has exactly one record per language.
@@ -73,10 +116,10 @@ PHOIBLEdf_PH <- ruhlen_raw |>
     Language_type = case_when(
       language %in% Ph_Languages       ~ "Philippine Language",
       language %in% Interest_Languages ~ "Language of Interest",
-      language %in% UnrelatedLangs     ~ "Unrelated Language"
+      language %in% Unrelated_Langauges     ~ "Unrelated Language"
     )
   ) |>
-  select(iso6393, language, source, all_of(phoneme_cols), Language_type)
+  select(iso6393, language, source, latitude, longitude, all_of(phoneme_cols), Language_type)
 
 # Diagnostic: report any study languages absent from the Ruhlen database
 unmatched <- setdiff(Languages, PHOIBLEdf_PH$language)
@@ -94,7 +137,7 @@ if (length(unmatched) > 0) {
 # ---- 5. Preview geographic spread ----
 map.feature(PHOIBLEdf_PH$language, PHOIBLEdf_PH$Language_type)
 
-write_csv(PHOIBLEdf_PH, here("data", "PHOIBLEdf_PH_ruhlen.csv"))
+write_csv(PHOIBLEdf_PH, here("data", "RUHLENdf_PH"))
 
 # ---- 6. Compute global phoneme frequencies and IDF weights ----
 # Denominator: all 2082 Ruhlen languages (one row per language, no deduplication).

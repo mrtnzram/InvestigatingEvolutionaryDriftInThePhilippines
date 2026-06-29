@@ -17,35 +17,32 @@ library(ggridges)
 
 # ---- Prepping Globals --------------------------------------------------------------------------
 
-PHOIBLEdf <- read_csv(here("data", "PHOIBLEdf_PH.csv"))
+RUHLENdf <- read_csv(here("data", "RUHLENdf_PH.csv"))
 
-PHOIBLEdf <- PHOIBLEdf %>% 
-  mutate(latitude = lat.lang(language),
-         longitude = long.lang(language))
+ph_lang <- RUHLENdf |> 
+  filter(Language_type == 'Philippine Language') |> 
+  pull(language)
 
-ph_lang <- c('Tiruray', 'Maranao', 'Central Sama', 'Hiligaynon', 'Aklanon', 'Filipino', 'Coastal-Naga Bikol','Tagalog','Pampanga','Pangasinan','Iloko','Dupaninan Agta',
-             'Cebuano','Southern Sama')
-int_lang <- c('English','Spanish','Japanese')
-unr_lang <- c("Basque","Hungarian","Finnish","South Saami","Gagauz","Estonian","Turkish","Moksha","Liv",
-              "Korean","Mandarin Chinese","Udihe","Halh Mongolian","Sedang")
+int_lang <- RUHLENdf |> 
+  filter(Language_type == 'Language of Interest') |> 
+  pull(language)
 
+unr_lang <- RUHLENdf |> 
+  filter(Language_type == 'Unrelated Language') |> 
+  pull(language)
 
-phoneme_cols <- PHOIBLEdf %>% 
+phoneme_cols <- RUHLENdf %>% 
   select(-language,-source,-iso6393,-Language_type,-latitude,-longitude)
 
 phoneme_cols <- colnames(phoneme_cols)
 
-PHOIBLEdf_full<- phoible.feature(source='all',na.rm = FALSE)
-
-
-phoneme_freq <- read_csv(here("data", "phoneme_freq.csv"))
-
+phoneme_freq <- read_csv(here("data", "phoneme_freq_ruhlen.csv"))
 
 
 # ------ weighted similarity ---------------------
 
 
-calculate_language_similarity <- function(PHOIBLEdf, phoneme_freq, phoneme_cols, id_col = "language") {
+calculate_language_similarity <- function(RUHLENdf, phoneme_freq, phoneme_cols, id_col = "language") {
   
   # Ensure data frames are aligned by phoneme order
   # This is a crucial step to ensure weights match the correct phonemes
@@ -54,11 +51,11 @@ calculate_language_similarity <- function(PHOIBLEdf, phoneme_freq, phoneme_cols,
     arrange(match(phoneme, phoneme_cols))
   
   # Extract binary phoneme data
-  binary_data <- PHOIBLEdf %>%
+  binary_data <- RUHLENdf %>%
     select(all_of(phoneme_cols))
   
   # Extract language IDs
-  language_ids <- PHOIBLEdf[[id_col]]
+  language_ids <- RUHLENdf[[id_col]]
   
   # Calculate the weights for 1-1 and 0-0 matches
   w_11 <- phoneme_freq$IDF
@@ -105,7 +102,7 @@ calculate_language_similarity <- function(PHOIBLEdf, phoneme_freq, phoneme_cols,
 }
 
 similarity_matrix <- calculate_language_similarity(
-  PHOIBLEdf = PHOIBLEdf,
+  RUHLENdf = RUHLENdf,
   phoneme_freq = phoneme_freq,
   phoneme_cols = phoneme_cols,
   id_col = "language"
@@ -189,14 +186,14 @@ ggplot(combined_scores, aes(x = Similarity_Score, fill = Language)) +
 
 # investigate deeper on a phoneme level ------------------------------------------------------------------
 
-investigate_language_pair <- function(PHOIBLEdf, phoneme_freq, phoneme_cols, id_col, lang1_id, lang2_id) {
+investigate_language_pair <- function(RUHLENdf, phoneme_freq, phoneme_cols, id_col, lang1_id, lang2_id) {
   
   # Step 1: Extract and align the two language vectors
-  lang1_row <- PHOIBLEdf %>%
+  lang1_row <- RUHLENdf %>%
     dplyr::filter(!!rlang::sym(id_col) == lang1_id) %>%
     dplyr::select(dplyr::all_of(phoneme_cols))
   
-  lang2_row <- PHOIBLEdf %>%
+  lang2_row <- RUHLENdf %>%
     dplyr::filter(!!rlang::sym(id_col) == lang2_id) %>%
     dplyr::select(dplyr::all_of(phoneme_cols))
   
@@ -252,7 +249,7 @@ investigate_language_pair <- function(PHOIBLEdf, phoneme_freq, phoneme_cols, id_
 }
 
 comparison_results <- investigate_language_pair(
-  PHOIBLEdf = PHOIBLEdf,
+  RUHLENdf = RUHLENdf,
   phoneme_freq = phoneme_freq,
   phoneme_cols = phoneme_cols,
   id_col = "language",
@@ -261,7 +258,7 @@ comparison_results <- investigate_language_pair(
 )
 
 comparison_results2 <- investigate_language_pair(
-  PHOIBLEdf = PHOIBLEdf,
+  RUHLENdf = RUHLENdf,
   phoneme_freq = phoneme_freq,
   phoneme_cols = phoneme_cols,
   id_col = "language",
@@ -311,7 +308,7 @@ comparison_results2 %>%
 
 # ----- cosine similarity ------------------------
 
-calculate_weighted_cosine_similarity <- function(PHOIBLEdf, phoneme_freq, phoneme_cols, id_col = "language") {
+calculate_weighted_cosine_similarity <- function(RUHLENdf, phoneme_freq, phoneme_cols, id_col = "language") {
   
   # Extract and align the binary data and IDF weights
   # Ensure the phoneme frequencies are in the same order as the phoneme columns
@@ -322,12 +319,12 @@ calculate_weighted_cosine_similarity <- function(PHOIBLEdf, phoneme_freq, phonem
   idf_weights <- aligned_freq$IDF
   
   # Extract the binary phoneme data
-  binary_data <- PHOIBLEdf %>%
+  binary_data <- RUHLENdf %>%
     dplyr::select(dplyr::all_of(phoneme_cols)) %>%
     as.matrix() # Convert to a matrix for faster calculations
   
   # Extract language IDs for matrix naming
-  language_ids <- PHOIBLEdf[[id_col]]
+  language_ids <- RUHLENdf[[id_col]]
   
   # Step 2: Create a weighted phoneme matrix
   # Multiply each column of the binary matrix by its corresponding IDF weight
@@ -368,17 +365,17 @@ calculate_weighted_cosine_similarity <- function(PHOIBLEdf, phoneme_freq, phonem
   return(cosine_matrix)
 }
 
-
+attested_phonemes <- phoneme_freq$phoneme
 
 cosine_matrix <- calculate_weighted_cosine_similarity(
-  PHOIBLEdf, 
+  RUHLENdf, 
   phoneme_freq, 
-  phoneme_cols, 
+  attested_phonemes, 
   id_col = "language")
 
 # INVESTIGATE --------------------------------------------------
 
-ordered_languages <- PHOIBLEdf %>%
+ordered_languages <- RUHLENdf %>%
   arrange(Language_type) %>%
   pull(language)
 
@@ -389,30 +386,24 @@ cosine_matrix <- cosine_matrix[ordered_languages, ordered_languages]
 cosine_matrix['Tagalog','Spanish'] 
 cosine_matrix['Tagalog','Japanese'] 
 
-sub_matrixspan <- cosine_matrix[ph_lang, 'Spanish']
-sub_matrixjap <- cosine_matrix[ph_lang, 'Japanese']
-sub_matrixeng <- cosine_matrix[ph_lang, 'English']
+unr_lang_test <- unr_lang[!unr_lang %in% c("Ainu", "Nimboran")]
 
+sub_matrixspan <- cosine_matrix[ph_lang, "Spanish"]
+sub_matrixjap  <- cosine_matrix[ph_lang, "Japanese"]
+sub_matrixeng  <- cosine_matrix[ph_lang, "English"]
 
-df_span <- as_tibble(sub_matrixspan, rownames = 'language')
-colnames(df_span)[2] <- 'cossim_span'
+df_span <- cosine_matrix[ph_lang, "Spanish"] |>
+  enframe(name = "language", value = "cossim_span")
 
-df_jap <- as_tibble(sub_matrixjap, rownames = 'language')
-colnames(df_jap)[2] <- 'cossim_jap'
+df_jap <- cosine_matrix[ph_lang, "Japanese"] |>
+  enframe(name = "language", value = "cossim_jap")
 
-df_eng <- as_tibble(sub_matrixeng, rownames = 'language')
-colnames(df_eng)[2] <- 'cossim_eng'
+df_eng <- cosine_matrix[ph_lang, "English"] |>
+  enframe(name = "language", value = "cossim_eng")
 
-
-sub_matrixunr <- cosine_matrix[ph_lang, unr_lang]
-mean_scores_unr <- rowMeans(sub_matrixunr)
-mean_scores_unr_matrix <- as.matrix(mean_scores_unr)
-
-df_unr <- as_tibble(mean_scores_unr_matrix, rownames = 'language')
-colnames(df_unr)[2] <- 'cossim_unr'
-
-colnames(mean_scores_unr_matrix) <- "Unrelated"
-
+df_unr <- rowMeans(cosine_matrix[ph_lang, unr_lang]) |>
+  enframe(name = "language", value = "cossim_unr")
+mean_scores_unr_matrix <- rowMeans(cosine_matrix[ph_lang, unr_lang])
 
 melted_matrix <- melt(cosine_matrix)
 
@@ -423,7 +414,6 @@ ggplot(melted_matrix, aes(x = Var1, y = Var2, fill = value)) +
   labs(title = "", x = "", y = "") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + # Rotates x-axis labels
   coord_fixed() # Ensures cells are square
-
 
 
 combined_scores <- data.frame(
@@ -457,7 +447,7 @@ cossim_phoneme_density_ridge <- ggplot(combined_scores, aes(x = Similarity_Score
       color = Language
     ),
     linetype = "dashed",
-    size = 1.2,
+    linewidth = 1.2,
     inherit.aes = FALSE # Prevents conflicting with the main plot's y aesthetic mapping
   ) +
   labs(
@@ -536,22 +526,18 @@ phoneme_cos_j <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','
 phoneme_cos_s + phoneme_cos_e + phoneme_cos_j
 
 
-# ---- non-independent non-parametric statistical tests for similarity distributions --------------
-
-
-
 
 # ---- distance metric -------------------
 
-df_span<- df_span %>% 
-  mutate(latitude = lat.lang(language),
-         longitude = long.lang(language))
-df_jap<- df_jap %>% 
-  mutate(latitude = lat.lang(language),
-         longitude = long.lang(language))
-df_eng<- df_eng %>% 
-  mutate(latitude = lat.lang(language),
-         longitude = long.lang(language))
+#df_span<- df_span %>% 
+#  mutate(latitude = lat.lang(language),
+#         longitude = long.lang(language))
+#df_jap<- df_jap %>% 
+#  mutate(latitude = lat.lang(language),
+#         longitude = long.lang(language))
+#df_eng<- df_eng %>% 
+#  mutate(latitude = lat.lang(language),
+#         longitude = long.lang(language))
 
 
 # ---- weighted geo_distance from capital using waypoints -------
@@ -1213,11 +1199,11 @@ cosine_matrix_phil <- 1-cosine_matrix_phil
 PHONEME_diss_matrix <- cosine_matrix_phil
 
 # ----- distance matrix --------------------------------------
-ph_lang <- PHOIBLEdf %>% 
+ph_lang <- RUHLENdf %>% 
   filter(Language_type == 'Philippine Language') %>% 
   pull(language)
 
-phil_df <- PHOIBLEdf %>%
+phil_df <- RUHLENdf %>%
   filter(Language_type == "Philippine Language") %>%
   mutate(
     start_coords = map2(longitude, latitude, ~ c(.x, .y)),
@@ -1337,11 +1323,12 @@ ggplot(data.frame(x = x_vec, y = y_vec), aes(x = x, y = y)) +
 
 write.csv(cosine_matrix, file = here("data", "PHONEME_cosine_matrix.csv"), row.names = TRUE)
 
-PHONEME_cossim <- df_span %>% 
-  left_join(df_jap,by = 'language') %>% 
-  left_join(df_eng,by = 'language') %>% 
-  left_join(df_unr,by = 'language') %>% 
-  mutate(latitude = lat.lang(language),
-         longitude = long.lang(language))
+PHONEME_cossim <- RUHLENdf |> 
+  filter(Language_type == 'Philippine Language') |> 
+  select(language, latitude, longitude) |>
+  left_join(df_span,by = 'language') |> 
+  left_join(df_jap,by = 'language') |> 
+  left_join(df_eng,by = 'language') |> 
+  left_join(df_unr,by = 'language')
 
 write.csv(PHONEME_cossim, file = here("data", "PHONEME_cossim.csv"), row.names = TRUE)
