@@ -4,6 +4,7 @@
 .Rproj.user/
 .Rhistory
 .RData
+.RDataTmp
 .Ruserdata
 
 # --- Local project notes (not part of the published repo) ---

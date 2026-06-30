@@ -63,28 +63,69 @@ Ph_Languages <- ruhlen_raw |>
 message("Philippine languages detected by bounding box (n = ", length(Ph_Languages), "):\n",
         paste0("  ", Ph_Languages, collapse = "\n"))
 
+# filter further after running [0]_Phylogenetic_Tree.R use Ph_Languages_pruned downstream
+
 Interest_Languages <- c("English", "Spanish", "Japanese")
 
 # --- Derive unrelated languages set ----------
 
 # Get Philippine families and regions directly from ruhlen
 ph_families <- ruhlen_raw |>
-  filter(language %in% ph_lang) |>
+  filter(language %in% Ph_Languages_pruned) |>
   pull(language_family) |>
   unique()
 
 ph_regions <- ruhlen_raw |>
-  filter(language %in% ph_lang) |>
+  filter(language %in% Ph_Languages_pruned) |>
   pull(region) |>
   unique()
 
-# Ruhlen candidates — same region, different family, not already in study set
+# Bounding box buffer (km) — controls for areal contact effects, following
+# the convention in typological sampling of excluding/modeling languages
+# within ~1000 km to avoid areal (contact-induced) similarity confounding
+# genealogical signal. See Jaeger, Graff, Croft & Pontillo (2011),
+# "Mixed effect models for genetic and areal dependencies in linguistic
+# typology," Linguistic Typology 15(2): 281-319.
+buffer_km <- 1000
+
+ph_coords <- ruhlen_raw |>
+  filter(language %in% Ph_Languages)
+
+ph_bbox <- list(
+  lat_min = min(ph_coords$latitude, na.rm = TRUE),
+  lat_max = max(ph_coords$latitude, na.rm = TRUE),
+  lon_min = min(ph_coords$longitude, na.rm = TRUE),
+  lon_max = max(ph_coords$longitude, na.rm = TRUE)
+)
+
+ph_centroid_lat <- mean(c(ph_bbox$lat_min, ph_bbox$lat_max))
+
+# 1 deg latitude ~= 111.32 km everywhere; 1 deg longitude shrinks with cos(lat)
+# 111.32 conversion rate
+deg_lat_buffer <- buffer_km / 111.32
+deg_lon_buffer <- buffer_km / (111.32 * cos(ph_centroid_lat * pi / 180))
+
+ph_bbox_buffered <- list(
+  lat_min = ph_bbox$lat_min - deg_lat_buffer,
+  lat_max = ph_bbox$lat_max + deg_lat_buffer,
+  lon_min = ph_bbox$lon_min - deg_lon_buffer,
+  lon_max = ph_bbox$lon_max + deg_lon_buffer
+)
+
+# Ruhlen candidates — same region, different family, not already in study
+# set, and outside the contact-effect buffer zone around the Philippines
 ruhlen_candidates <- ruhlen_raw |>
   filter(
-    region           %in% ph_regions,
+    !region           %in% ph_regions,
     !language_family %in% ph_families,
-    !language        %in% Languages
+    !language        %in% c(Ph_Languages,Interest_Languages),
+    !(
+      latitude  >= ph_bbox_buffered$lat_min & latitude  <= ph_bbox_buffered$lat_max &
+        longitude >= ph_bbox_buffered$lon_min & longitude <= ph_bbox_buffered$lon_max
+    )
   )
+
+# insert GRAMBANKdf_unrelated here
 
 # Bridge Grambank glottocodes to ISO via lingtypology::languages
 grambank_iso <- GRAMBANKdf_unrelated |>
@@ -98,15 +139,30 @@ Unrelated_Langauges <- ruhlen_candidates |>
   ) |>
   pull(language)
 
-message("Unrelated languages (n = ", length(unr_lang), "):\n",
-        paste0("  ", unr_lang, collapse = "\n"))
+message("Unrelated languages (n = ", length(Unrelated_Langauges), "):\n",
+        paste0("  ", Unrelated_Langauges, collapse = "\n"))
 
+# Languages with independent contact to the contrast set (Spanish/English/Japanese),
+# which would inject the very signal being measured into the "unrelated" baseline.
+# Tiers reflect strength + structurality of contact (see methods notes).
+contact_contaminated <- c(
+  "Morr",   # Japanese colonial (1910-45) + American English (post-1945) — both axes
+  "Ainu",     # Japanese: lexical + grammatical (analytic constructions)
+  "Mandarin", # Japanese (wasei-kango back-borrowing) + English lexical
+  "Wu",       # as Mandarin (treaty-port Shanghai)
+  "Nivkh",    # "Nivkh"(Gilyak): Russian-dominated; Japanese contact thin
+  "Burmese"   # "Burmese": British (not American) English lexical contact
+)
+
+
+unrelated_clean <- setdiff(Unrelated_Langauges, contact_contaminated)
 
 # -- All Languages
 
-Languages <- c(Ph_Languages, Interest_Languages, Unrelated_Langauges)
+Languages <- c(Ph_Languages_pruned, Interest_Languages, unrelated_clean)
 
 # ---- 4. Filter to study languages and build output schema ----
+
 # No source deduplication needed: Ruhlen has exactly one record per language.
 # We add source = "ruhlen" to preserve schema compatibility with the PHOIBLE output.
 PHOIBLEdf_PH <- ruhlen_raw |>
@@ -137,7 +193,7 @@ if (length(unmatched) > 0) {
 # ---- 5. Preview geographic spread ----
 map.feature(PHOIBLEdf_PH$language, PHOIBLEdf_PH$Language_type)
 
-write_csv(PHOIBLEdf_PH, here("data", "RUHLENdf_PH"))
+write_csv(PHOIBLEdf_PH, here("data", "RUHLENdf_PH.csv"))
 
 # ---- 6. Compute global phoneme frequencies and IDF weights ----
 # Denominator: all 2082 Ruhlen languages (one row per language, no deduplication).

@@ -38,274 +38,6 @@ phoneme_cols <- colnames(phoneme_cols)
 
 phoneme_freq <- read_csv(here("data", "phoneme_freq_ruhlen.csv"))
 
-
-# ------ weighted similarity ---------------------
-
-
-calculate_language_similarity <- function(RUHLENdf, phoneme_freq, phoneme_cols, id_col = "language") {
-  
-  # Ensure data frames are aligned by phoneme order
-  # This is a crucial step to ensure weights match the correct phonemes
-  phoneme_freq <- phoneme_freq %>%
-    filter(phoneme %in% phoneme_cols) %>%
-    arrange(match(phoneme, phoneme_cols))
-  
-  # Extract binary phoneme data
-  binary_data <- RUHLENdf %>%
-    select(all_of(phoneme_cols))
-  
-  # Extract language IDs
-  language_ids <- RUHLENdf[[id_col]]
-  
-  # Calculate the weights for 1-1 and 0-0 matches
-  w_11 <- phoneme_freq$IDF
-  
-  # Frequencies are needed to calculate w_00.
-  # We can get frequencies from IDF: freq = exp(-IDF)
-  frequencies <- exp(-w_11)
-  w_00 <- -log2(1 - frequencies)
-  
-  # Calculate the denominator (total possible score) once
-  denominator <- sum(w_11 + w_00)
-  
-  # Get the number of languages
-  n_languages <- nrow(binary_data)
-  
-  # Initialize an empty matrix to store results
-  similarity_matrix <- matrix(0, nrow = n_languages, ncol = n_languages,
-                              dimnames = list(language_ids, language_ids))
-  
-  # Loop through all unique pairs of languages to compute scores
-  for (i in 1:n_languages) {
-    for (j in i:n_languages) {
-      
-      # Extract the two vectors to compare
-      vec_a <- as.numeric(binary_data[i, ])
-      vec_b <- as.numeric(binary_data[j, ])
-      
-      # Calculate the numerator for this pair
-      numerator <- sum(
-        # 1-1 matches weighted by w_11
-        (vec_a == 1 & vec_b == 1) * w_11,
-        # 0-0 matches weighted by w_00
-        (vec_a == 0 & vec_b == 0) * w_00
-      )
-      
-      # Calculate the normalized score and fill the matrix
-      score <- numerator / denominator
-      similarity_matrix[i, j] <- score
-      similarity_matrix[j, i] <- score # Matrix is symmetric
-    }
-  }
-  
-  return(similarity_matrix)
-}
-
-similarity_matrix <- calculate_language_similarity(
-  RUHLENdf = RUHLENdf,
-  phoneme_freq = phoneme_freq,
-  phoneme_cols = phoneme_cols,
-  id_col = "language"
-)
-
-# Investigate --------------------- 
-
-similarity_matrix['Tagalog','Spanish']
-similarity_matrix['Tagalog','Japanese']
-similarity_matrix['Tagalog','Tagalog']
-
-sub_matrixspan <- similarity_matrix[ph_lang, 'Spanish']
-df_span_ss <- as_tibble(sub_matrixspan, rownames = 'language')
-colnames(df_span_ss)[2] <- 'sim'
-
-sub_matrixjap <- similarity_matrix[ph_lang, 'Japanese']
-df_jap_ss <- as_tibble(sub_matrixjap, rownames = 'language')
-colnames(df_jap_ss)[2] <- 'sim'
-
-sub_matrixeng <- similarity_matrix[ph_lang, 'English']
-df_eng_ss <- as_tibble(sub_matrixeng, rownames = 'language')
-colnames(df_eng_ss)[2] <- 'sim'
-
-sub_matrixunr <- similarity_matrix[ph_lang, unr_lang]
-mean_scores_unr <- rowMeans(sub_matrixunr)
-mean_scores_unr_matrix <- as.matrix(mean_scores_unr)
-colnames(mean_scores_unr_matrix) <- "Unrelated"
-
-
-melted_matrix <- melt(similarity_matrix)
-
-# heatmap
-ggplot(melted_matrix, aes(x = Var1, y = Var2, fill = value)) +
-  geom_tile(color = "white") + # Creates the colored tiles
-  scale_fill_gradient(low = "yellow", high = "red") + # Customizes the colors
-  labs(title = "Language Similarity Heatmap", x = "", y = "") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + # Rotates x-axis labels
-  coord_fixed() # Ensures cells are squar
-
-
-
-combined_scores <- data.frame(
-  Spanish = sub_matrixspan,
-  Japanese = sub_matrixjap,
-  English = sub_matrixeng,
-  Unr = mean_scores_unr_matrix
-) %>%
-  pivot_longer(
-    cols = everything(),
-    names_to = "Language",
-    values_to = "Similarity_Score"
-  )
-
-combined_scores_summary <- combined_scores %>%
-  group_by(Language) %>%
-  summarize(mean_score = mean(Similarity_Score))
-
-ggplot(combined_scores, aes(x = Similarity_Score, fill = Language)) +
-  geom_density(alpha = 0.5) +
-  geom_vline(
-    data = combined_scores_summary,
-    aes(xintercept = mean_score, color = Language),
-    linetype = "dashed",
-    size = 1.2
-  ) +
-  labs(
-    title = "Weighted Similarity Distribution",
-    x = "Similarity Score",
-    y = "Density"
-  ) +
-  theme_bw()
-
-
-
-
-
-
-
-
-
-
-# investigate deeper on a phoneme level ------------------------------------------------------------------
-
-investigate_language_pair <- function(RUHLENdf, phoneme_freq, phoneme_cols, id_col, lang1_id, lang2_id) {
-  
-  # Step 1: Extract and align the two language vectors
-  lang1_row <- RUHLENdf %>%
-    dplyr::filter(!!rlang::sym(id_col) == lang1_id) %>%
-    dplyr::select(dplyr::all_of(phoneme_cols))
-  
-  lang2_row <- RUHLENdf %>%
-    dplyr::filter(!!rlang::sym(id_col) == lang2_id) %>%
-    dplyr::select(dplyr::all_of(phoneme_cols))
-  
-  # Check if languages were found
-  if (nrow(lang1_row) == 0 || nrow(lang2_row) == 0) {
-    stop("One or both language IDs not found.")
-  }
-  
-  # Step 2: Prepare the phoneme frequency data
-  aligned_freq <- phoneme_freq %>%
-    dplyr::filter(phoneme %in% phoneme_cols) %>%
-    dplyr::arrange(match(phoneme, phoneme_cols))
-  
-  w_11 <- aligned_freq$IDF
-  frequencies <- exp(-w_11)
-  w_00 <- -log2(1 - frequencies)
-  
-  phoneme_info <- tibble(
-    phoneme = phoneme_cols,
-    w_11_weight = w_11,
-    w_00_weight = w_00
-  )
-  
-  # Step 3: Compare the two language vectors
-  comparison_df <- phoneme_info %>%
-    dplyr::mutate(
-      lang1_value = as.numeric(lang1_row[1, ]),
-      lang2_value = as.numeric(lang2_row[1, ])
-    ) %>%
-    dplyr::rowwise() %>%
-    dplyr::mutate(
-      match_type = case_when(
-        lang1_value == 1 & lang2_value == 1 ~ "1-1 Match",
-        lang1_value == 0 & lang2_value == 0 ~ "0-0 Match",
-        TRUE ~ "Mismatch"
-      ),
-      match_weight = case_when(
-        match_type == "1-1 Match" ~ w_11_weight,
-        match_type == "0-0 Match" ~ w_00_weight,
-        TRUE ~ 0
-      ),
-      # New column to show the lost weight for mismatches
-      mismatch_lost_weight = case_when(
-        match_type == "Mismatch" & lang1_value == 1 ~ w_11_weight,
-        match_type == "Mismatch" & lang2_value == 1 ~ w_11_weight,
-        TRUE ~ 0
-      )
-    ) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(phoneme, lang1_value, lang2_value, match_type, match_weight, mismatch_lost_weight)
-  
-  return(comparison_df)
-}
-
-comparison_results <- investigate_language_pair(
-  RUHLENdf = RUHLENdf,
-  phoneme_freq = phoneme_freq,
-  phoneme_cols = phoneme_cols,
-  id_col = "language",
-  lang1_id = "Tagalog",
-  lang2_id = "Spanish"
-)
-
-comparison_results2 <- investigate_language_pair(
-  RUHLENdf = RUHLENdf,
-  phoneme_freq = phoneme_freq,
-  phoneme_cols = phoneme_cols,
-  id_col = "language",
-  lang1_id = "Tagalog",
-  lang2_id = "Japanese"
-)
-
-# view the detailed results
-
-sum(comparison_results$match_weight)
-sum(comparison_results2$match_weight)
-
-sum(comparison_results$mismatch_lost_weight)
-sum(comparison_results2$mismatch_lost_weight)
-
-
-# analyze the distribution of match types
-comparison_results %>%
-  dplyr::group_by(match_type) %>%
-  dplyr::summarise(
-    count = n(),
-    total_weight = sum(match_weight)
-  )
-
-comparison_results2 %>%
-  dplyr::group_by(match_type) %>%
-  dplyr::summarise(
-    count = n(),
-    total_weight = sum(match_weight)
-  )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # ----- cosine similarity ------------------------
 
 calculate_weighted_cosine_similarity <- function(RUHLENdf, phoneme_freq, phoneme_cols, id_col = "language") {
@@ -456,7 +188,7 @@ cossim_phoneme_density_ridge <- ggplot(combined_scores, aes(x = Similarity_Score
     y = "Language"
   ) +
   theme_minimal() +
-  scale_x_continuous(breaks = seq(0, 0.4, by = 0.05)) +
+  scale_x_continuous(breaks = seq(0, 0.5, by = 0.05)) +
   scale_y_discrete(expand = c(0.01,0)) +
   theme(legend.position = "none")
 
@@ -475,10 +207,10 @@ ggsave(
 
 
 # Individual Plots ---- 
-phoneme_cos_s <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','Spanish')), aes(x = Similarity_Score, fill = Language)) +
+phoneme_cos_s <- ggplot(combined_scores %>% filter(Language %in% c('Unr','Spanish')), aes(x = Similarity_Score, fill = Language)) +
   geom_density(alpha = 0.5) +
   geom_vline(
-    data = combined_scores_summary %>% filter(Language %in% c('Unrelated','Spanish')),
+    data = combined_scores_summary %>% filter(Language %in% c('Unr','Spanish')),
     aes(xintercept = mean_score, color = Language),
     linetype = "dashed",
     size = 1.2
@@ -736,13 +468,17 @@ compute_shortest_path_df <- function(df, ref_coords1, nodes, edges, land_penalty
     ggplot() +
       geom_polygon(data = world_map, aes(x = long, y = lat, group = group),
                    fill = "gray95", color = "gray70") +
-      geom_sf(data = connector_segments, aes(color = crosses_land), size = 1.2) +
+      geom_sf(data = connector_segments, 
+      aes(color = crosses_land), size = 1.2) +
       geom_path(data = path_df, aes(x = longitude, y = latitude),
                 color = "black", size = 1.2) +
       geom_point(data = path_df, aes(x = longitude, y = latitude),
                  color = "black", size = 2) +
-      { if (!is.null(start_coords)) geom_point(aes(x = start_coords[1], y = start_coords[2]),
-                                               color = "red", size = 3) } +
+      {if (!is.null(start_coords))
+      geom_point(aes(x = start_coords[1],
+                    y = start_coords[2]),
+                    color = "red", size = 3) 
+                    } +
       { if (!is.null(end_coords)) geom_point(aes(x = end_coords[1], y = end_coords[2]),
                                              color = "green", size = 3) } +
       scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
@@ -1047,6 +783,7 @@ slope <- round(coef(lm_span)[2],5)
 coefficient <- round(coef(lm_span)[1],5)
 r_squared <- round(summary_lm_span$r.squared,3)
 linear_model_equation <- paste0("Y = ", slope, "x + ", coefficient)
+print(linear_model_equation)
 
 ggplot(data = PHONEME_cossim, aes(x = geodist_H1_span, y = cossim_span)) +
   geom_point() +
