@@ -10,7 +10,16 @@
 # Phoneme column names (phoneme_001–phoneme_728) correspond to the positional
 # indices in SI Dataset 2 (not included here; join on position if IPA names needed).
 #
-# Outputs: data/PHOIBLEdf_PH.csv, data/phoneme_freq.csv
+# Outputs: data/RUHLENdf_PH.csv, data/phoneme_freq_ruhlen.csv
+#
+# RUN ORDER (this script has a dependency on the phylogenetic tree):
+#   1. Run PART A below (down to the `Ph_Languages` definition).
+#   2. Run [0]_Phylogenetic_Tree.R — it consumes `Ph_Languages` and produces
+#      `Ph_Languages_pruned` (the tree-validated subset used downstream).
+#   3. Run PART B below (everything after the banner), which needs
+#      `Ph_Languages_pruned`.
+# The Grambank unrelated-control set is now built locally (see PART B); no
+# grammar script needs to be sourced.
 # =============================================================================
 
 library(lingtypology)
@@ -63,7 +72,18 @@ Ph_Languages <- ruhlen_raw |>
 message("Philippine languages detected by bounding box (n = ", length(Ph_Languages), "):\n",
         paste0("  ", Ph_Languages, collapse = "\n"))
 
-# filter further after running [0]_Phylogenetic_Tree.R use Ph_Languages_pruned downstream
+# =============================================================================
+# >>> END OF PART A <<<
+# STOP here and run [0]_Phylogenetic_Tree.R, which consumes `Ph_Languages`
+# (defined above) and returns `Ph_Languages_pruned` — the tree-validated subset.
+# PART B below requires `Ph_Languages_pruned` to be in the environment.
+# =============================================================================
+stopifnot(
+  "Run [0]_Phylogenetic_Tree.R first: `Ph_Languages_pruned` is not defined." =
+    exists("Ph_Languages_pruned")
+)
+
+# ----------------------------- PART B (run after tree) -----------------------
 
 Interest_Languages <- c("English", "Spanish", "Japanese")
 
@@ -125,7 +145,38 @@ ruhlen_candidates <- ruhlen_raw |>
     )
   )
 
-# insert GRAMBANKdf_unrelated here
+# ---- Build GRAMBANKdf_unrelated locally (no grammar script needed) ----
+# The "unrelated" baseline must be languages that are covered in BOTH the Ruhlen
+# phoneme data and the Grambank grammar data, so the two analyses share a control
+# set. This block reproduces the unrelated-set definition from
+# [0]_GRAMBANKdatabase.R, but WITHOUT its iterative matrix-reduction loop: the
+# only value that filter consumed from the reduced matrix is the macroarea(s) of
+# the Philippine languages (`relatedmacroareas`), which is simply "Papunesia".
+languages <- read_csv(here("data", "languages.csv"), show_col_types = FALSE)
+
+# Macroarea(s) of the Philippine languages — the sole input the unrelated-set
+# filter needs from Grambank's (here-dropped) reduction step. Resolves to
+# "Papunesia"; deriving it from the bbox keeps this self-contained.
+relatedmacroareas <- languages |>
+  filter(Latitude > 4.5 & Latitude < 21 & Longitude > 115 & Longitude < 128) |>
+  pull(Macroarea) |>
+  unique()
+
+# Query the same 50 Grambank features used by the grammar analysis.
+GRAMBANK_query <- grambank.feature(
+  c('gb020','gb021','gb022','gb023','gb028','gb030','gb031','gb035','gb036','gb037','gb042','gb043','gb044','gb051','gb052','gb053',
+    'gb054','gb065','gb070','gb071','gb072','gb073','gb079','gb080','gb082','gb083','gb084','gb086','gb089','gb090','gb091','gb092',
+    'gb093','gb094','gb107','gb121','gb130','gb131','gb137','gb138','gb171','gb172','gb186','gb192','gb196','gb197','gb316','gb318',
+    'gb321','gb415'),
+  na.rm = FALSE)
+
+# Keep languages outside the Austronesian family and outside the Philippine
+# macroarea(s) — i.e. genealogically and areally unrelated controls.
+GRAMBANKdf_unrelated <- GRAMBANK_query |>
+  left_join(languages |> select(ID, Family_name, Macroarea), by = c("glottocode" = "ID")) |>
+  filter(!Family_name %in% "Austronesian",
+         !Macroarea   %in% relatedmacroareas) |>
+  select(glottocode)
 
 # Bridge Grambank glottocodes to ISO via lingtypology::languages
 grambank_iso <- GRAMBANKdf_unrelated |>
@@ -196,28 +247,39 @@ map.feature(PHOIBLEdf_PH$language, PHOIBLEdf_PH$Language_type)
 write_csv(PHOIBLEdf_PH, here("data", "RUHLENdf_PH.csv"))
 
 # ---- 6. Compute global phoneme frequencies and IDF weights ----
-# Denominator: all 2082 Ruhlen languages (one row per language, no deduplication).
-# This parallels the PHOIBLE pipeline's PHOIBLEdf_clean step.
-n_total_languages <- nrow(ruhlen_raw)
+# Denominator: all Austronesian Languages excluding Philippine Languages 
+# to avoid circularity
 
-phoneme_freq <- ruhlen_raw |>
-  summarise(across(all_of(phoneme_cols), \(x) sum(x, na.rm = TRUE))) |>
-  pivot_longer(
-    cols      = everything(),
-    names_to  = "phoneme",
-    values_to = "n_languages"
-  ) |>
-  filter(n_languages > 0) |>
-  mutate(
-    freq = n_languages / n_total_languages,
-    IDF  = log(1 / freq)
+compute_phoneme_freq <- function(data, n_total = nrow(data)) {
+  data |>
+    summarise(across(all_of(phoneme_cols), \(x) sum(x, na.rm = TRUE))) |>
+    pivot_longer(
+      cols      = everything(),
+      names_to  = "phoneme",
+      values_to = "n_languages"
+    ) |>
+    mutate(
+      n_total = n_total,
+      freq    = n_languages / n_total,
+      IDF     = log((n_total + 1) / (n_languages + 1))  # Laplace-smoothed, matches your Methods spec
+    )
+}
+
+ruhlen_austronesian <- ruhlen_raw |>
+  filter(
+    language_family == "Austronesian",
+    !language %in% Philippine_langs
   )
 
-write_csv(phoneme_freq, here("data", "phoneme_freq_ruhlen.csv"))
+n_total_languages_an <- nrow(ruhlen_austronesian)
+
+phoneme_freq_austronesian <- compute_phoneme_freq(ruhlen_austronesian, n_total_languages_an)
+
+write_csv(phoneme_freq_austronesian, here("data", "phoneme_freq_ruhlen_austronesian.csv"))
 
 message(
   "\nDone.",
-  "\n  PHOIBLEdf_PH : ", nrow(PHOIBLEdf_PH), " languages × ",
-  ncol(PHOIBLEdf_PH) - 4L, " phoneme features",  # minus iso6393, language, source, Language_type
-  "\n  phoneme_freq : ", nrow(phoneme_freq), " attested phonemes"
+  "\n  ruhlen_austronesian : ", n_total_languages_an, " languages × ",
+  ncol(ruhlen_austronesian) - 4L, " phoneme features",
+  "\n  phoneme_freq_austronesian : ", nrow(phoneme_freq_austronesian), " attested phonemes"
 )

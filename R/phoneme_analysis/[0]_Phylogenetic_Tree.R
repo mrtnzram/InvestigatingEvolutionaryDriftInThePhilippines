@@ -1,9 +1,29 @@
+# =============================================================================
+# [0] Phoneme Analysis — Prune the phylogenetic tree to the study languages
+#
+# Reads the MCC tree (data/mcc.tree), reconciles its tip labels with the
+# Ruhlen/phoneme language names, and prunes it to the Philippine study set.
+#
+# DEPENDENCY / RUN ORDER:
+#   - REQUIRES `Ph_Languages` from PART A of [0]_CREANZA_RUHLENdatabase.R
+#     (run that first, down to its END OF PART A banner).
+#   - PRODUCES `Ph_Languages_pruned`, consumed by PART B of
+#     [0]_CREANZA_RUHLENdatabase.R.
+#   - ALSO PRODUCES `tree_pruned` and `tree_df_matched`, consumed by
+#     [6]_PHONEME_PGLS.R.
+# =============================================================================
+
 library(tibble)
 library(tidyverse)
 library(ape)
 library(stringr)
 library(ggplot2)
 library(here)
+
+stopifnot(
+  "Run PART A of [0]_CREANZA_RUHLENdatabase.R first: `Ph_Languages` is not defined." =
+    exists("Ph_Languages")
+)
 
 tree <- read.nexus(here('data','mcc.tree'))
 

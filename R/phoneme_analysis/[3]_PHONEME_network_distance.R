@@ -1,4 +1,11 @@
-# ── network_distance_pipeline.R ──────────────────────────────────────────────
+# ── [3]_PHONEME_network_distance.R ───────────────────────────────────────────
+# Graph network creation + per-language distance calculation.
+# Input:   data/PHONEME_cossim.csv, data/nodes.csv, data/edges.csv
+# Outputs: data/PHONEME_cossim_dist.csv (cossim + geodist_H1_span, for the
+#          regression file), data/phoneme_waypoint_plot.rds (overview arrow plot)
+# Note:    pairwise inter-language distances for the Mantel test are computed
+#          separately in [5]_PHONEME_mantel.R (Dijkstra routing).
+#
 # Replaces compute_shortest_path_df(). Instead of routing each language to a
 # single reference point (ref_coords1) via Dijkstra, this computes each
 # language's terrain-penalized cost to ENTER the navigable network — i.e.
@@ -166,6 +173,13 @@ PHONEME_cossim |>
                   "land_len", "sea_len", "crosses_land"))) |>
   arrange(geodist_H1_span) |>
   print(n = 20)
+
+# Write the geodist-augmented table (flat columns only; drops the geometry /
+# list-columns) for [4]_PHONEME_regression.R to consume.
+PHONEME_cossim |>
+  select(language, latitude, longitude, starts_with("cossim_"),
+         geodist_H1_span, nearest_node, land_len, sea_len, crosses_land) |>
+  write.csv(file = here("data", "PHONEME_cossim_dist.csv"), row.names = FALSE)
 
 
 # ── 7. Assemble full_tree_sf (main edges + per-language connectors) ─────────

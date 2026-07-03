@@ -1,5 +1,5 @@
 # =============================================================================
-# [2] Phoneme Analysis — Render the EEMS migration surface as the base map
+# [7] Phoneme Analysis — Render the EEMS migration surface as the base map
 # Reads the EEMS MCMC output, builds the log-migration-rate surface, overlays the
 # per-language cosine-similarity points, and saves the base map for later overlays.
 # Requires GRAMMAR_cossim in the environment (shared color scale across analyses).
