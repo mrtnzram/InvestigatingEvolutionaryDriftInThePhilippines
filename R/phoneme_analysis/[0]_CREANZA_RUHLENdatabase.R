@@ -283,3 +283,31 @@ message(
   ncol(ruhlen_austronesian) - 4L, " phoneme features",
   "\n  phoneme_freq_austronesian : ", nrow(phoneme_freq_austronesian), " attested phonemes"
 )
+
+# Phoneme names key mapping -------------------------------------
+
+# ---- build the phoneme_n -> IPA keymap -------------------------------------
+raw   <- read_lines(here('data','pnas_1424033112_sd02.txt'))
+hdr_i <- which(str_starts(raw, "Column\t"))
+
+pnas_key <- read_tsv(I(raw[hdr_i:length(raw)]), show_col_types = FALSE) |>
+  transmute(
+    phoneme_id = str_c("phoneme_", str_pad(Column - 9L, 3, pad = "0")),  # SI col 10 -> phoneme_001
+    ipa        = Phoneme,
+    global_n   = Number_of_occurrences,
+    class = case_when(
+      Consonant          == 1 ~ "consonant",
+      Vowel              == 1 ~ "vowel",
+      Modified_consonant == 1 ~ "mod_consonant",
+      Modified_Vowel     == 1 ~ "mod_vowel",
+      Click              == 1 ~ "click"
+    )
+  )
+
+# ---- sanity check: keymap should match your actual phoneme_cols -----------
+missing_from_key <- setdiff(phoneme_cols, pnas_key$phoneme_id)
+if (length(missing_from_key) > 0)
+  warning(length(missing_from_key), " phoneme_cols not found in pnas_key: ",
+          paste(head(missing_from_key, 10), collapse = ", "))
+
+pnas_key

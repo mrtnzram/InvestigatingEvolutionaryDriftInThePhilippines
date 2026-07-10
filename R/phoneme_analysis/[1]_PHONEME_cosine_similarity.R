@@ -40,6 +40,15 @@ phoneme_cols <- colnames(phoneme_cols)
 
 phoneme_freq <- read_csv(here("data", "phoneme_freq_ruhlen_austronesian.csv"))
 
+# ---- sensitivity analysis -----
+
+# Most recent coverage
+
+
+# Least coverage
+
+
+
 # ----- cosine similarity -----------------------------------------------------
 
 calculate_weighted_cosine_similarity <- function(RUHLENdf, phoneme_freq, phoneme_cols, id_col = "language") {
@@ -113,6 +122,11 @@ ordered_languages <- RUHLENdf %>%
   pull(language)
 
 cosine_matrix <- cosine_matrix[ordered_languages, ordered_languages]
+
+
+cosine_matrix['Tagalog','Spanish'] 
+cosine_matrix['Tagalog','English'] 
+cosine_matrix['Tagalog','Japanese'] 
 
 # ---- Per-language similarity to each baseline -------------------------------
 df_span <- cosine_matrix[ph_lang, "Spanish"] |>

@@ -27,7 +27,7 @@ r_squared <- round(summary_lm_span$r.squared, 3)
 linear_model_equation <- paste0("Y = ", slope, "x + ", coefficient)
 print(linear_model_equation)
 
-ggplot(data = PHONEME_cossim, aes(x = geodist_H1_span, y = cossim_span)) +
+ggplot(data = PHONEME_cossim_filter_test, aes(x = geodist_H1_span, y = delta_spanish)) +
   geom_point() +
   geom_smooth(method = 'lm', se = FALSE) +
   theme_bw() +
@@ -43,26 +43,26 @@ PHONEME_cossim$dist_std <- standardize(PHONEME_cossim$geodist_H1_span)
 # Model: exponential decay
 m_exp <- rethinking::map(
   alist(
-    cossim_span ~ dnorm(mu, sigma),
-    mu <- a * exp(-b * dist_std),
+    delta_spanish ~ dnorm(mu, sigma),
+    mu <- a * exp(-b * geodist_H1_span),
     a ~ dnorm(0.5, 0.2),
     b ~ dnorm(0, 1),
     sigma ~ dexp(1)
   ),
-  data = PHONEME_cossim
+  data = PHONEME_cossim_filter_test
 )
 
 # Summarize
 precis(m_exp)
 
 # Generate predictions
-dist_seq <- seq(from = min(PHONEME_cossim$dist_std), to = max(PHONEME_cossim$dist_std), length.out = 100)
-preds <- link(m_exp, data = data.frame(dist_std = dist_seq))
+dist_seq <- seq(from = min(PHONEME_cossim_filter_test$geodist_H1_span), to = max(PHONEME_cossim_filter_test$geodist_H1_span), length.out = 100)
+preds <- link(m_exp, data = data.frame(geodist_H1_span = dist_seq))
 mu_mean <- apply(preds, 2, mean)
 mu_PI <- apply(preds, 2, PI)
 mu_PI_t <- t(mu_PI)
 # Plot
-scatter_df <- PHONEME_cossim
+scatter_df <- PHONEME_cossim_filter_test
 
 # Line + ribbon data
 ribbon_df <- data.frame(
@@ -73,7 +73,7 @@ ribbon_df <- data.frame(
 )
 
 ggplot() +
-  geom_point(data = scatter_df, aes(x = dist_std, y = cossim_span),
+  geom_point(data = scatter_df, aes(x = geodist_H1_span, y = delta_spanish),
              color = "black", size = 2) +
   geom_line(data = ribbon_df, aes(x = dist, y = mean),
             color = "blue", linewidth = 1.2) +

@@ -32,7 +32,9 @@ combined_scores <- PHONEME_cossim |>
 
 combined_scores_summary <- combined_scores |>
   group_by(Language) |>
-  summarize(mean_score = mean(Similarity_Score), .groups = "drop")
+  summarize(mean_score = mean(Similarity_Score), 
+            median_score = median(Similarity_Score),
+            .groups = "drop")
 
 cossim_phoneme_density_ridge <- ggplot(combined_scores, aes(x = Similarity_Score, y = Language, fill = Language)) +
   geom_density_ridges(alpha = 0.5, scale = 1.2, color = "black") +
@@ -95,7 +97,11 @@ phoneme_cos_j <- density_compare(c("Unrelated", "Japanese"))
 
 phoneme_cos_s + phoneme_cos_e + phoneme_cos_j
 
-# --- Frieddman Test --------
+
+
+# -- Population Level ------------
+
+# Friedman Test --------
 sim_matrix <- PHONEME_cossim |>
   select(cossim_span, cossim_eng, cossim_jap, cossim_unr) |>
   as.matrix()
@@ -106,10 +112,11 @@ W_kendall       <- friedman_result$statistic / (nrow(sim_matrix) * (ncol(sim_mat
 cat(sprintf("Friedman: chi2(3) = %.3f, p = %.4f, W = %.3f\n",
             friedman_result$statistic, friedman_result$p.value, W_kendall))
 
-# no siginificant difference between the distirbutions
-# no need for Wilcoxon signed rank test
+# Wilcoxon-signed ranked test ----
 
-# --- Linear Mixed Model ------
+
+
+# Linear Mixed Model ------
 
 phoneme_long <- PHONEME_cossim |> 
   pivot_longer(
@@ -156,4 +163,8 @@ tibble(
   p_bh       = p_bh,
   reject_bh  = p_bh < 0.05
 )
+
+
+
+# ------------- Individual Level ---------------
 
