@@ -2,8 +2,9 @@
 # [2] Phoneme Analysis — Cosine-similarity distribution analysis
 # Visualizes the distribution of each Philippine language's phoneme cosine
 # similarity to Spanish / English / Japanese / unrelated controls (ridge +
-# density plots), then tests whether the baselines differ (Friedman + linear
-# mixed model).
+# density plots), then tests whether the baselines differ at the population level
+# (Friedman + linear mixed model) and individual level (permuatation tests)
+# 
 # Input: data/PHONEME_cossim.csv   (from [1]_PHONEME_cosine_similarity.R)
 # =============================================================================
 
