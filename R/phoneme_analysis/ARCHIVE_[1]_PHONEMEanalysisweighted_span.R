@@ -8,209 +8,136 @@ library(infotheo)
 library(reshape2)
 library(ggplot2)
 library(purrr)
+library(patchwork)
+library(igraph)
+library(sfheaders)
 library(here)
 library(ggridges)
-library(fastDummies)
 
 
 # ---- Prepping Globals --------------------------------------------------------------------------
 
-GRAMBANKdf_PH <- read_csv(here("data", "GRAMBANKdf_PH.csv"))
+RUHLENdf <- read_csv(here("data", "RUHLENdf_PH.csv"))
 
-GRAMBANKdf_PH <- GRAMBANKdf_PH %>% 
-  mutate(latitude = lat.lang(language),
-         longitude = long.lang(language))
+ph_lang <- RUHLENdf |> 
+  filter(Language_type == 'Philippine Language') |> 
+  pull(language)
 
-ph_lang <- c('Tiruray', 'Maranao', 'Central Sama', 'Hiligaynon', 'Aklanon', 'Filipino', 'Coastal-Naga Bikol','Tagalog','Pampanga','Pangasinan','Iloko','Dupaninan Agta',
-             'Cebuano','Southern Sama')
-int_lang <- c('English','Spanish','Japanese')
-unr_lang <- c("Basque","Hungarian","Finnish","South Saami","Gagauz","Estonian","Turkish","Moksha","Liv",
-              "Korean","Mandarin Chinese","Udihe","Halh Mongolian","Sedang")
+int_lang <- RUHLENdf |> 
+  filter(Language_type == 'Language of Interest') |> 
+  pull(language)
 
-GRAMBANK_query <- grambank.feature(c('gb020','gb021','gb022','gb023','gb028','gb030','gb031','gb035','gb036','gb037','gb042','gb043','gb044','gb051','gb052','gb053',
-                                     'gb054','gb065','gb070','gb071','gb072','gb073','gb079','gb080','gb082','gb083','gb084','gb086','gb089','gb090','gb091','gb092',
-                                     'gb093','gb094','gb107','gb121','gb130','gb131','gb137','gb138','gb171','gb172','gb186','gb192','gb196','gb197','gb316','gb318',
-                                     'gb321','gb415'),na.rm = FALSE)
+unr_lang <- RUHLENdf |> 
+  filter(Language_type == 'Unrelated Language') |> 
+  pull(language)
 
-feature_cols <- intersect(colnames(GRAMBANKdf_PH), colnames(GRAMBANK_query)) %>%
-  setdiff(c("longitude", "latitude"))
+phoneme_cols <- RUHLENdf %>% 
+  select(-language,-source,-iso6393,-Language_type,-latitude,-longitude)
 
-feature_cols
+phoneme_cols <- colnames(phoneme_cols)
 
-
-gramfeature_freq <- read_csv(here("data", "gramfeature_freq.csv"))
-
-# ---- one-hot encode categorical columns ----------
-
-# Classify feature_cols by cardinality
-n_levels <- map_int(
-  feature_cols,
-  \(col) GRAMBANKdf_PH[[col]] |> na.omit() |> unique() |> length()
-)
-
-binary_cols      <- feature_cols[n_levels <= 2]   # 0/1  → already valid; keep
-categorical_cols <- feature_cols[n_levels >  2]   # 0/1/2 → expand to 3 dummies
-
-cat(sprintf(
-  "Binary (kept):       %d cols\nCategorical (OHE'd): %d cols\n",
-  length(binary_cols), length(categorical_cols)
-))
-
-# One-hot encode the 3-level columns
-GRAMBANKdf_PH_ohe <- GRAMBANKdf_PH |>
-  dummy_cols(
-    select_columns          = categorical_cols,
-    remove_selected_columns = TRUE,   # drop original integer column
-    remove_first_dummy      = FALSE,  # full OHE — keep all 3 levels
-    ignore_na               = TRUE    # NA row → NA across all 3 dummies
-  )
-
-# Reconstruct updated feature_cols vector
-# fastDummies names dummies as <col>_<value> (e.g. CONJ_COORD_0, _1, _2)
-ohe_pattern  <- str_c("^(", str_c(categorical_cols, collapse = "|"), ")_")
-ohe_cols     <- str_subset(names(GRAMBANKdf_PH_ohe), ohe_pattern)
-
-feature_cols_ohe <- c(binary_cols, ohe_cols)
-
-cat(sprintf(
-  "Feature matrix: %d binary + %d OHE cols = %d total features\n",
-  length(binary_cols), length(ohe_cols), length(feature_cols_ohe)
-))
-
-GRAMBANKdf_PH <- GRAMBANKdf_PH_ohe
+phoneme_freq <- read_csv(here("data", "phoneme_freq_ruhlen.csv"))
 
 # ----- cosine similarity ------------------------
 
-calculate_weighted_cosine_similarity <- function(GRAMBANKdf_PH, gramfeature_freq, feature_cols, id_col = "language", feature_col = "feature") {
+calculate_weighted_cosine_similarity <- function(RUHLENdf, phoneme_freq, phoneme_cols, id_col = "language") {
   
-  aligned_freq <- gramfeature_freq %>%
-    filter(feature %in% feature_cols) %>%
-    distinct(feature, .keep_all = TRUE) %>%
-    arrange(match(feature, feature_cols))
+  # Extract and align the binary data and IDF weights
+  # Ensure the phoneme frequencies are in the same order as the phoneme columns
+  aligned_freq <- phoneme_freq %>%
+    dplyr::filter(phoneme %in% phoneme_cols) %>%
+    dplyr::arrange(match(phoneme, phoneme_cols))
   
   idf_weights <- aligned_freq$IDF
-  binary_data <- GRAMBANKdf_PH %>%
-    select(all_of(aligned_freq$feature)) %>%
-    as.matrix()
   
-
-  long_data <- GRAMBANKdf_PH %>%
-    select(all_of(feature_cols)) %>%
-    mutate(language = GRAMBANKdf_PH[[id_col]]) %>%
-    pivot_longer(cols = -language, names_to = "feature", values_to = "value")
+  # Extract the binary phoneme data
+  binary_data <- RUHLENdf %>%
+    dplyr::select(dplyr::all_of(phoneme_cols)) %>%
+    as.matrix() # Convert to a matrix for faster calculations
   
-  weighted_long <- long_data %>%
-    left_join(gramfeature_freq, by = c("feature", "value")) %>%
-    mutate(weighted_value = IDF)
+  # Extract language IDs for matrix naming
+  language_ids <- RUHLENdf[[id_col]]
   
-  weighted_data <- weighted_long %>%
-    select(language, feature, weighted_value) %>%
-    pivot_wider(names_from = feature, values_from = weighted_value) %>%
-    column_to_rownames("language") %>%
-    as.matrix()
+  # Step 2: Create a weighted phoneme matrix
+  # Multiply each column of the binary matrix by its corresponding IDF weight
+  weighted_data <- sweep(binary_data, 2, idf_weights, FUN = "*")
   
-  weighted_data["Spanish", ]
-  
-  
-  
-  language_ids <- GRAMBANKdf_PH[[id_col]]
-  
-  # Step 4: Compute cosine similarity
+  # Step 3: Calculate the cosine similarity matrix
   n_languages <- nrow(weighted_data)
-  cosine_matrix_grammar <- matrix(0, nrow = n_languages, ncol = n_languages,
+  cosine_matrix <- matrix(0, nrow = n_languages, ncol = n_languages,
                           dimnames = list(language_ids, language_ids))
   
+  # A small epsilon to avoid division by zero for languages with no phonemes
   epsilon <- 1e-9
-   
+  
+  # Loop through all unique pairs of languages
   for (i in 1:n_languages) {
     for (j in i:n_languages) {
+      
       vec_a <- weighted_data[i, ]
       vec_b <- weighted_data[j, ]
       
-      # Handle partial NAs
-      valid_idx <- which(!is.na(vec_a) & !is.na(vec_b))
+      # Cosine Similarity Formula: (A . B) / (||A|| * ||B||)
+      # Numerator is the dot product
+      dot_product <- sum(vec_a * vec_b)
       
-      if (length(valid_idx) == 0) {
-        score <- NA
-      } else {
-        dot_product <- sum(vec_a[valid_idx] * vec_b[valid_idx])
-        magnitude_a <- sqrt(sum(vec_a[valid_idx]^2))
-        magnitude_b <- sqrt(sum(vec_b[valid_idx]^2))
-        
-        denominator <- magnitude_a * magnitude_b
-        score <- ifelse(denominator == 0, NA, dot_product / denominator)
-      }
+      # Denominator is the product of the magnitudes (Euclidean norms)
+      magnitude_a <- sqrt(sum(vec_a^2))
+      magnitude_b <- sqrt(sum(vec_b^2))
       
-      cosine_matrix_grammar[i, j] <- score
-      cosine_matrix_grammar[j, i] <- score
+      denominator <- (magnitude_a * magnitude_b) + epsilon
+      
+      score <- dot_product / denominator
+      
+      cosine_matrix[i, j] <- score
+      cosine_matrix[j, i] <- score # Matrix is symmetric
     }
   }
   
-  return(cosine_matrix_grammar)
+  return(cosine_matrix)
 }
 
-feature
+attested_phonemes <- phoneme_freq$phoneme
 
-cosine_matrix_grammar <- calculate_weighted_cosine_similarity(
-  GRAMBANKdf_PH, 
-  gramfeature_freq, 
-  feature_cols_ohe, 
+cosine_matrix <- calculate_weighted_cosine_similarity(
+  RUHLENdf, 
+  phoneme_freq, 
+  attested_phonemes, 
   id_col = "language")
-
-
 
 # INVESTIGATE --------------------------------------------------
 
-ordered_languages <- GRAMBANKdf_PH %>%
-  arrange(Language_Type) %>%
+ordered_languages <- RUHLENdf %>%
+  arrange(Language_type) %>%
   pull(language)
 
 
-cosine_matrix_grammar <- cosine_matrix_grammar[ordered_languages, ordered_languages]
-
-setdiff(ordered_languages, rownames(cosine_matrix_grammar))
+cosine_matrix <- cosine_matrix[ordered_languages, ordered_languages]
 
 
-cosine_matrix_grammar['Filipino','Spanish'] 
-cosine_matrix_grammar['Filipino','Japanese'] 
-cosine_matrix_grammar['Filipino','English'] 
+cosine_matrix['Tagalog','Spanish'] 
+cosine_matrix['Tagalog','Japanese'] 
 
-ph_lang <- GRAMBANKdf_PH %>% 
-  filter(Language_Type == 'Philippine Language') %>% 
-  pull(language)
+unr_lang_test <- unr_lang[!unr_lang %in% c("Ainu", "Nimboran")]
 
-ph_lang %in% rownames(cosine_matrix_grammar)
+sub_matrixspan <- cosine_matrix[ph_lang, "Spanish"]
+sub_matrixjap  <- cosine_matrix[ph_lang, "Japanese"]
+sub_matrixeng  <- cosine_matrix[ph_lang, "English"]
 
+df_span <- cosine_matrix[ph_lang, "Spanish"] |>
+  enframe(name = "language", value = "cossim_span")
 
-sub_matrixspan <- cosine_matrix_grammar[ph_lang, 'Spanish']
-sub_matrixjap <- cosine_matrix_grammar[ph_lang, 'Japanese']
-sub_matrixeng <- cosine_matrix_grammar[ph_lang, 'English']
+df_jap <- cosine_matrix[ph_lang, "Japanese"] |>
+  enframe(name = "language", value = "cossim_jap")
 
-colnames(cosine_matrix_grammar)
+df_eng <- cosine_matrix[ph_lang, "English"] |>
+  enframe(name = "language", value = "cossim_eng")
 
+df_unr <- rowMeans(cosine_matrix[ph_lang, unr_lang]) |>
+  enframe(name = "language", value = "cossim_unr")
+mean_scores_unr_matrix <- rowMeans(cosine_matrix[ph_lang, unr_lang])
 
-
-df_span <- as_tibble(sub_matrixspan, rownames = 'language')
-colnames(df_span)[2] <- 'cossim_span'
-
-df_jap <- as_tibble(sub_matrixjap, rownames = 'language')
-colnames(df_jap)[2] <- 'cossim_jap'
-
-df_eng <- as_tibble(sub_matrixeng, rownames = 'language')
-colnames(df_eng)[2] <- 'cossim_eng'
-
-
-sub_matrixunr <- cosine_matrix_grammar[ph_lang, unr_lang]
-mean_scores_unr <- rowMeans(sub_matrixunr)
-mean_scores_unr_matrix <- as.matrix(mean_scores_unr)
-
-df_unr <- as_tibble(mean_scores_unr_matrix, rownames = 'language')
-colnames(df_unr)[2] <- 'cossim_unr'
-
-colnames(mean_scores_unr_matrix) <- "Unrelated"
-
-
-melted_matrix <- melt(cosine_matrix_grammar)
+melted_matrix <- melt(cosine_matrix)
 
 # heatmap
 ggplot(melted_matrix, aes(x = Var1, y = Var2, fill = value)) +
@@ -218,8 +145,7 @@ ggplot(melted_matrix, aes(x = Var1, y = Var2, fill = value)) +
   scale_fill_gradient(low = "yellow", high = "red") + # Customizes the colors
   labs(title = "", x = "", y = "") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + # Rotates x-axis labels
-  coord_fixed() # Ensures cells are squar
-
+  coord_fixed() # Ensures cells are square
 
 
 combined_scores <- data.frame(
@@ -238,41 +164,41 @@ combined_scores_summary <- combined_scores %>%
   group_by(Language) %>%
   summarize(mean_score = mean(Similarity_Score))
 
-
-cossim_grammar_density_ridge <- ggplot(combined_scores, aes(x = Similarity_Score, y = Language, fill = Language)) +
-  
+cossim_phoneme_density_ridge <- ggplot(combined_scores, aes(x = Similarity_Score, y = Language, fill = Language)) +
+  # Changed to geom_density_ridges
   geom_density_ridges(alpha = 0.5, scale = 1.2, color = "black") + 
   
+  # Replaced geom_vline with geom_segment to keep lines contained within each ridge
   geom_segment(
     data = combined_scores_summary,
     aes(
       x = mean_score, 
       xend = mean_score, 
       y = as.numeric(factor(Language)), 
-      yend = as.numeric(factor(Language)) + 0.9, 
+      yend = as.numeric(factor(Language)) + 0.9, # Adjust height of the line
       color = Language
     ),
     linetype = "dashed",
-    size = 1.2,
+    linewidth = 1.2,
     inherit.aes = FALSE # Prevents conflicting with the main plot's y aesthetic mapping
   ) +
   labs(
-    title = "Grammar Cosine Similarity Distribution",
+    title = "Phoneme Cosine Similarity Distribution",
     x = "Similarity Score",
     y = "Language"
   ) +
   theme_minimal() +
-  scale_x_continuous(breaks = seq(0, 0.8, by = 0.05)) +
+  scale_x_continuous(breaks = seq(0, 0.5, by = 0.05)) +
   scale_y_discrete(expand = c(0.01,0)) +
   theme(legend.position = "none")
 
 #---
-cossim_grammar_density_ridge
+cossim_phoneme_density_ridge
 #---
 
 ggsave(
-  filename = here("figures", "grammar", "distributions", "grammar_ridgeplot.png"),
-  plot = cossim_grammar_density_ridge,
+  filename = here("figures", "phoneme", "distributions", "phoneme_ridgeplot.png"),
+  plot = cossim_phoneme_density_ridge,
   width = 7,
   height = 4.5,
   units = "in",
@@ -280,10 +206,11 @@ ggsave(
 )
 
 
-grammar_cos_s <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','Spanish')), aes(x = Similarity_Score, fill = Language)) +
+# Individual Plots ---- 
+phoneme_cos_s <- ggplot(combined_scores %>% filter(Language %in% c('Unr','Spanish')), aes(x = Similarity_Score, fill = Language)) +
   geom_density(alpha = 0.5) +
   geom_vline(
-    data = combined_scores_summary %>% filter(Language %in% c('Unrelated','Spanish')),
+    data = combined_scores_summary %>% filter(Language %in% c('Unr','Spanish')),
     aes(xintercept = mean_score, color = Language),
     linetype = "dashed",
     size = 1.2
@@ -294,9 +221,9 @@ grammar_cos_s <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','
     y = "Density"
   ) +
   theme_bw() +
-  scale_x_continuous(breaks = seq(0, 0.8, by = 0.05))
+  scale_x_continuous(breaks = seq(0, 0.4, by = 0.02))
 
-grammar_cos_e <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','English')), aes(x = Similarity_Score, fill = Language)) +
+phoneme_cos_e <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','English')), aes(x = Similarity_Score, fill = Language)) +
   geom_density(alpha = 0.5) +
   geom_vline(
     data = combined_scores_summary %>% filter(Language %in% c('Unrelated','English')),
@@ -310,9 +237,9 @@ grammar_cos_e <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','
     y = "Density"
   ) +
   theme_bw() +
-  scale_x_continuous(breaks = seq(0, 0.8, by = 0.05))
+  scale_x_continuous(breaks = seq(0, 0.4, by = 0.02))
 
-grammar_cos_j <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','Japanese')), aes(x = Similarity_Score, fill = Language)) +
+phoneme_cos_j <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','Japanese')), aes(x = Similarity_Score, fill = Language)) +
   geom_density(alpha = 0.5) +
   geom_vline(
     data = combined_scores_summary %>% filter(Language %in% c('Unrelated','Japanese')),
@@ -326,20 +253,23 @@ grammar_cos_j <- ggplot(combined_scores %>% filter(Language %in% c('Unrelated','
     y = "Density"
   ) +
   theme_bw() +
-  scale_x_continuous(breaks = seq(0, 0.8, by = 0.05))
+  scale_x_continuous(breaks = seq(0, 0.4, by = 0.02))
 
-grammar_cos_s + grammar_cos_e + grammar_cos_j
+phoneme_cos_s + phoneme_cos_e + phoneme_cos_j
 
-# ----- grammar_cossim ver 1 -----------------
 
-GRAMMAR_cossim <- df_span %>% 
-  left_join(df_jap,by = 'language') %>% 
-  left_join(df_eng,by = 'language') %>% 
-  left_join(df_unr,by = 'language') %>% 
-  mutate(latitude = lat.lang(language),
-         longitude = long.lang(language))
 
-write.csv(GRAMMAR_cossim, file = here("data", "GRAMMAR_cossim.csv"), row.names = TRUE)
+# ---- distance metric -------------------
+
+#df_span<- df_span %>% 
+#  mutate(latitude = lat.lang(language),
+#         longitude = long.lang(language))
+#df_jap<- df_jap %>% 
+#  mutate(latitude = lat.lang(language),
+#         longitude = long.lang(language))
+#df_eng<- df_eng %>% 
+#  mutate(latitude = lat.lang(language),
+#         longitude = long.lang(language))
 
 
 # ---- weighted geo_distance from capital using waypoints -------
@@ -352,8 +282,9 @@ library(sf)
 library(maps)
 library(sfheaders)
 
-GRAMMAR_cossim <- read.csv(here("data", "GRAMMAR_cossim.csv"))
-df <- GRAMMAR_cossim
+PHONEME_cossim <- read.csv(here("data", "PHONEME_cossim.csv"))
+#df <- PHONEME_cossim
+
 # load MGT route tree
 nodes <- read.csv(here("data", "nodes.csv"))
 edges <- read.csv(here("data", "edges.csv"))
@@ -368,8 +299,8 @@ ref_coords1 <- c(121,14.6)
 
 compute_shortest_path_df <- function(df, ref_coords1, nodes, edges, land_penalty = 4.44) {
   
-  land_penalty <- 4.44
-  df <- GRAMMAR_cossim
+  df <- PHONEME_cossim
+  land_penalty = 4.44
   # Ensure IDs are character
   nodes <- nodes %>% mutate(id = as.character(id))
   edges <- edges %>% mutate(from = as.character(from), to = as.character(to))
@@ -389,6 +320,7 @@ compute_shortest_path_df <- function(df, ref_coords1, nodes, edges, land_penalty
   ) %>%
     st_union() %>%
     st_sf(geometry = .)
+  
   
   # Compute edge weights and terrain-aware cost
   edges <- edges %>%
@@ -536,13 +468,17 @@ compute_shortest_path_df <- function(df, ref_coords1, nodes, edges, land_penalty
     ggplot() +
       geom_polygon(data = world_map, aes(x = long, y = lat, group = group),
                    fill = "gray95", color = "gray70") +
-      geom_sf(data = connector_segments, aes(color = crosses_land), size = 1.2) +
+      geom_sf(data = connector_segments, 
+      aes(color = crosses_land), size = 1.2) +
       geom_path(data = path_df, aes(x = longitude, y = latitude),
                 color = "black", size = 1.2) +
       geom_point(data = path_df, aes(x = longitude, y = latitude),
                  color = "black", size = 2) +
-      { if (!is.null(start_coords)) geom_point(aes(x = start_coords[1], y = start_coords[2]),
-                                               color = "red", size = 3) } +
+      {if (!is.null(start_coords))
+      geom_point(aes(x = start_coords[1],
+                    y = start_coords[2]),
+                    color = "red", size = 3) 
+                    } +
       { if (!is.null(end_coords)) geom_point(aes(x = end_coords[1], y = end_coords[2]),
                                              color = "green", size = 3) } +
       scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
@@ -655,13 +591,11 @@ compute_shortest_path_df <- function(df, ref_coords1, nodes, edges, land_penalty
     ) %>%
     ungroup()
   
-  
+    
   return(df)
 }
 
-GRAMMAR_cossim <- compute_shortest_path_df(GRAMMAR_cossim, ref_coords1, nodes, edges, land_penalty = 44.18)
-
-df <- GRAMMAR_cossim 
+PHONEME_cossim <- compute_shortest_path_df(PHONEME_cossim, ref_coords1, nodes, edges, land_penalty = 44.18)
 
 # ------- ROUTE PLOTTING ----------------
 world_map <- map_data("world") %>%
@@ -704,49 +638,100 @@ sea_segments_sf <- st_sf(geometry = st_sfc(sea_geoms, crs = 4326))
 
 # ----- plot paths -------------------------
 
-print(GRAMMAR_cossim$plot[[12]])
+print(PHONEME_cossim$plot[[14]])
 
 land_segments_sf$crosses_land <- TRUE
 sea_segments_sf$crosses_land  <- FALSE
+
 main_path_sf <- rbind(land_segments_sf, sea_segments_sf)
 
-# Build arrow_sf and connector_sf from a single loop
-arrow_geom_list <- list()
-arrow_land_flag <- logical()
+
+connector_segments <- list()
 
 for (i in seq_len(nrow(df))) {
+  # Start connector
   if (!is.null(df$land_geom_start[[i]])) {
-    arrow_geom_list <- append(arrow_geom_list, list(df$land_geom_start[[i]]))
-    arrow_land_flag <- append(arrow_land_flag, TRUE)
+    connector_segments <- append(connector_segments, list(
+      st_sf(geometry = st_sfc(df$land_geom_start[[i]], crs = 4326), crosses_land = TRUE)
+    ))
   }
   if (!is.null(df$sea_geom_start[[i]])) {
-    arrow_geom_list <- append(arrow_geom_list, list(df$sea_geom_start[[i]]))
-    arrow_land_flag <- append(arrow_land_flag, FALSE)
+    connector_segments <- append(connector_segments, list(
+      st_sf(geometry = st_sfc(df$sea_geom_start[[i]], crs = 4326), crosses_land = FALSE)
+    ))
   }
+  
+  # End connector
   if (!is.null(df$land_geom_end[[i]])) {
-    arrow_geom_list <- append(arrow_geom_list, list(df$land_geom_end[[i]]))
-    arrow_land_flag <- append(arrow_land_flag, TRUE)
+    connector_segments <- append(connector_segments, list(
+      st_sf(geometry = st_sfc(df$land_geom_end[[i]], crs = 4326), crosses_land = TRUE)
+    ))
   }
   if (!is.null(df$sea_geom_end[[i]])) {
-    arrow_geom_list <- append(arrow_geom_list, list(df$sea_geom_end[[i]]))
-    arrow_land_flag <- append(arrow_land_flag, FALSE)
+    connector_segments <- append(connector_segments, list(
+      st_sf(geometry = st_sfc(df$sea_geom_end[[i]], crs = 4326), crosses_land = FALSE)
+    ))
   }
 }
 
-arrow_sf <- st_sf(
-  crosses_land = arrow_land_flag,
-  geometry     = st_sfc(arrow_geom_list, crs = 4326)
-)
+connector_sf <- do.call(rbind, connector_segments)
 
-connector_sf <- arrow_sf
 
-# Tag and combine
-main_path_sf$source <- "main"
-connector_sf$source <- "connector"
-main_path_sf        <- st_set_crs(main_path_sf, 4326)
-full_tree_sf        <- rbind(main_path_sf, connector_sf)
+arrow_segments <- list()
 
-# Diagnostic plot
+for (i in seq_len(nrow(df))) {
+  if (!is.null(df$land_geom_start[[i]])) {
+    arrow_segments <- append(arrow_segments, list(
+      st_sf(geometry = st_sfc(df$land_geom_start[[i]], crs = 4326), crosses_land = TRUE)
+    ))
+  }
+  if (!is.null(df$sea_geom_start[[i]])) {
+    arrow_segments <- append(arrow_segments, list(
+      st_sf(geometry = st_sfc(df$sea_geom_start[[i]], crs = 4326), crosses_land = FALSE)
+    ))
+  }
+  if (!is.null(df$land_geom_end[[i]])) {
+    arrow_segments <- append(arrow_segments, list(
+      st_sf(geometry = st_sfc(df$land_geom_end[[i]], crs = 4326), crosses_land = TRUE)
+    ))
+  }
+  if (!is.null(df$sea_geom_end[[i]])) {
+    arrow_segments <- append(arrow_segments, list(
+      st_sf(geometry = st_sfc(df$sea_geom_end[[i]], crs = 4326), crosses_land = FALSE)
+    ))
+  }
+}
+
+arrow_sf <- do.call(rbind, arrow_segments)
+
+
+main_path_sf$source   <- "main"
+connector_sf$source   <- "connector"
+
+full_tree_sf <- rbind(main_path_sf, connector_sf)
+
+full_tree_lines <- full_tree_sf %>%
+  st_cast("MULTILINESTRING") %>%
+  st_cast("LINESTRING")
+
+arrow_main <- full_tree_lines %>%
+  filter(source == "main") %>%          # ← only main path, not connectors
+  mutate(row_id = row_number()) %>%
+  group_by(row_id) %>%
+  group_modify(~ {
+    coords <- st_coordinates(.x)
+    if (nrow(coords) < 2) return(.x)
+    start_coord <- coords[1, c("X", "Y")]
+    end_coord   <- coords[nrow(coords), c("X", "Y")]
+    new_geom <- st_sfc(st_linestring(rbind(start_coord, end_coord)), crs = st_crs(.x))
+    st_set_geometry(.x, new_geom)
+  }) %>%
+  ungroup() %>%
+  select(-row_id) %>%
+  st_as_sf()
+
+
+
 ggplot() +
   geom_polygon(data = world_map, aes(x = long, y = lat, group = group),
                fill = "gray95", color = "gray70") +
@@ -754,52 +739,66 @@ ggplot() +
   geom_sf(data = arrow_sf,
           arrow = arrow(length = unit(0.2, "cm"), type = "closed"),
           color = "black") +
-  geom_point(data = GRAMMAR_cossim, aes(x = longitude, y = latitude),
+  geom_sf(data = arrow_main,
+        arrow = arrow(length = unit(0.25, "cm"), type = "closed"),
+        color = "black") +
+  geom_point(data = PHONEME_cossim,aes(x = longitude, y = latitude), 
              size = 3, shape = 21) +
+  #geom_text(data = PHONEME_cossim,
+   #         aes(x = longitude, y = latitude, label = language),
+    #        size = 3, hjust = -0.1, vjust = -0.5) +
   coord_sf(xlim = c(116, 127), ylim = c(4, 21)) +
   theme_minimal() +
-  labs(title = "Grammatic Historical Routes Waypoint System",
-       x = "Longitude", y = "Latitude")
+  labs(title = "Phonemic Historical Routes Waypoint System",
+       color = "Travel Mode",
+       x = 'Longitude',
+       y = 'Latitude')
 
-# Arrow overlay plot (saved)
-arrow_plot_GRAMMAR <- ggplot() +
+
+arrow_plot <- ggplot() +
+  # Main path lines — no arrows
   geom_sf(data = full_tree_sf,
           mapping = aes(geometry = geometry),
-          color = "black", linewidth = 0.7) +
+          color = "black", linewidth = 1) +
+  
+  # Connector segments — with arrows only
   geom_sf(data = arrow_sf,
           mapping = aes(geometry = geometry),
           arrow = arrow(length = unit(0.2, "cm"), type = "closed"),
-          color = "black", linewidth = 0.7) +
+          color = "black", linewidth = 1) +
+  
   coord_sf(xlim = c(116, 127), ylim = c(4, 21)) +
   theme_minimal()
 
-arrow_plot_GRAMMAR
-saveRDS(arrow_plot_GRAMMAR, file = here("data", "grammar_waypoint_plot.rds"))
+print(arrow_plot)
+saveRDS(arrow_plot, file = here("data", "phoneme_waypoint_plot.rds"))
+
 
 # ----- linear model -------------------------------------------
 
-lm_span <- lm(cossim_span ~ geodist_H1_span, data = GRAMMAR_cossim)
+lm_span <- lm(cossim_span ~ geodist_H1_span, data = PHONEME_cossim)
 summary_lm_span <- summary(lm_span)
 
 slope <- round(coef(lm_span)[2],5)
 coefficient <- round(coef(lm_span)[1],5)
 r_squared <- round(summary_lm_span$r.squared,3)
 linear_model_equation <- paste0("Y = ", slope, "x + ", coefficient)
+print(linear_model_equation)
 
-ggplot(data = GRAMMAR_cossim, aes(x = geodist_H1_span, y = cossim_span)) +
+ggplot(data = PHONEME_cossim, aes(x = geodist_H1_span, y = cossim_span)) +
   geom_point() +
   geom_smooth(method = 'lm',se = FALSE) +
   theme_bw() +
   labs(title = 'Linear Model',
-         x = 'Relative Migration Distance (km)',
-         y = 'Cosine Similarity')
+       x = 'Relative Migration Distance (km)',
+       y = 'Cosine Similarity')
 
-# ---- exponential case -------------------------------------
+# ---- exponential model -------------------------------------
 
 library(rethinking)
 
 # Standardize predictors
-GRAMMAR_cossim$dist_std <- standardize(GRAMMAR_cossim$geodist_H1_span)
+PHONEME_cossim$dist_std <- standardize(PHONEME_cossim$geodist_H1_span)
 
 # Model: exponential decay
 m_exp <- rethinking::map(
@@ -810,20 +809,20 @@ m_exp <- rethinking::map(
     b ~ dnorm(0, 1),
     sigma ~ dexp(1)
   ),
-  data = GRAMMAR_cossim
+  data = PHONEME_cossim
 )
 
 # Summarize
 precis(m_exp)
 
 # Generate predictions
-dist_seq <- seq(from = min(GRAMMAR_cossim$dist_std), to = max(GRAMMAR_cossim$dist_std), length.out = 100)
+dist_seq <- seq(from = min(PHONEME_cossim$dist_std), to = max(PHONEME_cossim$dist_std), length.out = 100)
 preds <- link(m_exp, data = data.frame(dist_std = dist_seq))
 mu_mean <- apply(preds, 2, mean)
 mu_PI <- apply(preds, 2, PI)
 mu_PI_t <- t(mu_PI)
 # Plot
-scatter_df <- GRAMMAR_cossim
+scatter_df <- PHONEME_cossim
 
 # Line + ribbon data
 ribbon_df <- data.frame(
@@ -833,19 +832,14 @@ ribbon_df <- data.frame(
   upper = mu_PI_t[,2]
 )
 
-
-
 ggplot() +
   geom_point(data = scatter_df, aes(x = dist_std, y = cossim_span),
              color = "black", size = 2) +
   geom_line(data = ribbon_df, aes(x = dist, y = mean),
             color = "blue", linewidth = 1.2) +
-  theme_minimal() +
-  labs(
-    x = "Relative Migration Distance (km)",
-    y = "Cosine Similarity",
-    title = "Exponential Model"
-  ) + 
+  labs(title = 'Exponential Model',
+       x = 'Relative Migration Distance (km)',
+       y = 'Cosine Similarity') + 
   theme_bw()
 
 
@@ -858,27 +852,21 @@ b <- round(coefs["b"], 5)
 exp_eq <- paste0("μ = ", a, " * exp(-", b, " * x)")
 print(exp_eq)
 
-# ------- loess regression ---------------
-
-
-
-# ----- spline regression
+# ----- spline regression --------
 
 library(splines)
 
-spline_fit <- lm(cossim_span ~ bs(geodist_H1_span, df = 5), data = GRAMMAR_cossim)
-x_vals <- GRAMMAR_cossim$geodist_H1_span
+spline_fit <- lm(cossim_span ~ bs(geodist_H1_span, df = 5), data = PHONEME_cossim)
+x_vals <- PHONEME_cossim$geodist_H1_span
 y_spline <- predict(spline_fit, newdata = data.frame(geodist_H1_span = x_vals))
 
-ggplot(GRAMMAR_cossim, aes(x = geodist_H1_span, y = cossim_span)) +
+ggplot(PHONEME_cossim, aes(x = geodist_H1_span, y = cossim_span)) +
   geom_point(color = "gray") +
   geom_line(aes(y = y_spline), color = "blue", linewidth = 1.2) +
   theme_bw() +
-  labs(
-    title = "Spline Regression",
-    x = "Relative Migration Distance (km)",
-    y = "Cosine Similarity"
-  ) 
+  labs(title = 'Spline Model',
+       x = 'Relative Migration Distance (km)',
+       y = 'Cosine Similarity')
 
 paste0("y(x) = ", paste0("β", 1:5, "·B", 1:5, "(x)", collapse = " + "))
 coefs <- coef(spline_fit)
@@ -900,19 +888,19 @@ print(knots)
 # ----- comparing errors ---------------------------
 
 
-spline_fit <- lm(cossim_span ~ bs(geodist_H1_span, df = 5), data = GRAMMAR_cossim)
+spline_fit <- lm(cossim_span ~ bs(geodist_H1_span, df = 5), data = PHONEME_cossim)
 
 # Linear model predictions
-GRAMMAR_cossim$pred_linear <- predict(lm_span)
+PHONEME_cossim$pred_linear <- predict(lm_span)
 
 # Exponential model predictions using link()
 exp_preds <- link(m_exp)
-GRAMMAR_cossim$pred_exp <- apply(exp_preds, 2, mean)
+PHONEME_cossim$pred_exp <- apply(exp_preds, 2, mean)
 
 # RMSE calculation
-rmse_linear <- sqrt(mean((GRAMMAR_cossim$cossim_span - GRAMMAR_cossim$pred_linear)^2))
-rmse_exp <- sqrt(mean((GRAMMAR_cossim$cossim_span - GRAMMAR_cossim$pred_exp)^2))
-rmse_spline <- sqrt(mean((GRAMMAR_cossim$cossim_span - y_spline)^2))
+rmse_linear <- sqrt(mean((PHONEME_cossim$cossim_span - PHONEME_cossim$pred_linear)^2))
+rmse_exp <- sqrt(mean((PHONEME_cossim$cossim_span - PHONEME_cossim$pred_exp)^2))
+rmse_spline <- sqrt(mean((PHONEME_cossim$cossim_span - y_spline)^2))
 
 p_linear <- summary(lm_span)$coefficients[2, 4]  # Slope p-value
 p_spline <- pf(summary(spline_fit)$fstatistic[1],
@@ -925,7 +913,7 @@ pr_b_gt_0 <- mean(exp_post$b > 0)  # Replace 'b' with your actual slope paramete
 
 # Compare
 
-cossim_span_range <- max(GRAMMAR_cossim$cossim_span) - min(GRAMMAR_cossim$cossim_span)
+cossim_span_range <- max(PHONEME_cossim$cossim_span) - min(PHONEME_cossim$cossim_span)
 
 rmse_df <- data.frame(
   Model = c("Linear", "Exponential", "Spline"),
@@ -937,26 +925,25 @@ rmse_df <- data.frame(
 
 print(rmse_df)
 
+
 # ---- dissimilarity matrix ----------------------------------
 
-ph_lang <- GRAMBANKdf_PH %>% 
-  filter(Language_Type == 'Philippine Language') %>% 
-  pull(language)
+cosine_matrix_phil <- cosine_matrix[ph_lang, ph_lang]
+lang_order <- rownames(cosine_matrix_phil)
 
-cosine_matrix_phil_grammar <- cosine_matrix_grammar[ph_lang, ph_lang]
-lang_order <- rownames(cosine_matrix_phil_grammar)
+cosine_matrix_phil <- 1-cosine_matrix_phil
 
-cosine_matrix_phil_grammar <- 1-cosine_matrix_phil_grammar
-diag(cosine_matrix_phil_grammar) <- 0
-
-GRAMMAR_diss_matrix <- cosine_matrix_phil_grammar
+PHONEME_diss_matrix <- cosine_matrix_phil
 
 # ----- distance matrix --------------------------------------
+ph_lang <- RUHLENdf %>% 
+  filter(Language_type == 'Philippine Language') %>% 
+  pull(language)
 
-phil_df <- GRAMBANKdf_PH %>%
-  filter(Language_Type == "Philippine Language") %>%
+phil_df <- RUHLENdf %>%
+  filter(Language_type == "Philippine Language") %>%
   mutate(
-    start_coords = map2(Longitude, Latitude, ~ c(.x, .y)),
+    start_coords = map2(longitude, latitude, ~ c(.x, .y)),
     nearest_node = map_chr(start_coords, find_nearest_node)
   )
 
@@ -1010,22 +997,23 @@ dist_matrix <- phil_pairs %>%
   column_to_rownames("lang1") %>%
   as.matrix()
 
-GRAMMAR_dist_matrix <- dist_matrix[ph_lang, ph_lang]
-GRAMMAR_dist_matrix[is.na(GRAMMAR_dist_matrix)] <- 0
+PHONEME_dist_matrix <- dist_matrix[ph_lang, ph_lang]
+PHONEME_dist_matrix[is.na(PHONEME_dist_matrix)] <- 0
+
 
 # ---- plot matrices -----------------------------------
 
-melt_grammar_dist_matrix <- melt(GRAMMAR_dist_matrix)
-melt_grammar_diss_matrix <- melt(GRAMMAR_diss_matrix)
+melt_phoneme_dist_matrix <- melt(PHONEME_dist_matrix)
+melt_phoneme_diss_matrix <- melt(PHONEME_diss_matrix)
 
-dist_matrix_p <- ggplot(melt_grammar_dist_matrix, aes(x = Var1, y = Var2, fill = value)) +
+dist_matrix_p <- ggplot(melt_phoneme_dist_matrix, aes(x = Var1, y = Var2, fill = value)) +
   geom_tile(color = "white") + # Creates the colored tiles
   scale_fill_gradient(low = "yellow", high = "red") + # Customizes the colors
   labs(title = "", x = "", y = "") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + # Rotates x-axis labels
   coord_fixed() # Ensures cells are square
 
-diss_matrix_p  <- ggplot(melt_grammar_diss_matrix, aes(x = Var1, y = Var2, fill = value)) +
+diss_matrix_p  <- ggplot(melt_phoneme_diss_matrix, aes(x = Var1, y = Var2, fill = value)) +
   geom_tile(color = "white") + # Creates the colored tiles
   scale_fill_gradient(low = "yellow", high = "red") + # Customizes the colors
   labs(title = "", x = "", y = "") +
@@ -1039,8 +1027,8 @@ dist_matrix_p + diss_matrix_p
 library(vegan)
 
 # Convert to distance objects
-x_dist <- as.dist(GRAMMAR_dist_matrix)
-y_dist <- as.dist(GRAMMAR_diss_matrix)
+x_dist <- as.dist(PHONEME_dist_matrix)
+y_dist <- as.dist(PHONEME_diss_matrix)
 
 # Run Mantel test
 mantel_result <- mantel(x_dist, y_dist, method = "spearman", permutations = 999)
@@ -1050,8 +1038,8 @@ print(mantel_result)
 library(ggplot2)
 
 # Convert matrices to vectors
-x_vec <- as.vector(as.dist(GRAMMAR_dist_matrix))
-y_vec <- as.vector(as.dist(GRAMMAR_diss_matrix))
+x_vec <- as.vector(as.dist(PHONEME_dist_matrix))
+y_vec <- as.vector(as.dist(PHONEME_diss_matrix))
 
 
 
@@ -1062,25 +1050,22 @@ ggplot(data.frame(x = x_vec, y = y_vec), aes(x = x, y = y)) +
   geom_smooth(method = "lm", color = "blue", se = FALSE) +
   theme_bw() +
   labs(
-    title = "Mantel Test: Grammar Feature Distance vs. Dissimilarity",
+    title = "Mantel Test: Phoneme Distance vs. Dissimilarity",
     x = "Relative Migration Pairwise Distance (km)",
-    y = "Grammatic Dissimilarity"
+    y = "Phonemic Dissimilarity"
   )
+
 
 # ----- saving dataframes -----------------------------------
 
-write.csv(cosine_matrix_grammar, file = here("data", "GRAMMAR_cosine_matrix.csv"), row.names = TRUE)
+write.csv(cosine_matrix, file = here("data", "PHONEME_cosine_matrix.csv"), row.names = TRUE)
 
+PHONEME_cossim <- RUHLENdf |> 
+  filter(Language_type == 'Philippine Language') |> 
+  select(language, latitude, longitude) |>
+  left_join(df_span,by = 'language') |> 
+  left_join(df_jap,by = 'language') |> 
+  left_join(df_eng,by = 'language') |> 
+  left_join(df_unr,by = 'language')
 
-GRAMMAR_cossim <- df_span %>% 
-  left_join(df_jap,by = 'language') %>% 
-  left_join(df_eng,by = 'language') %>% 
-  left_join(df_unr,by = 'language') %>% 
-  mutate(latitude = lat.lang(language),
-         longitude = long.lang(language))
-
-write.csv(GRAMMAR_cossim, file = here("data", "GRAMMAR_cossim.csv"), row.names = TRUE)
-
-
-
-
+write.csv(PHONEME_cossim, file = here("data", "PHONEME_cossim.csv"), row.names = TRUE)

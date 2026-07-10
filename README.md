@@ -22,7 +22,7 @@ is no build system or test suite.
 
 ```
 R/
-  phoneme_analysis/   Numbered PHOIBLE pipeline ([0]→[1]→[2]→[3]) + EEMS prep + shuffled null
+  phoneme_analysis/   Numbered Ruhlen/PHOIBLE pipeline ([0]→[1]→…→[8]) + EEMS prep + shuffled null
   grammar_analysis/   Numbered GRAMBANK pipeline ([0]→[1]→[2]→[4]) + EEMS prep + shuffled null
   cognate_analysis/   LingPy cognate analysis (gitignored; not used for the paper)
   helpers/            default.eems.plots.R (vendored EEMS plotting helper)
@@ -46,14 +46,26 @@ bracketed prefix is the execution order:
 
 1. **`[0]_*database.R`** — fetch from PHOIBLE/GRAMBANK (via `lingtypology`), filter to the study
    languages, pivot to a binary feature matrix, write the feature matrix + IDF frequency table.
-2. **`[1]_*analysisweighted_span.R`** — weighted cosine similarity (log-IDF weighting), the
-   graph-based waypoint network, geodesic/land-penalized distances, distance-decay regression,
-   and Mantel tests; writes the cosine/cossim matrices and the waypoint-plot object.
+   - Phonemes use the Creanza/Ruhlen source: run **PART A** of `[0]_CREANZA_RUHLENdatabase.R`,
+     then `[0]_Phylogenetic_Tree.R` (prunes the MCC tree to the study languages and returns
+     `Ph_Languages_pruned`), then **PART B** of the database script. The Grambank unrelated-control
+     set is built locally, so no grammar script needs to run first.
+2. **Core similarity + downstream analyses.** For phonemes this is split into single-purpose files
+   (run in this order): `[1]_PHONEME_cosine_similarity.R` (writes the cosine/cossim matrices) →
+   `[2]_PHONEME_cosine_distribution_analysis.R` (ridge/density plots + Friedman/LMM) →
+   `[3]_PHONEME_network_distance.R` (waypoint network + per-language land-penalized distance,
+   writes `PHONEME_cossim_dist.csv`) → `[4]_PHONEME_regression.R` (distance-decay models) →
+   `[5]_PHONEME_mantel.R` (Dijkstra pairwise distances + Mantel test) →
+   `[6]_PHONEME_PGLS.R` (needs the phylogenetic tree). The grammar side still uses the combined
+   `[1]_GRAMMARanalysisweighted_span.R`. (The old monolithic `[1]_PHONEMEanalysisweighted_span.R`
+   and `[2]_PHONEMEanalysisweighted_otherlang.R` are retained for reference.)
 3. **`*_EEMS.R`** — turn the similarity scores into the EEMS dissimilarity (`datapath.diffs`) and
    coordinate (`datapath.coord`) inputs, plus a shuffled null-model variant.
 4. *(MATLAB)* run the EEMS MCMC in `matlab/matlab_eems_*/eems*.m`, consuming the `datapath.*` files.
-5. **`[2]_eems_plot_*_span.R`** — render the EEMS MCMC output (`reemsplots2`) into a base map RDS.
-6. **`[3]/[4]_*_weight_mst_eems_span.R`** — overlay MST edges / waypoint routes on the base map.
+5. **`eems_plot_*_span.R`** — render the EEMS MCMC output (`reemsplots2`) into a base map RDS.
+   For phonemes this is `[7]_eems_plot_PA_span.R`; for grammar `[2]_eems_plot_GA_span.R`.
+6. **`*_weight_mst_eems_span.R`** — overlay MST edges / waypoint routes on the base map
+   (`[8]_PA_weight_mst_eems_span.R` for phonemes, `[4]_GA_weight_mst_eems_span.R` for grammar).
 
 `*_shuffled` / `eems_plot_*_shuffled.R` are permutation null-model runs used to assess
 significance against the real analysis.
