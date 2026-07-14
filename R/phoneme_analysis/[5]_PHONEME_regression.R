@@ -14,11 +14,11 @@ library(rethinking)
 library(splines)
 library(here)
 
-PHONEME_cossim <- read.csv(here("data", "PHONEME_cossim_dist.csv"))
+PHONEME_cossim_dist <- read.csv(here("data", "PHONEME_cossim_dist.csv"))
 
 # ----- linear model ----------------------------------------------------------
 
-lm_span <- lm(cossim_span ~ geodist_H1_span, data = PHONEME_cossim)
+lm_span <- lm(cossim_span ~ geodist_H1_span, data = PHONEME_cossim_dist)
 summary_lm_span <- summary(lm_span)
 
 slope <- round(coef(lm_span)[2], 5)
@@ -27,7 +27,7 @@ r_squared <- round(summary_lm_span$r.squared, 3)
 linear_model_equation <- paste0("Y = ", slope, "x + ", coefficient)
 print(linear_model_equation)
 
-ggplot(data = PHONEME_cossim_filter_test, aes(x = geodist_H1_span, y = delta_spanish)) +
+ggplot(data = PHONEME_cossim_dist, aes(x = geodist_H1_span, y = delta_span)) +
   geom_point() +
   geom_smooth(method = 'lm', se = FALSE) +
   theme_bw() +
@@ -38,18 +38,18 @@ ggplot(data = PHONEME_cossim_filter_test, aes(x = geodist_H1_span, y = delta_spa
 # ---- exponential model ------------------------------------------------------
 
 # Standardize predictors
-PHONEME_cossim$dist_std <- standardize(PHONEME_cossim$geodist_H1_span)
+PHONEME_cossim_dist$dist_std <- rethinking::standardize(PHONEME_cossim_dist$geodist_H1_span)
 
 # Model: exponential decay
 m_exp <- rethinking::map(
   alist(
-    delta_spanish ~ dnorm(mu, sigma),
+    cossim_span ~ dnorm(mu, sigma),
     mu <- a * exp(-b * geodist_H1_span),
     a ~ dnorm(0.5, 0.2),
     b ~ dnorm(0, 1),
     sigma ~ dexp(1)
   ),
-  data = PHONEME_cossim_filter_test
+  data = PHONEME_cossim_dist
 )
 
 # Summarize

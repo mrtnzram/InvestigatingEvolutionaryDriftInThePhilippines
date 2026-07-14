@@ -6,7 +6,7 @@
 # Note:    pairwise inter-language distances for the Mantel test are computed
 #          separately in [5]_PHONEME_mantel.R (Dijkstra routing).
 #
-# Replaces compute_shortest_path_df(). Instead of routing each language to a
+# compute_shortest_path_df(). Instead of routing each language to a
 # single reference point (ref_coords1) via Dijkstra, this computes each
 # language's terrain-penalized cost to ENTER the navigable network — i.e.
 # the connector from the language's coordinate to its nearest graph node.
@@ -175,9 +175,13 @@ PHONEME_cossim |>
   print(n = 20)
 
 # Write the geodist-augmented table (flat columns only; drops the geometry /
-# list-columns) for [4]_PHONEME_regression.R to consume.
+# list-columns) for [4]_PHONEME_regression.R to consume. The *_influenced /
+# sig_* columns are carried forward when present (written by [2]); any_of() keeps
+# this runnable if [2] hasn't been sourced yet.
 PHONEME_cossim |>
   select(language, latitude, longitude, starts_with("cossim_"),
+         any_of(c("span_influenced", "jap_influenced", "eng_influenced",
+                  "sig_span", "sig_jap", "sig_eng")),
          geodist_H1_span, nearest_node, land_len, sea_len, crosses_land) |>
   write.csv(file = here("data", "PHONEME_cossim_dist.csv"), row.names = FALSE)
 
