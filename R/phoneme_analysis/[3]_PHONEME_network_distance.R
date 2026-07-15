@@ -33,7 +33,7 @@ library(sfheaders)
 library(here)
 
 # ── 0. Load data ─────────────────────────────────────────────────────────────
-PHONEME_cossim <- read.csv(here("data", "PHONEME_cossim.csv"))
+PHONEME_cossim <- read.csv(here("data", "PHONEME_cossim_marked.csv"))
 
 nodes <- read.csv(here("data", "nodes.csv")) |> mutate(id = as.character(id))
 edges <- read.csv(here("data", "edges.csv")) |>
@@ -123,49 +123,170 @@ find_nearest_node <- function(coords, nodes) {
 }
 
 
+# ── Manila reference (hoisted so plots can use it too) ──────────────────────
+MANILA <- data.frame(
+  longitude = 121,
+  latitude  = 14.6
+)
+
+
 # ── 5. Per-language: terrain-penalized distance to the network ───────────────
-compute_network_distance_df <- function(df, nodes, edges, land_sf, land_penalty = 4.44) {
+# geodist_H1_span : penalized cost from the language point to its nearest
+#                   network node (the "get onto the network" leg).
+# geodist_H2_span : penalized cost to Manila, taking whichever is cheaper —
+#                   (connector + network traversal) or a direct line.
+# using_network   : TRUE when the network route won; also selects which
+#                   split geometry is retained for plotting.
+compute_network_distance_df <- function(df, nodes, edges, land_sf,
+                                        refdf1 = MANILA,
+                                        land_penalty = 4.44) {
   
   stopifnot(land_penalty >= 1)
   
-  nodes <- nodes |> mutate(id = as.character(id))
-  edges <- edges |> mutate(from = as.character(from), to = as.character(to))
+  nodes <- nodes |>
+    dplyr::mutate(id = as.character(id))
   
+  edges <- edges |>
+    dplyr::mutate(
+      from = as.character(from),
+      to   = as.character(to)
+    )
+  
+  #------------------------------------------------------------
+  # Build weighted graph
+  #------------------------------------------------------------
+  g <- igraph::graph_from_data_frame(
+    d = edges |>
+      dplyr::select(from, to, weighted_cost),
+    directed = FALSE,
+    vertices = nodes
+  )
+  
+  #------------------------------------------------------------
+  # Compute shortest weighted distance from Manila node to all nodes
+  #------------------------------------------------------------
+  manila_coords <- c(refdf1$longitude, refdf1$latitude)
+  
+  manila_node <- find_nearest_node(manila_coords, nodes)
+  
+  net_to_manila <- igraph::distances(
+    g,
+    v = manila_node,
+    to = igraph::V(g),
+    weights = igraph::E(g)$weighted_cost
+  )
+  
+  net_dist_km <- tibble(
+    nearest_node = colnames(net_to_manila),
+    net_km = as.numeric(net_to_manila[1, ]) / 1000
+  )
+  
+  #------------------------------------------------------------
+  # Build connector to nearest node
+  #------------------------------------------------------------
   df_geom <- df |>
     rowwise() |>
     mutate(
-      start_coords  = list(c(longitude, latitude)),
-      nearest_node  = find_nearest_node(start_coords, nodes),
-      connector_geom = list(st_linestring(rbind(
-        start_coords,
-        c(nodes$longitude[nodes$id == nearest_node],
-          nodes$latitude[nodes$id == nearest_node])
-      )))
+      start_coords = list(c(longitude, latitude)),
+      nearest_node = find_nearest_node(start_coords, nodes),
+      
+      connector_geom = list(
+        st_linestring(rbind(
+          start_coords,
+          c(
+            nodes$longitude[nodes$id == nearest_node],
+            nodes$latitude[nodes$id == nearest_node]
+          )
+        ))
+      )
     ) |>
     ungroup() |>
-    mutate(connector_geom = st_sfc(connector_geom, crs = 4326))   # list-col -> real sfc
+    mutate(
+      connector_geom = st_sfc(connector_geom, crs = 4326)
+    )
   
+  #------------------------------------------------------------
+  # Build direct connector to Manila
+  #------------------------------------------------------------
+  df_geom <- df_geom |>
+    rowwise() |>
+    mutate(
+      manila_geom = list(
+        st_linestring(rbind(
+          start_coords,
+          manila_coords
+        ))
+      )
+    ) |>
+    ungroup() |>
+    mutate(
+      manila_geom = st_sfc(manila_geom, crs = 4326)
+    )
+  
+  #------------------------------------------------------------
+  # Compute connector costs, pick the cheaper H2 route, and retain
+  # the geometry belonging to whichever route won.
+  #------------------------------------------------------------
   df_geom |>
     rowwise() |>
     mutate(
-      .split          = list(split_and_penalize(connector_geom, land_sf, land_penalty)),
-      land_len        = .split$land_len,
-      sea_len         = .split$sea_len,
-      crosses_land    = .split$crosses_land,
-      geodist_H1_span = .split$weighted_cost / 1000,     # metres -> km
-      land_geom       = list(.split$land_geom),
-      sea_geom        = list(.split$sea_geom)
+      # Point -> nearest node
+      .split_node = list(
+        split_and_penalize(connector_geom, land_sf, land_penalty)
+      ),
+      
+      # Point -> Manila directly
+      .split_manila = list(
+        split_and_penalize(manila_geom, land_sf, land_penalty)
+      ),
+      
+      geodist_H1_span  = .split_node$weighted_cost   / 1000,   # m -> km
+      direct_to_manila = .split_manila$weighted_cost / 1000    # m -> km
     ) |>
     ungroup() |>
-    select(-.split)
+    left_join(net_dist_km, by = join_by(nearest_node)) |>
+    mutate(
+      network_to_manila = geodist_H1_span + net_km,
+      
+      # igraph::distances() yields Inf for unreachable nodes, so a
+      # disconnected graph falls back to the direct line rather than NA.
+      using_network = !is.na(network_to_manila) &
+        network_to_manila < direct_to_manila,
+      
+      geodist_H2_span = pmin(network_to_manila, direct_to_manila, na.rm = TRUE)
+    ) |>
+    # Geometry follows the winning route: these feed connector_sf in §7.
+    rowwise() |>
+    mutate(
+      land_geom    = list(if (using_network) .split_node$land_geom else .split_manila$land_geom),
+      sea_geom     = list(if (using_network) .split_node$sea_geom  else .split_manila$sea_geom),
+      land_len     = if (using_network) .split_node$land_len     else .split_manila$land_len,
+      sea_len      = if (using_network) .split_node$sea_len      else .split_manila$sea_len,
+      crosses_land = if (using_network) .split_node$crosses_land else .split_manila$crosses_land
+    ) |>
+    ungroup() |>
+    dplyr::select(
+      -.split_node, -.split_manila,
+      -net_km, -network_to_manila, -direct_to_manila
+    )
 }
 
 
 # ── 6. Run ─────────────────────────────────────────────────────────────────
-edge_lines <- build_network_edges(nodes, edges, land_sf, land_penalty = 44.18)
+network_edges <- build_network_edges(
+  nodes,
+  edges,
+  land_sf,
+  land_penalty = 4.44
+)
 
 PHONEME_cossim <- compute_network_distance_df(
-  PHONEME_cossim, nodes, edges, land_sf, land_penalty = 44.18
+  PHONEME_cossim,
+  nodes,
+  network_edges,
+  land_sf,
+  refdf1 = MANILA,
+  land_penalty = 4.44
 )
 
 PHONEME_cossim |>
@@ -174,15 +295,26 @@ PHONEME_cossim |>
   arrange(geodist_H1_span) |>
   print(n = 20)
 
+PHONEME_cossim |>
+  select(any_of(c("language", "nearest_node", "geodist_H2_span",
+                  "using_network", "land_len", "sea_len", "crosses_land"))) |>
+  arrange(geodist_H2_span) |>
+  print(n = 20)
+
+# Diagnostic: how often does the network actually beat the direct line?
+# At land_penalty = 4.44 expect more FALSE than under the old 44.18 setting.
+PHONEME_cossim |>
+  count(using_network) |>
+  print()
+
 # Write the geodist-augmented table (flat columns only; drops the geometry /
 # list-columns) for [4]_PHONEME_regression.R to consume. The *_influenced /
 # sig_* columns are carried forward when present (written by [2]); any_of() keeps
 # this runnable if [2] hasn't been sourced yet.
 PHONEME_cossim |>
   select(language, latitude, longitude, starts_with("cossim_"),
-         any_of(c("span_influenced", "jap_influenced", "eng_influenced",
-                  "sig_span", "sig_jap", "sig_eng")),
-         geodist_H1_span, nearest_node, land_len, sea_len, crosses_land) |>
+         any_of(c("span_influenced", "jap_influenced", "eng_influenced")),
+         geodist_H1_span, geodist_H2_span, using_network) |>
   write.csv(file = here("data", "PHONEME_cossim_dist.csv"), row.names = FALSE)
 
 
@@ -190,8 +322,10 @@ PHONEME_cossim |>
 # Mirrors the original land_segments_sf / sea_segments_sf / connector_sf
 # assembly, but built once via map()/list_rbind() instead of manual loops,
 # and with a single connector per language (no "end" connector, since there
-# is no longer a ref_coords1 target).
-geom_rows <- function(geom_list, crosses_land_value, source_value) {
+# is no longer a ref_coords1 target). The connector geometry is now whichever
+# route won in §5, so `using_network` is carried through for styling.
+geom_rows <- function(geom_list, crosses_land_value, source_value,
+                      row_attrs = NULL) {
   # NOTE: purrr::map is explicitly namespaced — library(maps) is loaded after
   # library(tidyverse), so the unqualified map() resolves to maps::map()
   # (cartographic plotting), not purrr::map() (list mapping), and silently
@@ -209,15 +343,26 @@ geom_rows <- function(geom_list, crosses_land_value, source_value) {
     list()
   }
   
-  unwrapped <- purrr::map(geom_list, 1)                     # undo rowwise's list(x) wrapper
-  sfg_list  <- do.call(c, purrr::map(unwrapped, to_sfg_list))  # flatten to one list of sfg
+  unwrapped   <- purrr::map(geom_list, 1)                  # undo rowwise's list(x) wrapper
+  sfg_per_row <- purrr::map(unwrapped, to_sfg_list)        # per-row list of sfg
+  n_per_row   <- purrr::map_int(sfg_per_row, length)       # 0 when a row has no piece
+  sfg_list    <- do.call(c, sfg_per_row)                   # flatten to one list of sfg
   
   if (length(sfg_list) == 0) return(NULL)
-  st_sf(
+  
+  out <- st_sf(
     geometry     = st_sfc(sfg_list, crs = 4326),
     crosses_land = crosses_land_value,
     source       = source_value
   )
+  
+  # rep(times = n_per_row) keeps per-language attrs aligned with the
+  # flattened geometry: a row contributing zero pieces contributes zero attrs.
+  if (!is.null(row_attrs)) {
+    out$using_network <- rep(row_attrs, times = n_per_row)
+  }
+  
+  out
 }
 
 main_sf <- bind_rows(
@@ -226,10 +371,12 @@ main_sf <- bind_rows(
 )
 
 connector_sf <- bind_rows(
-  geom_rows(PHONEME_cossim$land_geom, TRUE,  "connector"),
-  geom_rows(PHONEME_cossim$sea_geom,  FALSE, "connector")
+  geom_rows(PHONEME_cossim$land_geom, TRUE,  "connector", PHONEME_cossim$using_network),
+  geom_rows(PHONEME_cossim$sea_geom,  FALSE, "connector", PHONEME_cossim$using_network)
 )
 
+# main_sf has no using_network; bind_rows fills NA, which is harmless because
+# the plots filter on `source` before mapping colour.
 full_tree_sf <- bind_rows(main_sf, connector_sf)
 
 
@@ -263,37 +410,56 @@ arrow_connectors <- full_tree_sf |>
 
 
 # ── 9. Overview plot: network + language points + directional arrows ────────
+# Connector arrows are coloured by using_network: black arrows stop at a
+# network node (main edges carry them onward to Manila), red arrows run
+# straight to Manila.
 plot_network <- function(full_tree_sf, arrow_main, arrow_connectors,
-                         points_df, lon_range = c(116, 127), lat_range = c(4, 21)) {
+                         points_df, refdf1 = MANILA,
+                         lon_range = c(116, 127), lat_range = c(4, 21)) {
   ggplot() +
     geom_polygon(data = world_map, aes(x = long, y = lat, group = group),
                  fill = "gray95", color = "gray70") +
-    geom_sf(data = full_tree_sf, linewidth = 1, color = "black") +
+    geom_sf(data = full_tree_sf |> filter(source == "main"),
+            linewidth = 1, color = "grey40") +
     geom_sf(data = arrow_connectors,
-            arrow = arrow(length = unit(0.2, "cm"), type = "closed"),
-            color = "black") +
+            aes(color = using_network),
+            arrow = arrow(length = unit(0.2, "cm"), type = "closed")) +
     geom_sf(data = arrow_main,
             arrow = arrow(length = unit(0.25, "cm"), type = "closed"),
-            color = "black") +
+            color = "grey40") +
     geom_point(data = points_df, aes(x = longitude, y = latitude),
                size = 3, shape = 21) +
+    geom_point(data = refdf1, aes(x = longitude, y = latitude),
+               shape = 23, size = 3, fill = "white", stroke = 1) +
+    scale_color_manual(
+      values = c(`TRUE` = "black", `FALSE` = "firebrick"),
+      labels = c(`TRUE` = "via network node", `FALSE` = "direct to Manila"),
+      name   = "H2 route"
+    ) +
     coord_sf(xlim = lon_range, ylim = lat_range) +
     theme_minimal() +
     labs(title = "Phonemic Historical Routes Waypoint System",
          x = "Longitude", y = "Latitude")
 }
 
-print(plot_network(full_tree_sf, arrow_main, arrow_connectors, PHONEME_cossim))
+print(plot_network(full_tree_sf, arrow_main, arrow_connectors,
+                   PHONEME_cossim, refdf1 = MANILA))
 
 
-# ── 10. Arrow-only plot (connectors get arrows, main path stays plain) ──────
+# ── 10. Arrow-only plot (main tree + connector arrows, all black) ───────────
+# Built as a transparent overlay layer for the EEMS raster + cossim dots.
 arrow_plot <- ggplot() +
-  geom_sf(data = full_tree_sf, color = "black", linewidth = 1) +
-  geom_sf(data = arrow_connectors,
-          arrow = arrow(length = unit(0.2, "cm"), type = "closed"),
+  geom_sf(data = full_tree_sf |> filter(source == "main"),
           color = "black", linewidth = 1) +
+  geom_sf(data = arrow_connectors,
+          color = "black", linewidth = 1,
+          arrow = arrow(length = unit(0.2, "cm"), type = "closed")) +
   coord_sf(xlim = c(116, 127), ylim = c(4, 21)) +
-  theme_minimal()
+  theme_void() +
+  theme(
+    panel.background = element_rect(fill = "transparent", color = NA),
+    plot.background  = element_rect(fill = "transparent", color = NA)
+  )
 
 print(arrow_plot)
 saveRDS(arrow_plot, file = here("data", "phoneme_waypoint_plot.rds"))
