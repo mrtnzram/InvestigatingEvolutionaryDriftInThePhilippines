@@ -27,13 +27,15 @@ library(patchwork)
 library(here)
 library(broom)
 library(mclust)
+library(lme4)
+library(lmerTest)
 
 # --- Loading data ------------------------------------------------------------
 # read_csv names an unnamed leading index column "...1"; drop it if present.
 # Also drop any *_influenced / sig_* columns that a previous run may have left in
 # the file, so the classification joins below stay idempotent (no .x/.y dupes).
 PHONEME_cossim <- read_csv(here("data", "PHONEME_cossim.csv")) |>
-  select(-any_of(c("...1", "span_influenced", "jap_influenced", "eng_influenced",
+  dplyr::select(-any_of(c("...1", "span_influenced", "jap_influenced", "eng_influenced",
                    "sig_span", "sig_jap", "sig_eng")))
 
 # Philippine / unrelated language sets (derived locally so [2] is self-contained
@@ -239,8 +241,105 @@ wilcox_boxplot
 ggsave(
   filename = here("figures", "phoneme", "distributions", "phoneme_wilcoxon_boxplot.png"),
   plot = wilcox_boxplot,
-  width = 7, height = 4.5, units = "in", dpi = 300
+  width = 8, height = 3.5, units = "in", dpi = 300
 )
+
+# --- Linear Mixed Model ------------------------------------------------------
+# Baseline as fixed effect (Unrelated = reference), language as random intercept.
+# lmerTest supplies Kenward-Roger df for the t-tests.
+phoneme_long <- PHONEME_cossim |>
+  select(language, cossim_span, cossim_eng, cossim_jap, cossim_unr) |>
+  pivot_longer(
+    cols      = c(cossim_span, cossim_eng, cossim_jap, cossim_unr),
+    names_to  = "baseline",
+    values_to = "similarity"
+  ) |>
+  mutate(
+    baseline = factor(baseline,
+                      levels = c("cossim_unr", "cossim_span", "cossim_eng", "cossim_jap"),
+                      labels = c("Unrelated", "Spanish", "English", "Japanese"))
+  )
+
+m_lmm <- lmer(similarity ~ baseline + (1 | language),
+              data = phoneme_long, REML = TRUE)
+
+# Variance components and ICC
+vc       <- as.data.frame(VarCorr(m_lmm))
+sigma_u2 <- vc$vcov[1]
+sigma2   <- vc$vcov[2]
+
+lmm_icc_tbl <- tibble(
+  sigma_u2     = sigma_u2,                          # between-unit-of-observation variance
+  sigma2       = sigma2,                             # residual variance
+  icc          = sigma_u2 / (sigma_u2 + sigma2),    # proportion explained by language identity
+  sigma_resid  = sigma(m_lmm)                       # residual SD; denominator for Cohen's d
+)
+
+print(lmm_icc_tbl)
+
+# Profile CIs (asymmetric, more accurate than Wald at n = 14; rows matched to contrasts)
+ci_mat <- confint(m_lmm, method = "profile", quiet = TRUE) |>
+  as_tibble(rownames = "term") |>
+  filter(str_detect(term, "^baseline")) |>
+  rename(ci_lo = `2.5 %`, ci_hi = `97.5 %`)
+
+# Fixed effects table: contrasts only (drop intercept)
+coef_mat <- summary(m_lmm)$coefficients |>
+  as_tibble(rownames = "term") |>
+  filter(term != "(Intercept)")
+
+p_raw_lmm <- coef_mat$`Pr(>|t|)`
+
+lmm_results <- tibble(
+  baseline  = str_remove(coef_mat$term, "^baseline"),
+  estimate  = coef_mat$Estimate,
+  se        = coef_mat$`Std. Error`,
+  ci_lo     = ci_mat$ci_lo,
+  ci_hi     = ci_mat$ci_hi,
+  df        = coef_mat$df,
+  t         = coef_mat$`t value`,
+  p_raw     = p_raw_lmm,
+  p_bh      = p.adjust(p_raw_lmm, method = "BH"),
+  cohens_d  = coef_mat$Estimate / sigma(m_lmm),
+  reject_bh = p.adjust(p_raw_lmm, method = "BH") < 0.05
+) |>
+  arrange(p_raw)
+
+print(lmm_results)
+
+
+ranef_tbl <- ranef(m_lmm)$language |>
+  as_tibble(rownames = "language") |>
+  rename(u_i = `(Intercept)`) |>
+  arrange(u_i) |>
+  mutate(language = factor(language, levels = language),
+         direction = if_else(u_i >= 0, "above", "below"))
+
+lmm_ranef_plot <- ggplot(ranef_tbl, aes(x = u_i, y = language, color = direction)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey40") +
+  geom_segment(aes(x = 0, xend = u_i,
+                   y = language, yend = language),
+               linewidth = 0.7) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c(above = "#2ca6a4", below = "#e07a5f")) +
+  labs(
+    title    = "LMM random intercepts per language",
+    subtitle = paste0("û_i = language's deviation from population mean across all baselines",
+                      "  |  σ_u = ", round(sqrt(lmm_icc_tbl$sigma_u2), 4)),
+    x        = "Random intercept (û_i)",
+    y        = NULL
+  ) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+lmm_ranef_plot
+
+ggsave(
+  filename = here("figures", "phoneme", "distributions", "phoneme_lmm_ranef.png"),
+  plot = lmm_ranef_plot,
+  width = 10, height = 6, units = "in", dpi = 300
+)
+
 
 # --- Bimodality test (BIC-selected Gaussian mixture) -------------------------
 # Fit a 1–3 component Gaussian mixture to each baseline's deltas; BIC picks the

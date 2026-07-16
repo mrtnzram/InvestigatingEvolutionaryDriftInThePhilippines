@@ -3,8 +3,8 @@
 # Input:   data/PHONEME_cossim.csv, data/nodes.csv, data/edges.csv
 # Outputs: data/PHONEME_cossim_dist.csv (cossim + geodist_H1_span, for the
 #          regression file), data/phoneme_waypoint_plot.rds (overview arrow plot)
-# Note:    pairwise inter-language distances for the Mantel test are computed
-#          separately in [5]_PHONEME_mantel.R (Dijkstra routing).
+# Note:    pairwise inter-language distances for the MMRR analysis are computed
+#          separately in [5]_PHONEME_MMRR.R (Dijkstra routing).
 #
 # compute_shortest_path_df(). Instead of routing each language to a
 # single reference point (ref_coords1) via Dijkstra, this computes each
@@ -301,12 +301,6 @@ PHONEME_cossim |>
   arrange(geodist_H2_span) |>
   print(n = 20)
 
-# Diagnostic: how often does the network actually beat the direct line?
-# At land_penalty = 4.44 expect more FALSE than under the old 44.18 setting.
-PHONEME_cossim |>
-  count(using_network) |>
-  print()
-
 # Write the geodist-augmented table (flat columns only; drops the geometry /
 # list-columns) for [4]_PHONEME_regression.R to consume. The *_influenced /
 # sig_* columns are carried forward when present (written by [2]); any_of() keeps
@@ -366,8 +360,8 @@ geom_rows <- function(geom_list, crosses_land_value, source_value,
 }
 
 main_sf <- bind_rows(
-  geom_rows(edge_lines$land_geom, TRUE,  "main"),
-  geom_rows(edge_lines$sea_geom,  FALSE, "main")
+  geom_rows(network_edges$land_geom, TRUE,  "main"),
+  geom_rows(network_edges$sea_geom,  FALSE, "main")
 )
 
 connector_sf <- bind_rows(
@@ -450,10 +444,10 @@ print(plot_network(full_tree_sf, arrow_main, arrow_connectors,
 # Built as a transparent overlay layer for the EEMS raster + cossim dots.
 arrow_plot <- ggplot() +
   geom_sf(data = full_tree_sf |> filter(source == "main"),
-          color = "black", linewidth = 1) +
+          color = "black", linewidth = 0.8, alpha = 0.8) +
   geom_sf(data = arrow_connectors,
-          color = "black", linewidth = 1,
-          arrow = arrow(length = unit(0.2, "cm"), type = "closed")) +
+          color = "black", linewidth = 0.4, alpha = 0.7,
+          arrow = arrow(length = unit(0.15, "cm"), type = "closed")) +
   coord_sf(xlim = c(116, 127), ylim = c(4, 21)) +
   theme_void() +
   theme(
