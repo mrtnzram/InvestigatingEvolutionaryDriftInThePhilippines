@@ -3,12 +3,12 @@
 # Computes the IDF-weighted cosine-similarity matrix over phoneme inventories,
 # extracts each Philippine language's similarity to Spanish / Japanese / English
 # and its mean similarity to the unrelated controls, and writes the matrix +
-# per-language scores for the downstream [2]–[6] analyses and EEMS plotting.
+# per-language scores for the downstream [2]–[7] analyses and EEMS plotting.
 #
 # Input:   data/RUHLENdf_PH.csv, data/phoneme_freq_ruhlen.csv
 # Outputs: data/PHONEME_cosine_matrix.csv, data/PHONEME_cossim.csv
 # Next:    [2]_PHONEME_cosine_distribution_analysis.R,
-#          [3]_PHONEME_network_distance.R (then regression / mantel)
+#          [3]_PHONEME_network_distance.R (then regression / MMRR)
 # =============================================================================
 
 library(readr)
@@ -34,7 +34,7 @@ unr_lang <- RUHLENdf |>
   pull(language)
 
 phoneme_cols <- RUHLENdf %>%
-  select(-language, -source, -iso6393, -Language_type, -latitude, -longitude)
+  dplyr::select(-language, -source, -iso6393, -Language_type, -latitude, -longitude)
 
 phoneme_cols <- colnames(phoneme_cols)
 
@@ -46,7 +46,6 @@ phoneme_freq <- read_csv(here("data", "phoneme_freq_ruhlen_austronesian.csv"))
 
 
 # Least coverage
-
 
 
 # ----- cosine similarity -----------------------------------------------------
@@ -156,7 +155,7 @@ write.csv(cosine_matrix, file = here("data", "PHONEME_cosine_matrix.csv"), row.n
 
 PHONEME_cossim <- RUHLENdf |>
   filter(Language_type == 'Philippine Language') |>
-  select(language, latitude, longitude) |>
+  dplyr::select(language, latitude, longitude) |>
   left_join(df_span, by = 'language') |>
   left_join(df_jap,  by = 'language') |>
   left_join(df_eng,  by = 'language') |>

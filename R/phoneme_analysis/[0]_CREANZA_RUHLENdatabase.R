@@ -173,10 +173,10 @@ GRAMBANK_query <- grambank.feature(
 # Keep languages outside the Austronesian family and outside the Philippine
 # macroarea(s) — i.e. genealogically and areally unrelated controls.
 GRAMBANKdf_unrelated <- GRAMBANK_query |>
-  left_join(languages |> select(ID, Family_name, Macroarea), by = c("glottocode" = "ID")) |>
+  left_join(languages |> dplyr::select(ID, Family_name, Macroarea), by = c("glottocode" = "ID")) |>
   filter(!Family_name %in% "Austronesian",
          !Macroarea   %in% relatedmacroareas) |>
-  select(glottocode)
+  dplyr::select(glottocode)
 
 # Bridge Grambank glottocodes to ISO via lingtypology::languages
 grambank_iso <- GRAMBANKdf_unrelated |>
@@ -185,7 +185,7 @@ grambank_iso <- GRAMBANKdf_unrelated |>
 # Inner join on ISO — only keep ruhlen languages with full Grambank coverage
 Unrelated_Langauges <- ruhlen_candidates |>
   inner_join(
-    grambank_iso |> select(glottocode, iso6393),
+    grambank_iso |> dplyr::select(glottocode, iso6393),
     by = join_by(iso6393 == iso6393)
   ) |>
   pull(language)
@@ -193,20 +193,51 @@ Unrelated_Langauges <- ruhlen_candidates |>
 message("Unrelated languages (n = ", length(Unrelated_Langauges), "):\n",
         paste0("  ", Unrelated_Langauges, collapse = "\n"))
 
-# Languages with independent contact to the contrast set (Spanish/English/Japanese),
-# which would inject the very signal being measured into the "unrelated" baseline.
-# Tiers reflect strength + structurality of contact (see methods notes).
-contact_contaminated <- c(
-  "Morr",   # Japanese colonial (1910-45) + American English (post-1945) — both axes
-  "Ainu",     # Japanese: lexical + grammatical (analytic constructions)
-  "Mandarin", # Japanese (wasei-kango back-borrowing) + English lexical
-  "Wu",       # as Mandarin (treaty-port Shanghai)
-  "Nivkh",    # "Nivkh"(Gilyak): Russian-dominated; Japanese contact thin
-  "Burmese"   # "Burmese": British (not American) English lexical contact
+# ---- Exclusions from the 211-language unrelated baseline -------------------
+# NOTE: names must match colnames(null_mat) EXACTLY, RTF artifacts included.
+# Verify with: setdiff(contact_contaminated, colnames(null_mat))  # must be empty
+
+# Tier A: Indo-European — related to Spanish and/or English by descent.
+# This is the primary contaminant. Not contact; phylogeny.
+ie_related <- c(
+  # Romance — Spanish's own subfamily
+  "Latin", "Italian", "Romansch", "French", "Catalan", "Galician", "Portuguese",
+  # Germanic — English's own subfamily (Frisian = closest living relative)
+  "Dutch", "Frisian", "Faroese",
+  # Wider Indo-European
+  "Kashmiri", "Marathi", "Konkani", "Punjabi", "Bhojpuri", "Maithili", "Pashto",
+  "Albanian", "Classical Greek", "Greek", "Irish", "Breton",
+  "Latvian", "Lithuanian", "Russian", "Byelorussian", "Polish", "Czech",
+  "Slovene", "Macedonian", "Armenian"
 )
 
+# Tier B: Spanish colonial contact with documented inventory-level borrowing
+spanish_contact <- c(
+  # Mesoamerica (Bennett 2016; Suarez 1983)
+  "Huastec", "Yucatec", "Tojolabal", "Chuj", "Acatec", "Quiche",
+  "Tlamelula", "Amuzgo", "Huichol", "Tarascan",
+  # South America (Adelaar & Muysken 2004; Smeets 2008)
+  "Warao", "Itonama", "Mapudungu", "Qawasqar", "Cubeo", "Huambisa",
+  "Cocama", "Murui", "Chimane", "Chulupi", "Matses", "Eseejja", "Huarayo",
+  # California / SW missions (Bright 1960; Bright & Bright 1959; Bright 1965)
+  "Luisen~o", "Cahuilla", "Pima", "Patwin", "Wintun",
+  "Central Sierra Miwok", "Southern Sierra Miwok", "Maricopa",
+  # Spanish + English, Southwest / Plains (Campbell 1997)
+  "Navajo", "Western Apache", "Southern Paiute", "Chemehuevi",
+  "Kiowa", "Tonkawa"
+)
+
+# Tier B2: Ibero-Romance (Portuguese) contact — same phoneme signature as Spanish
+portuguese_contact <- c(
+  "Nhengatu",       # also a Tupi-based contact language; excluded on both grounds
+  "Pakaasnovos", "Bororo", "Mashakali",
+  "Makua", "Lwena"
+)
+
+contact_contaminated <- c(ie_related, spanish_contact, portuguese_contact)
 
 unrelated_clean <- setdiff(Unrelated_Langauges, contact_contaminated)
+length(unrelated_clean)
 
 # -- All Languages
 
@@ -226,7 +257,7 @@ PHOIBLEdf_PH <- ruhlen_raw |>
       language %in% Unrelated_Langauges     ~ "Unrelated Language"
     )
   ) |>
-  select(iso6393, language, source, latitude, longitude, all_of(phoneme_cols), Language_type)
+  dplyr::select(iso6393, language, source, latitude, longitude, all_of(phoneme_cols), Language_type)
 
 # Diagnostic: report any study languages absent from the Ruhlen database
 unmatched <- setdiff(Languages, PHOIBLEdf_PH$language)
