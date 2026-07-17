@@ -135,8 +135,11 @@ MANILA <- data.frame(
 #                   network node (the "get onto the network" leg).
 # geodist_H2_span : penalized cost to Manila, taking whichever is cheaper —
 #                   (connector + network traversal) or a direct line.
-# using_network   : TRUE when the network route won; also selects which
-#                   split geometry is retained for plotting.
+# using_network   : TRUE when the network route won on distance (the analysis
+#                   flag, unaffected by the plotting choice below).
+# The plotted geometry (land_geom/sea_geom, §7 onward) always shows the
+# via-node connector regardless of using_network — see the comment at the end
+# of this function.
 compute_network_distance_df <- function(df, nodes, edges, land_sf,
                                         refdf1 = MANILA,
                                         land_penalty = 4.44) {
@@ -255,14 +258,21 @@ compute_network_distance_df <- function(df, nodes, edges, land_sf,
       
       geodist_H2_span = pmin(network_to_manila, direct_to_manila, na.rm = TRUE)
     ) |>
-    # Geometry follows the winning route: these feed connector_sf in §7.
+    # Geometry ALWAYS shows the via-node connector (point -> nearest node),
+    # regardless of whether the network or the direct line actually won on
+    # distance above. This is a visualization-only choice — geodist_H2_span and
+    # using_network (just computed) are the true analysis outputs, unchanged by
+    # this, and still get written to PHONEME_cossim_dist.csv as-is; only the
+    # geometry that feeds connector_sf/arrow_connectors in §7 (never written to
+    # CSV) is affected, so every language visibly enters the network in the
+    # plot instead of some arrows jumping straight to Manila.
     rowwise() |>
     mutate(
-      land_geom    = list(if (using_network) .split_node$land_geom else .split_manila$land_geom),
-      sea_geom     = list(if (using_network) .split_node$sea_geom  else .split_manila$sea_geom),
-      land_len     = if (using_network) .split_node$land_len     else .split_manila$land_len,
-      sea_len      = if (using_network) .split_node$sea_len      else .split_manila$sea_len,
-      crosses_land = if (using_network) .split_node$crosses_land else .split_manila$crosses_land
+      land_geom    = list(.split_node$land_geom),
+      sea_geom     = list(.split_node$sea_geom),
+      land_len     = .split_node$land_len,
+      sea_len      = .split_node$sea_len,
+      crosses_land = .split_node$crosses_land
     ) |>
     ungroup() |>
     dplyr::select(
@@ -316,8 +326,11 @@ PHONEME_cossim |>
 # Mirrors the original land_segments_sf / sea_segments_sf / connector_sf
 # assembly, but built once via map()/list_rbind() instead of manual loops,
 # and with a single connector per language (no "end" connector, since there
-# is no longer a ref_coords1 target). The connector geometry is now whichever
-# route won in §5, so `using_network` is carried through for styling.
+# is no longer a ref_coords1 target). §5 now always retains the via-node
+# connector geometry (a visualization choice — see the comment there), so
+# every connector here is "via network node"; row_attrs is passed a constant
+# TRUE rather than PHONEME_cossim$using_network (which still holds the real,
+# possibly-FALSE analysis flag, just no longer tied to which geometry is drawn).
 geom_rows <- function(geom_list, crosses_land_value, source_value,
                       row_attrs = NULL) {
   # NOTE: purrr::map is explicitly namespaced — library(maps) is loaded after
@@ -365,8 +378,8 @@ main_sf <- bind_rows(
 )
 
 connector_sf <- bind_rows(
-  geom_rows(PHONEME_cossim$land_geom, TRUE,  "connector", PHONEME_cossim$using_network),
-  geom_rows(PHONEME_cossim$sea_geom,  FALSE, "connector", PHONEME_cossim$using_network)
+  geom_rows(PHONEME_cossim$land_geom, TRUE,  "connector", rep(TRUE, nrow(PHONEME_cossim))),
+  geom_rows(PHONEME_cossim$sea_geom,  FALSE, "connector", rep(TRUE, nrow(PHONEME_cossim)))
 )
 
 # main_sf has no using_network; bind_rows fills NA, which is harmless because
@@ -374,40 +387,23 @@ connector_sf <- bind_rows(
 full_tree_sf <- bind_rows(main_sf, connector_sf)
 
 
-# ── 8. Simplify each main edge to a straight start→end segment, for arrows ──
-# (Land/sea-split edges can be multi-vertex; arrows look cleaner on the
-# overall edge direction rather than every sub-segment.)
-simplify_to_straight <- function(sf_lines) {
-  sf_lines |>
-    mutate(.row = row_number()) |>
-    group_by(.row) |>
-    group_modify(~ {
-      coords <- st_coordinates(.x)
-      if (nrow(coords) < 2) return(.x)
-      new_geom <- st_sfc(
-        st_linestring(rbind(coords[1, c("X", "Y")], coords[nrow(coords), c("X", "Y")])),
-        crs = st_crs(.x)
-      )
-      st_set_geometry(.x, new_geom)
-    }) |>
-    ungroup() |>
-    select(-.row) |>
-    st_as_sf()
-}
-
-arrow_main <- full_tree_sf |>
-  filter(source == "main") |>
-  simplify_to_straight()
-
+# ── 8. Connector edges for the arrow overlay ─────────────────────────────────
 arrow_connectors <- full_tree_sf |>
   filter(source == "connector")
 
 
 # ── 9. Overview plot: network + language points + directional arrows ────────
-# Connector arrows are coloured by using_network: black arrows stop at a
-# network node (main edges carry them onward to Manila), red arrows run
-# straight to Manila.
-plot_network <- function(full_tree_sf, arrow_main, arrow_connectors,
+# Every connector now draws via its nearest network node (§5/§7), even for
+# languages whose cheaper H2 route was actually a direct line to Manila — this
+# is a visualization-only choice so every language visibly joins the network in
+# the plot. The color scale is left in place for continuity, but with all
+# connector rows now TRUE, the legend collapses to a single "via network node"
+# entry.
+# Main network edges are drawn plain (no arrowheads): they represent a
+# bidirectional route between nodes, so a directed arrow on one edge conflicts
+# visually with the arrow that would be needed on its reverse — only the
+# language -> node connectors are directional and keep their arrowheads.
+plot_network <- function(full_tree_sf, arrow_connectors,
                          points_df, refdf1 = MANILA,
                          lon_range = c(116, 127), lat_range = c(4, 21)) {
   ggplot() +
@@ -418,9 +414,6 @@ plot_network <- function(full_tree_sf, arrow_main, arrow_connectors,
     geom_sf(data = arrow_connectors,
             aes(color = using_network),
             arrow = arrow(length = unit(0.2, "cm"), type = "closed")) +
-    geom_sf(data = arrow_main,
-            arrow = arrow(length = unit(0.25, "cm"), type = "closed"),
-            color = "grey40") +
     geom_point(data = points_df, aes(x = longitude, y = latitude),
                size = 3, shape = 21) +
     geom_point(data = refdf1, aes(x = longitude, y = latitude),
@@ -436,7 +429,7 @@ plot_network <- function(full_tree_sf, arrow_main, arrow_connectors,
          x = "Longitude", y = "Latitude")
 }
 
-print(plot_network(full_tree_sf, arrow_main, arrow_connectors,
+print(plot_network(full_tree_sf, arrow_connectors,
                    PHONEME_cossim, refdf1 = MANILA))
 
 

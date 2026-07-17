@@ -167,7 +167,6 @@ tree_pruned <- drop.tip(
 tip_df <- tree_df_matched %>%
   select(original, ph)
 
-
 Ph_Languages_pruned <- tree_df_matched %>%
   filter(ph %in% Ph_Languages) %>%
   pull(ph)
