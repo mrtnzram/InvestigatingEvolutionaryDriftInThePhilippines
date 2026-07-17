@@ -16,6 +16,8 @@
 #     multiple matrix regression.
 #   - WRITES figures/shared/phylogenetic_tree.png (phylogram with tips coloured
 #     by Glottolog family subgroup).
+#   - WRITES data/PHONEME_subgroup_lookup.csv (language -> subgroup -> colour),
+#     the shared palette reused by [8]_PHONEME_tree_vs_network.R.
 # =============================================================================
 
 library(tibble)
@@ -211,6 +213,15 @@ soften <- function(cols, s_mult = 0.55, v_mult = 0.95) {
 subgroup_pal <- setNames(
   soften(.poly[.lum < 200])[seq_along(subgroup_levels)], subgroup_levels
 )
+
+# Export the per-language subgroup -> colour lookup so other scripts colour the
+# same languages with the identical palette (e.g. [8]'s tree-vs-network figure
+# needs the map points to match these tip colours exactly). One row per language
+# (ph); tip_subgroup's dialect duplicates collapse away via distinct().
+tip_subgroup %>%
+  distinct(language = ph, subgroup) %>%
+  mutate(colour = unname(subgroup_pal[subgroup])) %>%
+  write.csv(here("data", "PHONEME_subgroup_lookup.csv"), row.names = FALSE)
 
 # Let ape compute the rectangular phylogram layout, then read the tip/node
 # coordinates back out instead of re-deriving them. plot = FALSE fills
