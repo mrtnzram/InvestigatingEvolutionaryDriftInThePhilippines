@@ -1,6 +1,7 @@
 {
   "grid_res": "grid_100.shp",
-  "disc_r": 1.25,
+  "habitat_source": "Natural Earth coastline (countries.geojson, name='Philippines')",
+  "coast_buf": 0.8,
   "n_nodes": 97,
   "n_edges": 232,
   "n_observed_nodes": 31,
