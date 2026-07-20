@@ -8,7 +8,7 @@ library(ggplot2)
 library(here)
 
 # ---- Load the EEMS base map and the waypoint-route arrow layers ----
-base_plot <- readRDS(here("data", "base_plot_PA.rds"))
+base_plot <- readRDS(here("data", "base_plot_phoneme_FEEMS.rds"))
 arrows    <- readRDS(here("data", "phoneme_waypoint_plot.rds"))
 
 # ---- Overlay the arrow layers onto the cropped base map ----

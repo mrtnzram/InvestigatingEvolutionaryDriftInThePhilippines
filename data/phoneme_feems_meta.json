@@ -1,0 +1,12 @@
+{
+  "grid_res": "grid_100.shp",
+  "disc_r": 1.25,
+  "n_nodes": 97,
+  "n_edges": 232,
+  "n_observed_nodes": 31,
+  "scale_snps": false,
+  "use_idf": true,
+  "optimize_q": null,
+  "lamb_cv": 0.2976351441631313,
+  "n_features_retained": 39
+}
