@@ -15,7 +15,7 @@ CLAUDE.md
 credentials/
 
 # --- Archived legacy scripts (superseded by R/) ---
-_archive/
+archived_code/
 python/optimal_path.ipynb
 
 # --- Cognate analysis: excluded from the paper for now ---
@@ -30,6 +30,4 @@ data/languages.csv
 data/logicalTLI_grammar_densified_large.csv
 *.rds
 
-# --- EEMS MCMC run outputs (large/generated; re-run MATLAB EEMS to recreate) ---
-matlab/**/datapath-*simno*/
 .positai

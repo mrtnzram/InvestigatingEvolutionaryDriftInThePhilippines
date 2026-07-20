@@ -12,8 +12,12 @@ resulting structure geographically.
 
 For each dimension the workflow is: build a binary feature dataframe → compute a weighted
 cosine-similarity / distance matrix → fit distance-decay regressions and Mantel tests →
-feed distances into **EEMS** (Estimated Effective Migration Surfaces, run in MATLAB) →
+estimate an effective-migration surface with **FEEMS** (Fast EEMS, run in Python) →
 overlay a minimum spanning tree (MST) and historical "waypoint" migration routes on a map.
+
+> **Note:** the migration surface was migrated from MATLAB **EEMS** to Python **FEEMS**
+> (`python/phoneme_feems.ipynb`). The phoneme pipeline is fully on FEEMS; grammar's FEEMS
+> port is still pending.
 
 This is a collection of analysis scripts run interactively, not a software package — there
 is no build system or test suite.
@@ -22,14 +26,13 @@ is no build system or test suite.
 
 ```
 R/
-  phoneme_analysis/   Numbered Ruhlen/PHOIBLE pipeline ([0]→[1]→…→[8]) + EEMS prep + shuffled null
-  grammar_analysis/   Numbered GRAMBANK pipeline ([0]→[1]→[2]→[4]) + EEMS prep + shuffled null
+  phoneme_analysis/   Numbered Ruhlen/PHOIBLE pipeline ([0]→[1]→…→[8]); FEEMS plotting in [6]/[7]
+  grammar_analysis/   Numbered GRAMBANK pipeline ([0]→[1]); FEEMS port still pending
   cognate_analysis/   LingPy cognate analysis (gitignored; not used for the paper)
-  helpers/            default.eems.plots.R (vendored EEMS plotting helper)
 data/                 All R-pipeline data: inputs + intermediates (read/written via here("data", ...))
 figures/              Generated plots, grouped by section/type (gitignored)
-python/               Waypoint/optimal-path notebooks + LingPy helper (run as-is; not maintained here)
-matlab/               EEMS (MATLAB): one folder per analysis; MCMC run outputs are gitignored
+python/               FEEMS + waypoint/optimal-path notebooks (phoneme_feems.ipynb is the FEEMS engine)
+archived_code/        Superseded exploratory scripts, kept for reference (gitignored)
 swadeshlist_jsons/    Per-language Swadesh wordlists (cognate input)
 ```
 
@@ -60,16 +63,17 @@ bracketed prefix is the execution order:
    `[6]_PHONEME_PGLS.R` (needs the phylogenetic tree). The grammar side still uses the combined
    `[1]_GRAMMARanalysisweighted_span.R`. (The old monolithic `[1]_PHONEMEanalysisweighted_span.R`
    and `[2]_PHONEMEanalysisweighted_otherlang.R` are retained for reference.)
-3. **`*_EEMS.R`** — turn the similarity scores into the EEMS dissimilarity (`datapath.diffs`) and
-   coordinate (`datapath.coord`) inputs, plus a shuffled null-model variant.
-4. *(MATLAB)* run the EEMS MCMC in `matlab/matlab_eems_*/eems*.m`, consuming the `datapath.*` files.
-5. **`eems_plot_*_span.R`** — render the EEMS MCMC output (`reemsplots2`) into a base map RDS.
-   For phonemes this is `[7]_eems_plot_PA_span.R`; for grammar `[2]_eems_plot_GA_span.R`.
-6. **`*_weight_mst_eems_span.R`** — overlay MST edges / waypoint routes on the base map
-   (`[8]_PA_weight_mst_eems_span.R` for phonemes, `[4]_GA_weight_mst_eems_span.R` for grammar).
+3. *(Python — FEEMS)* run `python/phoneme_feems.ipynb` to estimate the effective-migration
+   surface. It reads the feature matrix + frequency table from `data/` and writes the surface
+   raster (`data/phoneme_surface_raster.csv`), node positions (`data/nodepos_phoneme.csv`), and
+   run metadata (`data/phoneme_feems_meta.json`).
+4. **`[6]_feems_plot_PA_span.R`** — render the FEEMS surface raster + per-language cosine points
+   into a ggplot base map, saved as `data/base_plot_phoneme_FEEMS.rds`.
+5. **`[7]_PA_weight_mst_feems_span.R`** — overlay MST edges / waypoint routes on the base map
+   and mark the colonial capital; saves `figures/phoneme/mst_waypoints/PA_weight_mst_feems.png`.
 
-`*_shuffled` / `eems_plot_*_shuffled.R` are permutation null-model runs used to assess
-significance against the real analysis.
+The grammar analysis has not yet been ported to FEEMS; its migration-surface steps will be
+duplicated from the phoneme `[6]`/`[7]` pattern.
 
 ## Python ↔ R coupling (important)
 
@@ -88,11 +92,12 @@ outputs there) so the R scripts pick them up.
 
 - **R 4.3+** with: `tidyverse`/`dplyr`/`readr`, `here`, `lingtypology`, `geosphere`, `rethinking`,
   `infotheo`, `proxy`, `reshape2`, `ggplot2`, `patchwork`, `igraph`, `sf`/`sfheaders`,
-  `rnaturalearth`(`data`), `maps`, `reemsplots2`.
-- **MATLAB/Octave** for the EEMS MCMC step (third-party EEMS code vendored under `matlab/**/mscripts/`).
+  `rnaturalearth`(`data`), `maps`, `scales`.
+- **Python** with `feems` (+ its deps) for the effective-migration-surface step
+  (`python/phoneme_feems.ipynb`).
 
 ## Not tracked in git
 
-Figures, the cognate analysis, credentials, archived legacy scripts, large source databases
-(`values.csv`, `languages.csv`, `logicalTLI_*`), generated `.rds` objects, and EEMS MCMC run
-outputs are gitignored (see `.gitignore`). Regenerate them by running the pipeline.
+Figures, the cognate analysis, credentials, archived legacy scripts (`archived_code/`), large
+source databases (`values.csv`, `languages.csv`, `logicalTLI_*`), and generated `.rds` objects
+are gitignored (see `.gitignore`). Regenerate them by running the pipeline.

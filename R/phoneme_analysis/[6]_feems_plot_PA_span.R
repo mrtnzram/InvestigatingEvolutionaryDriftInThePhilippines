@@ -1,13 +1,25 @@
+# =============================================================================
+# [6] Phoneme Analysis — FEEMS migration-surface base map
+# Renders the FEEMS effective-migration surface (the log10(w/w-bar) raster from
+# python/phoneme_feems.ipynb) as a ggplot base map of the Philippines, with each
+# language's cosine-similarity score overlaid as points. Saved as an RDS that
+# [7] loads to overlay the waypoint routes.
+#
+# Input:   data/phoneme_surface_raster.csv (FEEMS surface, from phoneme_feems.ipynb),
+#          data/PHONEME_cossim.csv (per-language cosine scores, from [1])
+# Outputs: data/base_plot_phoneme_FEEMS.rds
+# Next:    [7]_PA_weight_mst_feems_span.R
+# =============================================================================
+
 library(ggplot2)
 library(dplyr)
 library(here)
 library(scales)
 
-phon_surface <- read.csv(here("data", "phoneme_surface_raster.csv"))
-nodepos      <- read.csv(here("data", "nodepos_phoneme.csv"))
+phon_surface   <- read.csv(here("data", "phoneme_surface_raster.csv"))
 PHONEME_cossim <- read.csv(here("data", "PHONEME_cossim.csv"))
 
-global_lim <- c(0, max(PHONEME_cossim$cossim_span, GRAMMAR_cossim$cossim_span, na.rm = TRUE))
+global_lim <- c(0, max(PHONEME_cossim$cossim_span, na.rm = TRUE))
 
 vmax <- max(abs(phon_surface$log_w_ratio), na.rm = TRUE)
 lims <- c(-vmax, vmax)
@@ -24,9 +36,6 @@ base_plot <- ggplot() +
              size = 6, alpha = 0.7) +
   geom_point(data = PHONEME_cossim, aes(x = longitude, y = latitude),
              size = 6, shape = 21, color = "black") +
-  scale_fill_gradientn(colors = c("orange", "white", "cyan"),
-                       limits = range(phon_surface$log_w_ratio, na.rm = TRUE),
-                       na.value = "transparent") +
   scale_color_gradient(low = "white", high = "navy", limits = global_lim) +
   guides(
     fill = guide_colorbar(title = expression(log[10](w/bar(w))), title.position = "top", title.hjust = 0.5),
