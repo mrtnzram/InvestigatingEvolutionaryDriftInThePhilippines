@@ -14,8 +14,9 @@ CLAUDE.md
 # --- Secrets ---
 credentials/
 
-# --- Archived legacy scripts (superseded by R/) ---
+# --- Archived legacy scripts and data (superseded by R/ and data/) ---
 archived_code/
+archived_data/
 python/optimal_path.ipynb
 
 # --- Cognate analysis: excluded from the paper for now ---
@@ -27,7 +28,6 @@ figures/
 # --- Large source databases & generated R objects ---
 data/values.csv
 data/languages.csv
-data/logicalTLI_grammar_densified_large.csv
 *.rds
 
 .positai
