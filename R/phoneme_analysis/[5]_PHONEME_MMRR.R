@@ -498,7 +498,7 @@ pairplot <- ggplot() +
     strip.text       = element_text(face = "bold", size = 9),
     panel.spacing    = unit(4, "pt")
   ) +
-  labs(title = "MMRR inputs (standardized pairwise distances)")
+  labs(title = "MMRR inputs")
 print(pairplot)
 ggsave(here("figures", "phoneme", "mmrr", "phoneme_mmrr_pairplot.png"),
        pairplot, width = 6.5, height = 6, units = "in", dpi = 300)
