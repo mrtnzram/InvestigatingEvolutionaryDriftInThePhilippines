@@ -1,0 +1,138 @@
+"language","iso6393","language_family","region","inventory_size"
+"Hadza","hts","Khoisan","Africa",66
+"Kxoe","xuu","Khoisan","Africa",68
+"Buka","xuu","Khoisan","Africa",67
+"Xu^","xuu","Khoisan","Africa",76
+"\u450?Hu^","huc","Khoisan","Africa",63
+"Temne","tem","Niger-Congo","Africa",25
+"Suppire","spp","Niger-Congo","Africa",29
+"Dagbani","dag","Niger-Congo","Africa",31
+"Mumuye","mzm","Niger-Congo","Africa",30
+"Fon","fon","Niger-Congo","Africa",30
+"Nupe","nup","Niger-Congo","Africa",29
+"Idoma","idu","Niger-Congo","Africa",30
+"Degema","deg","Niger-Congo","Africa",35
+"Igbo","ibo","Niger-Congo","Africa",44
+"Aghem","agq","Niger-Congo","Africa",29
+"Babanki","bbk","Niger-Congo","Africa",31
+"Tikar","tik","Niger-Congo","Africa",42
+"Bembe\sub 2\nosupersub","beq","Niger-Congo","Africa",27
+"Nyoro","nyo","Niger-Congo","Africa",30
+"Nyakyusa","nyy","Niger-Congo","Africa",25
+"Mwera","mwe","Niger-Congo","Africa",28
+"Tswana","tsn","Niger-Congo","Africa",42
+"Southern Sotho","sot","Niger-Congo","Africa",50
+"Lozi","loz","Niger-Congo","Africa",21
+"Songhai","dje","Nilo-Saharan","Africa",32
+"Kanuri","knc","Nilo-Saharan","Africa",33
+"Fur","fvr","Nilo-Saharan","Africa",26
+"Dongolawi","kzh","Nilo-Saharan","Africa",29
+"Murle","mur","Nilo-Saharan","Africa",33
+"Shilluk","shk","Nilo-Saharan","Africa",28
+"Nuer","nus","Nilo-Saharan","Africa",32
+"Mangbetu","mdj","Nilo-Saharan","Africa",49
+"Coptic","cop","Afro-Asiatic","Africa",28
+"Tera","ttr","Afro-Asiatic","Africa",46
+"Margi","mrt","Afro-Asiatic","Africa",39
+"Kilba","hbb","Afro-Asiatic","Africa",41
+"Glavda","glw","Afro-Asiatic","Africa",39
+"Gude","gde","Afro-Asiatic","Africa",31
+"Kanakuru","kna","Afro-Asiatic","Africa",29
+"Sura","sur","Afro-Asiatic","Africa",33
+"Paa","pqa","Afro-Asiatic","Africa",32
+"Zayse","zay","Afro-Asiatic","Africa",33
+"Kemant","ahg","Afro-Asiatic","Africa",31
+"Bilin","byn","Afro-Asiatic","Africa",40
+"Burji","bji","Afro-Asiatic","Africa",31
+"Hadiyya","hdy","Afro-Asiatic","Africa",29
+"Yaaku","muu","Afro-Asiatic","Africa",27
+"Afar","aar","Afro-Asiatic","Africa",25
+"Dasenech","dsh","Afro-Asiatic","Africa",32
+"Georgian","kat","Kartvelian","MiddleEast",34
+"Basque","eus","Basque","Europe",25
+"Kabardian","kbd","North Caucasian","Europe",42
+"Hunzib","huz","North Caucasian","Europe",46
+"Lezgi","lez","North Caucasian","Europe",45
+"Hungarian","hun","Uralic","Europe",34
+"Eastern Saami","sms","Uralic","Europe",37
+"Southern Saami","sma","Uralic","Europe",30
+"Finnish","fin","Uralic","Europe",24
+"Ingrian","izh","Uralic","Europe",29
+"Vepsian","vep","Uralic","Europe",30
+"Livonian","liv","Uralic","Europe",30
+"Chuvash","chv","Altaic","Europe",22
+"Gagauz","gag","Altaic","Europe",31
+"Turkish","tur","Altaic","MiddleEast",30
+"Crimean Turkish","crh","Altaic","CentralSouthAsia",31
+"Turkmen","tuk","Altaic","CentralSouthAsia",31
+"Azerbaijani","azj","Altaic","MiddleEast",33
+"Uzbek","uzn","Altaic","CentralSouthAsia",29
+"Bashkir","bak","Altaic","Europe",31
+"Tatar","tat","Altaic","Europe",32
+"Baraba","tat","Altaic","Europe",27
+"Kalmyk","xal","Altaic","Europe",30
+"Greenlandic","kal","Eskimo-Aleut","AmericasNorthCentral",19
+"Malto","mjt","Dravidian","CentralSouthAsia",30
+"Kannada","kan","Dravidian","CentralSouthAsia",37
+"Kodagu","kfa","Dravidian","CentralSouthAsia",32
+"Tamil","tam","Dravidian","CentralSouthAsia",30
+"Malayalam","mal","Dravidian","CentralSouthAsia",35
+"Newari","new","Sino-Tibetan","CentralSouthAsia",36
+"Lepcha","lep","Sino-Tibetan","CentralSouthAsia",35
+"Thakali","ths","Sino-Tibetan","CentralSouthAsia",28
+"Chepang","cdm","Sino-Tibetan","CentralSouthAsia",39
+"Thulung","tdh","Sino-Tibetan","CentralSouthAsia",38
+"Sunwar","suz","Sino-Tibetan","CentralSouthAsia",33
+"Khaling","klr","Sino-Tibetan","CentralSouthAsia",34
+"Bodo","brx","Sino-Tibetan","CentralSouthAsia",22
+"Garo","grt","Sino-Tibetan","CentralSouthAsia",21
+"Nocte","njb","Sino-Tibetan","CentralSouthAsia",28
+"Lotha","njh","Sino-Tibetan","CentralSouthAsia",32
+"Ao","njo","Sino-Tibetan","CentralSouthAsia",32
+"Angami","njm","Sino-Tibetan","CentralSouthAsia",45
+"Tangkhul","nmf","Sino-Tibetan","CentralSouthAsia",24
+"Thado","tcz","Sino-Tibetan","CentralSouthAsia",28
+"Khasi","kha","Austro-Asiatic","CentralSouthAsia",27
+"Kusunda","kgg","Language Isolate","CentralSouthAsia",30
+"Maung","mph","Australian","Pacific",23
+"Ngalkbon","ngk","Australian","Pacific",24
+"Wagiman","waq","Australian","Pacific",16
+"Marithiyel","mfr","Australian","Pacific",18
+"Maranungku","zmr","Australian","Pacific",19
+"Gugu Yalandyi","gvn","Australian","Pacific",17
+"Pitta-Pitta","pit","Australian","Pacific",25
+"Kalkatungu","ktg","Australian","Pacific",24
+"Yalarnnga","ylr","Australian","Pacific",20
+"Aranda","are","Australian","Pacific",25
+"Nhanda","nha","Australian","Pacific",25
+"Eyak","eya","Na-Dene","AmericasNorthCentral",38
+"Hare","scs","Na-Dene","AmericasNorthCentral",40
+"Slave","xsl","Na-Dene","AmericasNorthCentral",45
+"Chipewyan","chp","Na-Dene","AmericasNorthCentral",47
+"Yurok","yur","Algic","AmericasNorthCentral",29
+"Blackfoot","bla","Algic","AmericasNorthCentral",14
+"Arapaho","arp","Algic","AmericasNorthCentral",17
+"Shawnee","sjw","Algic","AmericasNorthCentral",18
+"Micmac","mic","Algic","AmericasNorthCentral",17
+"Bella Coola","blc","Salishan","AmericasNorthCentral",36
+"Halkomelem","hur","Salishan","AmericasNorthCentral",35
+"Lushootseed","lut","Salishan","AmericasNorthCentral",38
+"Upper Chehalis","cjh","Salishan","AmericasNorthCentral",36
+"Cowlitz","cow","Salishan","AmericasNorthCentral",40
+"Coeur dAlene","crd","Salishan","AmericasNorthCentral",45
+"Yuchi","yuc","Language Isolate","AmericasNorthCentral",45
+"Crow","cro","Siouan","AmericasNorthCentral",18
+"Hidatsa","hid","Siouan","AmericasNorthCentral",17
+"Cherokee","chr","Iroquoian","AmericasNorthCentral",20
+"Coos","csz","Penutian","AmericasNorthCentral",43
+"Nez Perce","nez","Penutian","AmericasNorthCentral",34
+"Mountain Maidu","nmu","Penutian","AmericasNorthCentral",26
+"Chitimacha","ctm","Gulf","AmericasNorthCentral",25
+"Alabama","akz","Muskogean","AmericasNorthCentral",19
+"Karok","kyh","Hokan","AmericasNorthCentral",21
+"Northern Paiute","pao","Uto-Aztecan","AmericasNorthCentral",33
+"Shoshone","shh","Uto-Aztecan","AmericasNorthCentral",31
+"Galibi","car","Carib","AmericaSouth",21
+"Wayana","way","Carib","AmericaSouth",18
+"Trio","tri","Carib","AmericaSouth",17
+"Waiwai","waw","Carib","AmericaSouth",20

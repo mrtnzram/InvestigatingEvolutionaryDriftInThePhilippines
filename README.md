@@ -57,7 +57,7 @@ bracketed prefix is the execution order:
    (run in this order): `[1]_PHONEME_cosine_similarity.R` (writes the cosine/cossim matrices) →
    `[2]_PHONEME_cosine_distribution_analysis.R` (ridge/density plots + Friedman/LMM) →
    `[3]_PHONEME_network_distance.R` (waypoint network + per-language land-penalized distance,
-   writes `PHONEME_cossim_dist.csv`) → `[4]_PHONEME_regression.R` (distance-decay models) →
+   writes `PHONEME_final.csv`) → `[4]_PHONEME_regression.R` (distance-decay models) →
    `[5]_PHONEME_MMRR.R` (Dijkstra pairwise distances + multiple matrix regression of
    dissimilarity on geographic and phylogenetic distance) →
    `[6]_PHONEME_PGLS.R` (needs the phylogenetic tree). The grammar side still uses the combined

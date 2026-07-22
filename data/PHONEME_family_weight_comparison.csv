@@ -1,0 +1,138 @@
+"language","n_exceed_raw","n_exceed_family","family","size","delta"
+"Kanuri",34,37,"Nilo-Saharan",33,3
+"Fur",31,33,"Nilo-Saharan",26,2
+"Bodo",25,24,"Sino-Tibetan",22,-1
+"Turkmen",21,22,"Altaic",31,1
+"Kodagu",21,15,"Dravidian",32,-6
+"Kanakuru",18,18,"Afro-Asiatic",29,0
+"Micmac",18,19,"Algic",17,1
+"Dongolawi",16,16,"Nilo-Saharan",29,0
+"Coptic",16,17,"Afro-Asiatic",28,1
+"Yaaku",16,17,"Afro-Asiatic",27,1
+"Alabama",16,15,"Muskogean",19,-1
+"Karok",15,16,"Hokan",21,1
+"Galibi",14,22,"Carib",21,8
+"Gude",13,13,"Afro-Asiatic",31,0
+"Lotha",12,13,"Sino-Tibetan",32,1
+"Ao",12,13,"Sino-Tibetan",32,1
+"Finnish",11,9,"Uralic",24,-2
+"Garo",11,13,"Sino-Tibetan",21,2
+"Tamil",9,9,"Dravidian",30,0
+"Ngalkbon",9,12,"Australian",24,3
+"Blackfoot",9,10,"Algic",14,1
+"Hidatsa",9,7,"Siouan",17,-2
+"Babanki",8,10,"Niger-Congo",31,2
+"Trio",8,11,"Carib",17,3
+"Waiwai",8,7,"Carib",20,-1
+"Zayse",7,6,"Afro-Asiatic",33,-1
+"Arapaho",7,7,"Algic",17,0
+"Shawnee",7,8,"Algic",18,1
+"Hungarian",6,7,"Uralic",34,1
+"Southern Saami",6,6,"Uralic",30,0
+"Thado",6,6,"Sino-Tibetan",28,0
+"Khasi",6,10,"Austro-Asiatic",27,4
+"Nyoro",5,6,"Niger-Congo",30,1
+"Lozi",5,5,"Niger-Congo",21,0
+"Kalmyk",5,6,"Altaic",30,1
+"Temne",4,6,"Niger-Congo",25,2
+"Shilluk",4,9,"Nilo-Saharan",28,5
+"Margi",4,11,"Afro-Asiatic",39,7
+"Kilba",4,11,"Afro-Asiatic",41,7
+"Basque",4,4,"Basque",25,0
+"Ingrian",4,4,"Uralic",29,0
+"Uzbek",4,3,"Altaic",29,-1
+"Nyakyusa",3,5,"Niger-Congo",25,2
+"Sura",3,3,"Afro-Asiatic",33,0
+"Dasenech",3,3,"Afro-Asiatic",32,0
+"Vepsian",3,3,"Uralic",30,0
+"Livonian",3,3,"Uralic",30,0
+"Azerbaijani",3,4,"Altaic",33,1
+"Tatar",3,3,"Altaic",32,0
+"Wagiman",3,5,"Australian",16,2
+"Aranda",3,3,"Australian",25,0
+"Dagbani",2,2,"Niger-Congo",31,0
+"Mumuye",2,2,"Niger-Congo",30,0
+"Aghem",2,2,"Niger-Congo",29,0
+"Songhai",2,2,"Nilo-Saharan",32,0
+"Nuer",2,2,"Nilo-Saharan",32,0
+"Afar",2,3,"Afro-Asiatic",25,1
+"Eastern Saami",2,9,"Uralic",37,7
+"Crimean Turkish",2,3,"Altaic",31,1
+"Malto",2,2,"Dravidian",30,0
+"Maung",2,4,"Australian",23,2
+"Gugu Yalandyi",2,2,"Australian",17,0
+"Suppire",1,4,"Niger-Congo",29,3
+"Nupe",1,1,"Niger-Congo",29,0
+"Murle",1,1,"Nilo-Saharan",33,0
+"Mangbetu",1,1,"Nilo-Saharan",49,0
+"Gagauz",1,1,"Altaic",31,0
+"Turkish",1,1,"Altaic",30,0
+"Bashkir",1,1,"Altaic",31,0
+"Baraba",1,1,"Altaic",27,0
+"Greenlandic",1,0,"Eskimo-Aleut",19,-1
+"Kannada",1,1,"Dravidian",37,0
+"Malayalam",1,1,"Dravidian",35,0
+"Lepcha",1,1,"Sino-Tibetan",35,0
+"Thulung",1,1,"Sino-Tibetan",38,0
+"Khaling",1,1,"Sino-Tibetan",34,0
+"Maranungku",1,0,"Australian",19,-1
+"Pitta-Pitta",1,1,"Australian",25,0
+"Kalkatungu",1,1,"Australian",24,0
+"Nhanda",1,1,"Australian",25,0
+"Crow",1,1,"Siouan",18,0
+"Wayana",1,2,"Carib",18,1
+"Hadza",0,0,"Khoisan",66,0
+"Kxoe",0,0,"Khoisan",68,0
+"Buka",0,0,"Khoisan",67,0
+"Xu^",0,0,"Khoisan",76,0
+"\u450?Hu^",0,0,"Khoisan",63,0
+"Fon",0,1,"Niger-Congo",30,1
+"Idoma",0,0,"Niger-Congo",30,0
+"Degema",0,1,"Niger-Congo",35,1
+"Igbo",0,0,"Niger-Congo",44,0
+"Tikar",0,1,"Niger-Congo",42,1
+"Bembe\sub 2\nosupersub",0,0,"Niger-Congo",27,0
+"Mwera",0,0,"Niger-Congo",28,0
+"Tswana",0,0,"Niger-Congo",42,0
+"Southern Sotho",0,0,"Niger-Congo",50,0
+"Tera",0,1,"Afro-Asiatic",46,1
+"Glavda",0,1,"Afro-Asiatic",39,1
+"Paa",0,1,"Afro-Asiatic",32,1
+"Kemant",0,1,"Afro-Asiatic",31,1
+"Bilin",0,0,"Afro-Asiatic",40,0
+"Burji",0,0,"Afro-Asiatic",31,0
+"Hadiyya",0,0,"Afro-Asiatic",29,0
+"Georgian",0,0,"Kartvelian",34,0
+"Kabardian",0,0,"North Caucasian",42,0
+"Hunzib",0,0,"North Caucasian",46,0
+"Lezgi",0,0,"North Caucasian",45,0
+"Chuvash",0,0,"Altaic",22,0
+"Newari",0,0,"Sino-Tibetan",36,0
+"Thakali",0,0,"Sino-Tibetan",28,0
+"Chepang",0,0,"Sino-Tibetan",39,0
+"Sunwar",0,0,"Sino-Tibetan",33,0
+"Nocte",0,1,"Sino-Tibetan",28,1
+"Angami",0,1,"Sino-Tibetan",45,1
+"Tangkhul",0,0,"Sino-Tibetan",24,0
+"Kusunda",0,0,"Language Isolate",30,0
+"Marithiyel",0,0,"Australian",18,0
+"Yalarnnga",0,0,"Australian",20,0
+"Eyak",0,0,"Na-Dene",38,0
+"Hare",0,0,"Na-Dene",40,0
+"Slave",0,0,"Na-Dene",45,0
+"Chipewyan",0,0,"Na-Dene",47,0
+"Yurok",0,0,"Algic",29,0
+"Bella Coola",0,0,"Salishan",36,0
+"Halkomelem",0,0,"Salishan",35,0
+"Lushootseed",0,0,"Salishan",38,0
+"Upper Chehalis",0,0,"Salishan",36,0
+"Cowlitz",0,0,"Salishan",40,0
+"Coeur dAlene",0,0,"Salishan",45,0
+"Yuchi",0,0,"Language Isolate",45,0
+"Cherokee",0,0,"Iroquoian",20,0
+"Coos",0,0,"Penutian",43,0
+"Nez Perce",0,0,"Penutian",34,0
+"Mountain Maidu",0,1,"Penutian",26,1
+"Chitimacha",0,0,"Gulf",25,0
+"Northern Paiute",0,1,"Uto-Aztecan",33,1
+"Shoshone",0,1,"Uto-Aztecan",31,1

@@ -20,7 +20,7 @@
 #   - REQUIRES `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
 #   - Pairwise patristic distance matrix now lives in [0] (moved there); this
 #     script no longer produces it.
-# Input:   data/PHONEME_cossim_dist.csv (from [3]_PHONEME_network_distance.R)
+# Input:   data/PHONEME_final.csv (from [3]_PHONEME_network_distance.R)
 # Outputs: data/PHONEME_pgls_results.csv   (PGLS lambda / slope table)
 #          data/PHONEME_waic_compare.csv   (WAIC model comparison + nRMSE)
 #          figures/phoneme/regression/phoneme_{linear,exponential,spline}_model.png
@@ -50,7 +50,7 @@ stopifnot(
     exists("tree_df_matched")
 )
 
-PHONEME_cossim_dist <- read.csv(here("data", "PHONEME_cossim_dist.csv"))
+PHONEME_final <- read.csv(here("data", "PHONEME_final.csv"))
 
 # dplyr:: qualified throughout: caper loads MASS, whose select() masks
 # dplyr::select() once attached, regardless of library() order.
@@ -63,7 +63,7 @@ tip_map <- tree_df_matched |> dplyr::select(original, ph)
 # ordering we reuse below so y, x and R_lambda never fall out of sync. Languages
 # represented by more than one tree tip (dialect samples) are duplicated by the
 # tip_map join, giving one data point per tip, matching the PGLS fit.
-df <- PHONEME_cossim_dist |>
+df <- PHONEME_final |>
   dplyr::select(language, cossim = cossim_span, geodist_H1_span) |>
   left_join(tip_map, by = c("language" = "ph")) |>
   filter(!is.na(original)) |>

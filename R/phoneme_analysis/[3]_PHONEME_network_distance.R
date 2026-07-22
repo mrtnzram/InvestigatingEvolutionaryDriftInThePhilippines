@@ -1,8 +1,9 @@
 # ── [3]_PHONEME_network_distance.R ───────────────────────────────────────────
 # Graph network creation + per-language distance calculation.
 # Input:   data/PHONEME_cossim.csv, data/nodes.csv, data/edges.csv
-# Outputs: data/PHONEME_cossim_dist.csv (cossim + geodist_H1_span, for the
-#          regression file), data/phoneme_waypoint_plot.rds (overview arrow plot)
+# Outputs: data/PHONEME_final.csv (cossim + geodist_H1_span, the final
+#          per-language table for the regression file), data/phoneme_waypoint_plot.rds
+#          (overview arrow plot)
 # Note:    pairwise inter-language distances for the MMRR analysis are computed
 #          separately in [5]_PHONEME_MMRR.R (Dijkstra routing).
 #
@@ -262,7 +263,7 @@ compute_network_distance_df <- function(df, nodes, edges, land_sf,
     # regardless of whether the network or the direct line actually won on
     # distance above. This is a visualization-only choice — geodist_H2_span and
     # using_network (just computed) are the true analysis outputs, unchanged by
-    # this, and still get written to PHONEME_cossim_dist.csv as-is; only the
+    # this, and still get written to PHONEME_final.csv as-is; only the
     # geometry that feeds connector_sf/arrow_connectors in §7 (never written to
     # CSV) is affected, so every language visibly enters the network in the
     # plot instead of some arrows jumping straight to Manila.
@@ -319,7 +320,7 @@ PHONEME_cossim |>
   select(language, latitude, longitude, starts_with("cossim_"),
          any_of(c("span_influenced", "jap_influenced", "eng_influenced")),
          geodist_H1_span, geodist_H2_span, using_network) |>
-  write.csv(file = here("data", "PHONEME_cossim_dist.csv"), row.names = FALSE)
+  write.csv(file = here("data", "PHONEME_final.csv"), row.names = FALSE)
 
 
 # ── 7. Assemble full_tree_sf (main edges + per-language connectors) ─────────

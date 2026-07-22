@@ -4,14 +4,15 @@
 #          data/GRAMMAR_subgroup_lookup.csv (from [0]_Phylogenetic_Tree.R)
 #          (nodes/edges are the shared Philippine waypoint network — same
 #          geography as the phoneme analysis, not duplicated per-dataset)
-# Outputs: data/GRAMMAR_cossim_dist.csv (cossim + geodist_H1_span, for the
-#          regression file), data/grammar_waypoint_plot.rds (overview arrow plot)
+# Outputs: data/GRAMMAR_final.csv (cossim + geodist_H1_span, the final
+#          per-language table for the regression file), data/grammar_waypoint_plot.rds
+#          (overview arrow plot)
 # Note:    pairwise inter-language distances for the MMRR analysis are computed
 #          separately in [5]_GRAMMAR_MMRR.R (Dijkstra routing).
 # GRAMMAR-SPECIFIC: unlike phoneme (all study languages have a tree tip), 13 of
 # grammar's 39 Philippine languages (Sabah/Sama-Bajau + Karao) have no ABVD tree
 # placement. This script restricts to the 26 tree-pruned languages so the
-# waypoint map ([7]) and GRAMMAR_cossim_dist.csv align with the phylogeny-based
+# waypoint map ([7]) and GRAMMAR_final.csv align with the phylogeny-based
 # analyses ([4]/[5]) and the [8] subgroup network figure — all on the same 26.
 #
 # compute_shortest_path_df(). Instead of routing each language to a
@@ -277,7 +278,7 @@ compute_network_distance_df <- function(df, nodes, edges, land_sf,
     # regardless of whether the network or the direct line actually won on
     # distance above. This is a visualization-only choice — geodist_H2_span and
     # using_network (just computed) are the true analysis outputs, unchanged by
-    # this, and still get written to GRAMMAR_cossim_dist.csv as-is; only the
+    # this, and still get written to GRAMMAR_final.csv as-is; only the
     # geometry that feeds connector_sf/arrow_connectors in §7 (never written to
     # CSV) is affected, so every language visibly enters the network in the
     # plot instead of some arrows jumping straight to Manila.
@@ -334,7 +335,7 @@ GRAMMAR_cossim |>
   select(language, latitude, longitude, starts_with("cossim_"),
          any_of(c("span_influenced", "jap_influenced", "eng_influenced")),
          geodist_H1_span, geodist_H2_span, using_network) |>
-  write.csv(file = here("data", "GRAMMAR_cossim_dist.csv"), row.names = FALSE)
+  write.csv(file = here("data", "GRAMMAR_final.csv"), row.names = FALSE)
 
 
 # ── 7. Assemble full_tree_sf (main edges + per-language connectors) ─────────
