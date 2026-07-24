@@ -1,16 +1,24 @@
 # =============================================================================
-# [0] Phoneme Analysis — Build the Ruhlen (Creanza et al. 2015 PNAS) feature database
+# [0] Phoneme Evolutionary — Build the Ruhlen (Creanza et al. 2015 PNAS) feature database
 #
 # Reads binary phoneme inventories from the Creanza et al. 2015 supplemental
 # dataset (pnas_1424033112_sd01.txt), filters to the study languages, and
 # writes the feature matrix and IDF frequency table in a schema compatible with
 # the original PHOIBLE pipeline.
 #
+# Unlike the phoneme_analysis pipeline's copy of this script, PHOIBLEdf_PH here
+# also persists every Austronesian language in Ruhlen (Language_type =
+# "Austronesian"), not just the Philippine/interest/unrelated-control study
+# set — this experiment needs the Austronesian-wide phoneme table to pair with
+# the Austronesian-wide pulses tree in [0]_Phylogenetic_Tree.R. Writes to
+# evolutionary-suffixed files so the shared R/phoneme_analysis pipeline (which
+# reads data/RUHLENdf_PH.csv directly) is unaffected.
+#
 # Source: Creanza et al. 2015 PNAS, SI Dataset 1 — 2082 languages × 728 phonemes
 # Phoneme column names (phoneme_001–phoneme_728) correspond to the positional
 # indices in SI Dataset 2 (not included here; join on position if IPA names needed).
 #
-# Outputs: data/RUHLENdf_PH.csv, data/phoneme_freq_ruhlen.csv
+# Outputs: data/RUHLENdf_PH_evolutionary.csv, data/phoneme_freq_ruhlen_evolutionary.csv
 #
 # RUN ORDER (this script has a dependency on the phylogenetic tree):
 #   1. Run PART A below (down to the `Ph_Languages` definition).
@@ -65,7 +73,8 @@ ruhlen_raw <- ruhlen_raw |>
 Ph_Languages <- ruhlen_raw |>
   filter(
     latitude  >  4.5 & latitude  < 21 &
-      longitude > 115  & longitude < 128
+    longitude > 115  & longitude < 128 &
+    !language %in% c('Yakan','Timugon','Sangil') # seafaring languages
   ) |>
   pull(language)
 
@@ -239,9 +248,18 @@ contact_contaminated <- c(ie_related, spanish_contact, portuguese_contact)
 unrelated_clean <- setdiff(Unrelated_Langauges, contact_contaminated)
 length(unrelated_clean)
 
-# -- All Languages
+# -- All Languages ------------------------------------------------------------
+# Evolutionary experiment: also persist every Austronesian language in Ruhlen
+# (not just the Philippine/interest/unrelated study set), tagged below as
+# Language_type = "Austronesian" for anything not already claimed by one of
+# the other three categories. This is the phoneme table matched against the
+# Austronesian-wide pulses tree in [0]_Phylogenetic_Tree.R.
+Austronesian_Languages <- ruhlen_raw |>
+  filter(language_family == "Austronesian") |>
+  pull(language)
 
-Languages <- c(Ph_Languages_pruned, Interest_Languages, unrelated_clean)
+Languages <- c(Ph_Languages_pruned, Interest_Languages, unrelated_clean, Austronesian_Languages) |>
+  unique()
 
 # ---- 4. Filter to study languages and build output schema ----
 
@@ -254,7 +272,8 @@ PHOIBLEdf_PH <- ruhlen_raw |>
     Language_type = case_when(
       language %in% Ph_Languages       ~ "Philippine Language",
       language %in% Interest_Languages ~ "Language of Interest",
-      language %in% Unrelated_Langauges     ~ "Unrelated Language"
+      language %in% Unrelated_Langauges     ~ "Unrelated Language",
+      language_family == "Austronesian" ~ "Austronesian"
     )
   ) |>
   dplyr::select(iso6393, language, source, latitude, longitude, all_of(phoneme_cols), Language_type)
@@ -275,7 +294,7 @@ if (length(unmatched) > 0) {
 # ---- 5. Preview geographic spread ----
 map.feature(PHOIBLEdf_PH$language, PHOIBLEdf_PH$Language_type)
 
-write_csv(PHOIBLEdf_PH, here("data", "RUHLENdf_PH.csv"))
+write_csv(PHOIBLEdf_PH, here("data", "RUHLENdf_PH_evolutionary.csv"))
 
 # ---- 6. Compute global phoneme frequencies and IDF weights ----
 # Denominator: all Austronesian Languages excluding Philippine Languages 
@@ -299,14 +318,14 @@ compute_phoneme_freq <- function(data, n_total = nrow(data)) {
 ruhlen_austronesian <- ruhlen_raw |>
   filter(
     language_family == "Austronesian",
-    !language %in% Philippine_langs
+    !language %in% Ph_Languages_pruned
   )
 
 n_total_languages_an <- nrow(ruhlen_austronesian)
 
 phoneme_freq_austronesian <- compute_phoneme_freq(ruhlen_austronesian, n_total_languages_an)
 
-write_csv(phoneme_freq_austronesian, here("data", "phoneme_freq_ruhlen_austronesian.csv"))
+write_csv(phoneme_freq_austronesian, here("data", "phoneme_freq_ruhlen_evolutionary.csv"))
 
 message(
   "\nDone.",
@@ -315,7 +334,7 @@ message(
   "\n  phoneme_freq_austronesian : ", nrow(phoneme_freq_austronesian), " attested phonemes"
 )
 
-# Phoneme names key mapping -------------------------------------
+  # Phoneme names key mapping -------------------------------------
 
 # ---- build the phoneme_n -> IPA keymap -------------------------------------
 raw   <- read_lines(here('data','pnas_1424033112_sd02.txt'))
