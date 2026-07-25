@@ -278,8 +278,17 @@ map.feature(PHOIBLEdf_PH$language, PHOIBLEdf_PH$Language_type)
 write_csv(PHOIBLEdf_PH, here("data", "RUHLENdf_PH.csv"))
 
 # ---- 6. Compute global phoneme frequencies and IDF weights ----
-# Denominator: all Austronesian Languages excluding Philippine Languages 
-# to avoid circularity
+# Denominator: every Austronesian language in Ruhlen, Philippine languages
+# included (n = 284). Philippine languages are deliberately NOT excluded — they
+# are part of the Austronesian baseline a phoneme's rarity is measured against.
+#
+# This block previously filtered on `!language %in% Philippine_langs`, which
+# never removed anything: `Philippine_langs` is not defined in this script (it
+# defines `Ph_Languages` above) and exists only in the grammar scripts, where it
+# is a Grambank data frame rather than a vector of Ruhlen language names. Every
+# result downstream of this file was therefore already computed on the full 284,
+# so dropping the dead filter changes no output — it only makes the code state
+# what it actually does.
 
 compute_phoneme_freq <- function(data, n_total = nrow(data)) {
   data |>
@@ -297,10 +306,7 @@ compute_phoneme_freq <- function(data, n_total = nrow(data)) {
 }
 
 ruhlen_austronesian <- ruhlen_raw |>
-  filter(
-    language_family == "Austronesian",
-    !language %in% Philippine_langs
-  )
+  filter(language_family == "Austronesian")
 
 n_total_languages_an <- nrow(ruhlen_austronesian)
 

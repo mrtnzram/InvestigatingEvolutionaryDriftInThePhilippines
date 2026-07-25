@@ -18,7 +18,8 @@
 # Phoneme column names (phoneme_001–phoneme_728) correspond to the positional
 # indices in SI Dataset 2 (not included here; join on position if IPA names needed).
 #
-# Outputs: data/RUHLENdf_PH_evolutionary.csv, data/phoneme_freq_ruhlen_evolutionary.csv
+# Outputs: data/RUHLENdf_PH_evolutionary.csv, data/phoneme_freq_ruhlen_evolutionary.csv,
+#          data/phoneme_key_pnas.csv
 #
 # RUN ORDER (this script has a dependency on the phylogenetic tree):
 #   1. Run PART A below (down to the `Ph_Languages` definition).
@@ -297,8 +298,13 @@ map.feature(PHOIBLEdf_PH$language, PHOIBLEdf_PH$Language_type)
 write_csv(PHOIBLEdf_PH, here("data", "RUHLENdf_PH_evolutionary.csv"))
 
 # ---- 6. Compute global phoneme frequencies and IDF weights ----
-# Denominator: all Austronesian Languages excluding Philippine Languages 
-# to avoid circularity
+# Denominator: every Austronesian language in Ruhlen, Philippine languages
+# included (n = 284) — identical to the phoneme_analysis pipeline, so
+# phoneme_freq_ruhlen_evolutionary.csv and phoneme_freq_ruhlen_austronesian.csv
+# are the same table under two names.
+#
+# This block previously excluded `Ph_Languages_pruned`, which made the two
+# tables disagree (241 vs 284) on 49 of 728 phoneme counts.
 
 compute_phoneme_freq <- function(data, n_total = nrow(data)) {
   data |>
@@ -316,10 +322,7 @@ compute_phoneme_freq <- function(data, n_total = nrow(data)) {
 }
 
 ruhlen_austronesian <- ruhlen_raw |>
-  filter(
-    language_family == "Austronesian",
-    !language %in% Ph_Languages_pruned
-  )
+  filter(language_family == "Austronesian")
 
 n_total_languages_an <- nrow(ruhlen_austronesian)
 
@@ -360,4 +363,9 @@ if (length(missing_from_key) > 0)
   warning(length(missing_from_key), " phoneme_cols not found in pnas_key: ",
           paste(head(missing_from_key, 10), collapse = ", "))
 
-pnas_key
+# Persist the keymap so downstream scripts join against it instead of re-parsing
+# sd02.txt. Deliberately not evolutionary-suffixed: this is a straight decode of
+# the SI file with no study-set filtering, so it is identical for every pipeline.
+write_csv(pnas_key, here("data", "phoneme_key_pnas.csv"))
+
+message("Phoneme keymap: ", nrow(pnas_key), " phonemes -> data/phoneme_key_pnas.csv")
