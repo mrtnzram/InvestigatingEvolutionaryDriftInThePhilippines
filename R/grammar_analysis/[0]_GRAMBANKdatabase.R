@@ -9,13 +9,20 @@
 # GRAMBANK coverage on the retained features (same "present in both
 # datasets" criterion used in [0]_CREANZA_RUHLENdatabase.R PART B).
 #
-# RUN ORDER: run [0]_prelim.R first (informs feature_thresh/language_thresh
-# below); this script applies them deterministically, it does not re-explore.
+# RUN ORDER (this script has a dependency on the phylogenetic tree, mirroring
+# [0]_CREANZA_RUHLENdatabase.R):
+#   1. Run [0]_prelim.R first (informs feature_thresh/language_thresh below).
+#   2. Run PART A below (down to the `Ph_Languages` definition) — applies the
+#      settled thresholds deterministically, it does not re-explore.
+#   3. Run [0]_Phylogenetic_Tree.R — it consumes `Ph_Languages` and
+#      `GRAMBANKdf_PH_maximized` and produces `Ph_Languages_pruned` (the
+#      tree-validated subset used downstream).
+#   4. Run PART B below (everything after the banner), which needs
+#      `Ph_Languages_pruned`.
 #
 # Input:   data/languages.csv, data/values.csv, data/RUHLENdf_PH.csv
 #          (phoneme's control-set source, for the dynamic unrelated set)
 # Outputs: data/GRAMBANKdf_full.csv, data/gramfeature_freq.csv
-# Next:    [0]_Phylogenetic_Tree.R
 # =============================================================================
 
 library(lingtypology)
@@ -80,6 +87,40 @@ GRAMBANKdf_PH_maximized <- GRAMBANKdf_PH %>%
 message(
   "Retained (feature_thresh = ", feature_thresh, ", language_thresh = ", language_thresh, "): ",
   length(keep_features), " features, ", nrow(GRAMBANKdf_PH_maximized), " languages."
+)
+
+Ph_Languages <- GRAMBANKdf_PH_maximized %>%
+  filter(Language_Type == "Philippine Language") %>%
+  pull(language)
+
+# =============================================================================
+# >>> END OF PART A <<<
+# STOP here and run [0]_Phylogenetic_Tree.R, which consumes `Ph_Languages` and
+# `GRAMBANKdf_PH_maximized` (both defined above) and returns
+# `Ph_Languages_pruned` — the tree-validated subset.
+# PART B below requires `Ph_Languages_pruned` to be in the environment.
+# =============================================================================
+stopifnot(
+  "Run [0]_Phylogenetic_Tree.R first: `Ph_Languages_pruned` is not defined." =
+    exists("Ph_Languages_pruned")
+)
+
+# ----------------------------- PART B (run after tree) -----------------------
+
+# Drop Philippine languages that didn't survive tree pruning (no tree tip, or
+# unresolved name mismatch) — mirrors [0]_CREANZA_RUHLENdatabase.R PART B,
+# where the final Philippine set is Ph_Languages_pruned rather than the full
+# coverage-reduced candidate set. Interest languages (English/Japanese) are
+# untouched — the tree only covers Philippine languages.
+n_before_pruning <- sum(GRAMBANKdf_PH_maximized$Language_Type == "Philippine Language")
+
+GRAMBANKdf_PH_maximized <- GRAMBANKdf_PH_maximized %>%
+  filter(Language_Type != "Philippine Language" | language %in% Ph_Languages_pruned)
+
+message(
+  "\nDropped by tree pruning: ", n_before_pruning - sum(GRAMBANKdf_PH_maximized$Language_Type == "Philippine Language"),
+  " Philippine language(s) (", n_before_pruning, " -> ",
+  sum(GRAMBANKdf_PH_maximized$Language_Type == "Philippine Language"), ")."
 )
 
 # ---- 4. Spanish — hard-coded, not queried ----

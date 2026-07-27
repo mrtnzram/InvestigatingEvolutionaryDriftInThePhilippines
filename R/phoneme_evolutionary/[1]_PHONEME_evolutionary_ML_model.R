@@ -8,34 +8,17 @@
 #      (phytools::fitMk vs. fitmultiMk + manual LRT), using whichever of
 #      ER/ARD won stage 1.
 #
-# Model selection is by likelihood-ratio test at alpha = 0.05, with two
-# overrides: if the ARD fit has a non-finite standard error the ER model is
-# taken regardless of the p-value, and likewise if the 2-regime fit has a
-# non-finite standard error the 1-regime model is taken. Both overrides fire in
-# practice (23 and 59 rows respectively), and they overrule an otherwise
-# significant LRT 7 times.
+# Selection is by LRT at alpha = 0.05, overridden to the simpler model whenever
+# the more complex fit returns a non-finite standard error.
 #
-# Phonemes are analysed only if they are present in >2 and <100% of the tree
-# tips; anything outside that band is unidentifiable (fitMk errors outright on
-# an invariant trait) and is reported in the dropped table instead.
+# Only phonemes present in >2 and <100% of tips are analysed; the rest are
+# unidentifiable and go to the dropped table.
 #
-# INTERPRETING THE RATE COLUMNS. These are continuous-time Markov instantaneous
-# rates, not probabilities: the domain is [0, Inf) and the units are expected
-# transitions per unit branch length. On this tree (root-to-tip depth ~4.34,
-# median branch 0.46) a rate of 1 is already ~0.46 changes on a typical branch.
-# Roughly 87% of fitted rates fall below 1, but a minority saturate: 12 exceed
-# 10 and three reach ~2554, which is ~1.1e4 expected transitions from root to
-# tip. Past saturation the tip states retain no phylogenetic signal, the
-# likelihood is flat in that direction, and ace() applies no upper bound, so the
-# magnitude is an artefact of where the optimiser stopped rather than an
-# estimate. The SE overrides above do NOT screen these out — every selected
-# model with a rate >10 has finite standard errors; the non-finite SEs instead
-# cluster on fits with a rate pinned at the 0 boundary. Treat the model choice
-# and the rate magnitude as separate claims, and check rate_used * 4.34 before
-# quoting any rate or between-regime ratio.
+# Rates are instantaneous CTMC rates in [0, Inf), not probabilities; saturated
+# fits have an arbitrary magnitude but a meaningful q01:q10 ratio.
 #
-# Inputs:  data/RUHLENdf_PH_evolutionary.csv, data/phoneme_evolutionary_tree.nwk,
-#          data/phoneme_evolutionary_tip_mapping.csv, data/phoneme_key_pnas.csv
+# Inputs:  data/RUHLENdf_PH_evolutionary.csv, data/phoneme_evolutionary_tip_mapping.csv,
+#          data/phoneme_evolutionary_analysis_tree.rds, data/phoneme_key_pnas.csv
 #
 # Outputs: data/PHONEME_evolutionary_model_selection.csv
 #          data/PHONEME_evolutionary_dropped_phonemes.csv
@@ -60,13 +43,22 @@ RUHLENdf <- read_csv(
   show_col_types = FALSE
 )
 
-tree <- read.tree(
-  here("data", "phoneme_evolutionary_tree.nwk")
-)
-
 tip_mapping <- read_csv(
   here("data", "phoneme_evolutionary_tip_mapping.csv"),
   show_col_types = FALSE
+)
+
+# Tree pruning, conflict-tip resolution, and the Philippine regime are decided
+# once in [0]_Phylogenetic_Tree.R and loaded here, not rebuilt.
+tree_bundle     <- readRDS(here("data", "phoneme_evolutionary_analysis_tree.rds"))
+analysis_tree   <- tree_bundle$analysis_tree
+regime_tree     <- tree_bundle$regime_tree
+philippine_tips <- tree_bundle$philippine_tips
+
+plotSimmap(
+  regime_tree,
+  fsize = 0.5,
+  lwd = 2
 )
 
 phoneme_cols <- grep("^phoneme_", names(RUHLENdf), value = TRUE)
@@ -79,64 +71,38 @@ pnas_key <- read_csv(
   select(phoneme = phoneme_id, ipa, class)
 
 # ── 2. Tip-level table ───────────────────────────────────────
-# One row per tree tip. The Ruhlen phoneme matrix has no NAs, so every tip
-# carries a complete state vector and the tip set is identical for every
-# phoneme — which is what lets the tree be built once, outside the loop.
+# Restricted to the loaded analysis tree's own tip set, so conflict-tip
+# resolution never needs to be re-applied here.
 
 tips <- tip_mapping |>
+  filter(tip %in% analysis_tree$tip.label) |>
   left_join(
     RUHLENdf,
     by = c("iso6393", "ruhlen_language" = "language")
   )
 
 stopifnot(
-  "tip_mapping should join 1:1 onto RUHLENdf" =
-    nrow(tips) == nrow(tip_mapping),
+  "tip_mapping should join 1:1 onto the analysis tree" =
+    nrow(tips) == Ntip(analysis_tree),
   "every tip must resolve a Language_type" =
     !any(is.na(tips$Language_type)),
   "phoneme matrix must be complete for all tips" =
-    !any(is.na(tips[phoneme_cols]))
-)
-
-# ── 3. Analysis tree and Philippine regime, built once ───────
-
-analysis_tree <- keep.tip(tree, tips$tip)
-analysis_tree$root.edge <- 0
-analysis_tree <- multi2di(analysis_tree, random = FALSE)
-
-philippine_tips <- tips |>
-  filter(Language_type == "Philippine Language") |>
-  pull(tip)
-
-philippine_node <- getMRCA(analysis_tree, philippine_tips)
-
-# The Philippine languages need not be monophyletic, so verify the MRCA clade
-# does not sweep in non-Philippine tips before painting it as a regime.
-philippine_clade <- extract.clade(analysis_tree, philippine_node)
-stopifnot(
-  "Philippine MRCA clade must contain exactly the Philippine tips" =
-    setequal(philippine_clade$tip.label, philippine_tips)
-)
-
-regime_tree <- paintSubTree(
-  tree      = analysis_tree,
-  node      = philippine_node,
-  state     = "Philippine",
-  anc.state = "Background",
-  stem      = FALSE
+    !any(is.na(tips[phoneme_cols])),
+  "analysis tree must be binary" =
+    is.binary(analysis_tree),
+  "[0]'s Philippine tips must match tip-level Language_type" =
+    setequal(philippine_tips, tips$tip[tips$Language_type == "Philippine Language"])
 )
 
 message(
-  "Analysis tree: ", Ntip(analysis_tree), " tips (",
+  "Loaded analysis tree: ", Ntip(analysis_tree), " tips (",
   length(philippine_tips), " Philippine / ",
-  Ntip(analysis_tree) - length(philippine_tips), " background), binary = ",
-  is.binary(analysis_tree)
+  Ntip(analysis_tree) - length(philippine_tips), " background)."
 )
 
-# ── 4. Prevalence table (all 728 phonemes) ───────────────────
-# Denominators are the tree-matched languages, so every prevalence describes
-# exactly the languages the models see. Unrelated controls are never on the
-# tree, so that column uses the full unrelated set from the Ruhlen table.
+# ── 3. Prevalence table (all 728 phonemes) ───────────────────
+# Denominators are the tree-matched languages, so prevalences describe the
+# languages the models actually see; unrelated controls use the full Ruhlen set.
 
 prevalence_of <- function(data, prefix) {
   n <- nrow(data)
@@ -187,10 +153,10 @@ message(
   n_tree, " tree tips)."
 )
 
-# ── 5. Model-fitting helpers ─────────────────────────────────
+# ── 4. Model-fitting helpers ─────────────────────────────────
 
-# Collects warnings alongside the return value and downgrades errors to NULL,
-# so one pathological phoneme cannot abort the whole loop.
+# Downgrades errors to NULL and collects warnings so one bad phoneme cannot abort
+# the loop.
 try_fit <- function(expr) {
   notes <- character(0)
   value <- withCallingHandlers(
@@ -209,9 +175,8 @@ try_fit <- function(expr) {
   list(value = value, notes = notes)
 }
 
-# Rate lookup by transition, never by position: ape and phytools both index a
-# 2-state ARD as index.matrix[1,2] = 2 (gain, 0->1) and index.matrix[2,1] = 1
-# (loss, 1->0), which is the reverse of the obvious reading.
+# Look rates up by transition via index.matrix, never by position: ape orders a
+# 2-state ARD as rates[1] = loss, rates[2] = gain.
 rate_01 <- function(fit, offset = 0L) unname(fit$rates[offset + fit$index.matrix[1, 2]])
 rate_10 <- function(fit, offset = 0L) unname(fit$rates[offset + fit$index.matrix[2, 1]])
 
@@ -220,9 +185,8 @@ regime_offset <- function(fit, regime, k) {
   (match(regime, fit$regimes) - 1L) * k
 }
 
-# fitMk's own $lik is unusable in phytools 2.5.2 (isSymmetric dispatch error),
-# but fitmultiMk's works, so the 2-regime standard errors come from a numeric
-# Hessian of its log-likelihood surface.
+# 2-regime standard errors come from a numeric Hessian of fitmultiMk's $lik,
+# because fitMk's own $lik errors in phytools 2.5.2.
 se_from_lik <- function(fit) {
   n_par <- length(fit$rates)
   h <- tryCatch(
@@ -245,7 +209,7 @@ state_vector <- function(phoneme_col) {
   v
 }
 
-# ── 6. Loop ──────────────────────────────────────────────────
+# ── 5. Loop ──────────────────────────────────────────────────
 
 results <- vector("list", length(analysable))
 t_start <- Sys.time()
@@ -359,7 +323,7 @@ for (i in seq_along(analysable)) {
   }
 }
 
-# ── 7. Assemble and write outputs ────────────────────────────
+# ── 6. Assemble and write outputs ────────────────────────────
 
 model_selection <- bind_rows(results) |>
   left_join(phoneme_summary, by = "phoneme") |>
@@ -377,8 +341,8 @@ model_selection <- bind_rows(results) |>
   ) |>
   arrange(phoneme)
 
-# Excluded phonemes that are nonetheless attested somewhere in the Austronesian
-# tree set — i.e. real but unanalysable, as opposed to simply absent.
+# Excluded phonemes that are still attested on the tree, i.e. real but
+# unanalysable rather than simply absent.
 dropped_phonemes <- phoneme_summary |>
   filter(n_austronesian > 0, !phoneme %in% analysable) |>
   mutate(
