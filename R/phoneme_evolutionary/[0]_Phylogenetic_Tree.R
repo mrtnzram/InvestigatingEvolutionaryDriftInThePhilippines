@@ -1,337 +1,320 @@
 # =============================================================================
-# [0] Phoneme Analysis — Prune the phylogenetic tree to the study languages
+# [0] Phoneme Evolutionary — Match the pulses tree to the Ruhlen phoneme data
 #
-# Reads the MCC tree (data/mcc.tree), reconciles its tip labels with the
-# Ruhlen/phoneme language names, and prunes it to the Philippine study set.
+# Reads the pulses tree (data/pulses_summary.trees, 400 tips), and joins its
+# tips to the Ruhlen/Creanza phoneme languages via Glottocode: Ruhlen's
+# iso6393 -> Glottocode (lingtypology::gltc.iso()), then Glottocode is the
+# shared key with data/pulses_languages.csv (whose Name column supplies the
+# tree's own tip labels). Unlike the old mcc.tree script, no hand-built
+# tip-name lookup table is needed — the pulses tree tips already correspond
+# almost 1:1 to Ruhlen's own language names (e.g. "AttaPamplona",
+# "DumagatCasiguran"), and the join is done at the Glottocode level instead.
 #
 # DEPENDENCY / RUN ORDER:
-#   - REQUIRES `Ph_Languages` from PART A of [0]_CREANZA_RUHLENdatabase.R
-#     (run that first, down to its END OF PART A banner).
+#   - REQUIRES `Ph_Languages` and `ruhlen_raw` from PART A of
+#     [0]_CREANZA_RUHLENdatabase.R (run that first, down to its END OF PART A
+#     banner).
 #   - PRODUCES `Ph_Languages_pruned`, consumed by PART B of
 #     [0]_CREANZA_RUHLENdatabase.R.
-#   - ALSO PRODUCES `tree_pruned` and `tree_df_matched`, consumed by
-#     [4]_PHONEME_PGLS.R (the Bayesian phylogenetic regression).
-#   - WRITES data/PHONEME_phylo_dist_matrix.csv (pairwise patristic distance
-#     matrix, tree-only) — the phylogenetic predictor in [5]_PHONEME_MMRR.R's
-#     multiple matrix regression.
-#   - WRITES figures/shared/phylogenetic_tree.png (phylogram with tips coloured
-#     by Glottolog family subgroup).
-#   - WRITES data/PHONEME_subgroup_lookup.csv (language -> subgroup -> colour),
-#     the shared palette reused by [8]_PHONEME_tree_vs_network.R.
+#   - PRODUCES `tree_pruned` (Austronesian-wide, tips kept under the pulses
+#     tree's OWN original labels — not renamed to Ruhlen language names, so
+#     tip labels stay guaranteed-unique), then resolves zero/near-zero
+#     divergence conflicts into `analysis_tree` and paints its Philippine
+#     regime into `regime_tree`, with sanity plots of both.
+#   - WRITES data/phoneme_evolutionary_tree.nwk (Newick, tree_pruned),
+#     data/phoneme_evolutionary_tip_mapping.csv (one row per tip: tip ->
+#     Ruhlen language -> iso6393/glottocode/inventory_size), and
+#     data/phoneme_evolutionary_analysis_tree.rds (analysis_tree, regime_tree,
+#     philippine_tips), consumed by [1]/[2].
+#
+# Data quirks handled here:
+#   - `Baliledo` in pulses_languages.csv ships with a blank Glottocode. It is
+#     manually assigned "bali1288" (Glottolog's "Baliledu", a Central-East
+#     Sumbanese dialect with no ISO code of its own — confirmed by the tree
+#     placing Baliledo next to Pondok in the Sumba clade). Baliledo has no
+#     corresponding entry anywhere in the Ruhlen dataset, so this fix does not
+#     make it match a phoneme record — it is still dropped when the tree is
+#     pruned to matched tips, same as every other unmatched tip. The manual
+#     Glottocode is assigned purely so that omission is visible/intentional
+#     rather than a silent NA.
+#   - A handful of Glottocodes are shared by two distinct (non-identical)
+#     Ruhlen phoneme records under the same ISO code (e.g. ivat1242 covers
+#     both "Itbayaten" and "Ivatanen" — 8 of 728 phonemes differ between
+#     them). Tips are kept under their own original pulses label (so this
+#     never produces a duplicate tip label), but each such tip's Ruhlen match
+#     is ambiguous between the two records until step 4b resolves it: keep
+#     whichever record has the larger phoneme inventory (Kapuas/Katingan:
+#     24 vs. 19, clean). Itbayaten/Ivatanen tie exactly at 26 — that specific
+#     tie is broken manually in Itbayaten's favor, not derived from the data.
 # =============================================================================
 
 library(tibble)
 library(tidyverse)
 library(ape)
 library(stringr)
-library(ggplot2)
-library(lingtypology)   # glottolog affiliation -> family subgroup for tip colours
+library(lingtypology)   # gltc.iso() bridges Ruhlen's iso6393 -> Glottocode
 library(here)
+library(phytools)       # multi2di, paintSubTree, for the [1]/[2] analysis tree
 
 stopifnot(
   "Run PART A of [0]_CREANZA_RUHLENdatabase.R first: `Ph_Languages` is not defined." =
-    exists("Ph_Languages")
+    exists("Ph_Languages"),
+  "Run PART A of [0]_CREANZA_RUHLENdatabase.R first: `ruhlen_raw` is not defined." =
+    exists("ruhlen_raw")
 )
 
-tree <- read.nexus(here('data','mcc.tree'))
+tree <- read.nexus(here("data", "pulses_summary.trees"))
 
-tree_df <- tibble(
-  original = tree$tip.label
-) %>%
+# ---- 1. Ruhlen (Austronesian) -> Glottocode -------------------------------
+ruhlen_austronesian_gltc <- ruhlen_raw |>
+  filter(language_family == "Austronesian") |>
   mutate(
-    sanitized = str_remove(original, "_[0-9]+$") %>%
-      str_replace_all("_", " ") %>%
-      str_squish()
+    glottocode      = gltc.iso(iso6393),
+    inventory_size  = rowSums(across(all_of(phoneme_cols)))
   )
 
-lookup <- tribble(
-  ~tree, ~ph,
-  
-  # exact matches
-  "Agta", "Agta",
-  "Gaddang", "Gaddang",
-  "Ibanag", "Ibanag",
-  "Ilokano", "Ilokano",
-  "Balangaw", "Balangaw",
-  "Inibaloi", "Inibaloi",
-  "Iraya", "Iraya",
-  "Binukid", "Binukid",
-  "Mamanwa", "Mamanwa",
-  "Hanunoo", "Hanunoo",
-  "Buhid", "Buhid",
-  "Tagalog", "Tagalog",
-  "Kalagan", "Kalagan",
-  "Cebuano", "Cebuano",
-  "Hiligaynon", "Hiligaynon",
-  "Maranao", "Maranao",
-  "Tiruray", "Tiruray",
-  "Pangasinan", "Pangasinan",
-  "Kapampangan", "Kapampangan",
-  "Yogad", "Yogad",
-  
-  # variants
-  "Maguindanaon", "Magindanao",
-  "Cuyonon", "Kuyunon",
-  "Mansaka", "Mansakan",
-  "Sangil Saragani Islands", "Sangil",
-  "Tausug Jolo Dialect", "Tausug",
-  "Samar-Leyte", "Waray",
-  
-  # Agta / Dumagat
-  "Atta Pamplona", "Atta",
-  "Dumagat Casiguran", "Casiguran Dumagat",
-  
-  # Isneg
-  "Isneg Dibagat-Kabugao-Isneg", "Isnag",
-  
-  # Itneg
-  "Itneg Binongan", "Itneg",
-  
-  # Kalinga
-  "Kalinga Guinaang Lubuagan Dialect", "North Kalinga",
-  "Kalinga Minangali", "Central Kalinga",
-  "Kalinga Southern", "South Kalinga",
-  
-  # Ifugao
-  "Ifugao Amganad", "Central Ifugao",
-  "Ifugao Batad", "East Ifugao",
-  
-  # Bontok
-  "Bontok Guina-ang", "Central Bontok",
-  
-  # Kankanaey
-  "Kankanay Northern", "North Kankanay",
-  
-  # Kallahan
-  "Kallahan Kayapa Proper", "North Kallahan",
-  
-  # Ilongot
-  "Ilongot Kakidugen", "Ilongot",
-  
-  # Ivatan
-  "Ivatan Basco Dialect", "Ivatanen",
-  
-  # Sambal
-  "Sambal", "Tina",
-  
-  # Manobo
-  "Manobo Ata up-river", "Ata",
-  "Manobo Ata down-river", "Ata",
-  "Manobo Dibabawon", "Dibabawon",
-  "Manobo Ilianen Kibudtungan Dialect", "Ilianen",
-  "Manobo Tigwa Iglogsad Dialect", "Tigwa",
-  "Manobo Western Bukidnon", "Western Bukidnon",
-  "Manobo Sarangani Kayaponga Dialect", "Sarangani Manobo",
-  "Manobo Kalamansig Cotabato Paril Dialect", "Kalamansig",
-  
-  # Bilaan
-  "Bilaan Koronadal", "Cotabato Bilaan",
-  "Bilaan Sarangani", "Sarangani Bilaan",
-  
-  # Batak / Tagbanwa
-  "Palawan Batak", "Batak",
-  "Batak Palawan", "Batak",
-  "Tagbanwa Kalamian Coron Island Dialect", "Kalamianen",
-  "Tagbanwa Aborlan Dialect", "Tagbanwa",
-  
-  # Bikol
-  "Naga Bikol", "Naga",
-  
-  # Subanon
-  "Subanon Siocon", "Siocon Subanon",
-  "Subanun Sindangan", "Sindangan",
-  
-  # Tboli
-  "Tboli Tagabili", "Tboli"
-)
-
-Ph_Languages <- setdiff(Ph_Languages, "Ga-dang")
-
-tree_df_matched <- tree_df %>%
-  left_join(lookup, by = c("sanitized" = "tree")) %>%
-  mutate(ph = coalesce(ph, sanitized))
-
-setdiff(Ph_Languages, tree_df_matched$ph)
-
-# --- Pruning -----
-
-tips_keep <- tree_df_matched %>%
-  filter(ph %in% Ph_Languages) %>%
-  pull(original)
-
-tree_pruned <- drop.tip(
-  tree,
-  setdiff(tree$tip.label, tips_keep)
-)
-
-tip_df <- tree_df_matched %>%
-  select(original, ph)
-
-Ph_Languages_pruned <- tree_df_matched %>%
-  filter(ph %in% Ph_Languages) %>%
-  pull(ph)
-
-
-# ── Coloured phylogram (tips coloured by Glottolog family subgroup) ──────────
-# The MCC/nexus tree carries no clade annotations, so subgroup membership is
-# looked up from Glottolog via each language's ISO 639-3 code (lingtypology).
-# The affiliation path's 4th level is the finer Philippine subgroup (e.g.
-# "Meso-Cordilleran", "Central Philippine", "Manobo"); languages with a shorter
-# path fall back to their deepest available level. All study languages resolve.
-# Drawn as a ggplot phylogram straight from ape's own layout coordinates, so no
-# ggtree/Bioconductor dependency is needed.
-tip_subgroup <- tibble(original = tree_pruned$tip.label) %>%
-  left_join(tip_df, by = "original") %>%
-  left_join(
-    read_csv(here("data", "RUHLENdf_PH.csv"), show_col_types = FALSE) %>%
-      select(ph = language, iso6393),
-    by = "ph"
-  ) %>%
-  left_join(
-    lingtypology::glottolog %>% select(iso, affiliation) %>% distinct(),
-    by = c("iso6393" = "iso")
-  ) %>%
-  mutate(subgroup = map_chr(str_split(affiliation, ","), \(x) {
-    x <- str_trim(x)
-    if (length(x) >= 4) x[4] else tail(x, 1)   # 4th level = finer PH subgroup
-  }))
-
-# Palette assigned in order of clade size (largest first).
-subgroup_levels <- tip_subgroup %>% count(subgroup, sort = TRUE) %>% pull(subgroup)
-
-# Palette for the 18 level-4 subgroups. palette.colors("Polychrome 36") supplies
-# up to 36 maximally-distinct qualitative colours with no extra dependency; drop
-# the lightest (invisible on white), then desaturate so the strip reads as muted
-# rather than harshly saturated. Named by subgroup so colour <-> group is stable.
-soften <- function(cols, s_mult = 0.55, v_mult = 0.95) {
-  h <- grDevices::rgb2hsv(grDevices::col2rgb(cols))
-  grDevices::hsv(h["h", ], h["s", ] * s_mult, pmin(h["v", ] * v_mult, 1))
+unresolved <- ruhlen_austronesian_gltc |> filter(is.na(glottocode))
+if (nrow(unresolved) > 0) {
+  message(
+    nrow(unresolved), " Austronesian Ruhlen language(s) have no resolvable Glottocode ",
+    "(dropped from the tree match):\n",
+    paste0("  ", unresolved$language, " (iso6393 = ", unresolved$iso6393, ")", collapse = "\n")
+  )
 }
-.poly <- grDevices::palette.colors(NULL, "Polychrome 36")
-.lum  <- colSums(grDevices::col2rgb(.poly) * c(0.299, 0.587, 0.114))  # 0..255
-subgroup_pal <- setNames(
-  soften(.poly[.lum < 200])[seq_along(subgroup_levels)], subgroup_levels
+
+# ---- 2. pulses_languages.csv, with the Baliledo Glottocode patched --------
+pulses_languages <- read_csv(here("data", "pulses_languages.csv"), show_col_types = FALSE) |>
+  mutate(Glottocode = if_else(Name == "Baliledo", "bali1288", Glottocode))
+
+# ---- 3. Mapping table: Glottocode join between Ruhlen and the pulses tree -
+mapping_table <- ruhlen_austronesian_gltc |>
+  filter(!is.na(glottocode)) |>
+  inner_join(
+    pulses_languages |> dplyr::select(Name, Glottocode),
+    by = c("glottocode" = "Glottocode"),
+    relationship = "many-to-many"
+  )
+
+# ---- 4. Diagnostics: matched / dropped / duplicated ------------------------
+dropped_tips <- setdiff(tree$tip.label, mapping_table$Name)
+matched_tips <- unique(mapping_table$Name)
+
+message(
+  "Baliledo dropped as expected (no Ruhlen match despite manual Glottocode fix): ",
+  "Baliledo" %in% dropped_tips
 )
 
-# Export the per-language subgroup -> colour lookup so other scripts colour the
-# same languages with the identical palette (e.g. [8]'s tree-vs-network figure
-# needs the map points to match these tip colours exactly). One row per language
-# (ph); tip_subgroup's dialect duplicates collapse away via distinct().
-tip_subgroup %>%
-  distinct(language = ph, subgroup) %>%
-  mutate(colour = unname(subgroup_pal[subgroup])) %>%
-  write.csv(here("data", "PHONEME_subgroup_lookup.csv"), row.names = FALSE)
+dup_language <- mapping_table |> count(language, sort = TRUE) |> filter(n > 1)
+message(
+  nrow(dup_language), " Ruhlen language(s) matched to more than one tip ",
+  "(dialect-level fan-out on the tree side):\n",
+  paste0("  ", dup_language$language, " (", dup_language$n, " tips)", collapse = "\n")
+)
 
-# Let ape compute the rectangular phylogram layout, then read the tip/node
-# coordinates back out instead of re-deriving them. plot = FALSE fills
-# .PlotPhyloEnv without drawing (the null device just absorbs the device call).
-grDevices::pdf(NULL)
-plot.phylo(tree_pruned, plot = FALSE)
-grDevices::dev.off()
-pp     <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
-n_tip  <- length(tree_pruned$tip.label)
-x_tip  <- max(pp$xx)   # ultrametric tree: every tip sits at this x
-
-# Two segments per edge draw the elbow: a horizontal branch at the child's y and
-# a vertical connector at the parent's x spanning the parent->child y gap.
-edge_df <- tibble(P = tree_pruned$edge[, 1], C = tree_pruned$edge[, 2]) %>%
-  mutate(x0 = pp$xx[P], y0 = pp$yy[P], x1 = pp$xx[C], y1 = pp$yy[C])
-
-tip_plot_df <- tip_subgroup %>%
-  mutate(
-    x = pp$xx[seq_len(n_tip)], y = pp$yy[seq_len(n_tip)],
-    subgroup = factor(subgroup, levels = subgroup_levels)
+# Tips are kept under their own original pulses label (no renaming — see
+# header), so duplicate tip labels are impossible by construction. What CAN
+# happen is the reverse: one tip's Glottocode matches more than one distinct
+# Ruhlen phoneme record, leaving that tip's phoneme match ambiguous.
+ambiguous_tips <- mapping_table |>
+  distinct(Name, language) |>
+  count(Name, sort = TRUE) |>
+  filter(n > 1)
+message(
+  nrow(ambiguous_tips), " tip(s) matched more than one Ruhlen language under the same ",
+  "Glottocode (phoneme match ambiguous between them):\n",
+  paste0(
+    "  ", ambiguous_tips$Name, " -> ",
+    map_chr(ambiguous_tips$Name, \(nm) {
+      mapping_table |> filter(Name == nm) |> pull(language) |> unique() |> sort() |> paste(collapse = " / ")
+    }),
+    collapse = "\n"
   )
+)
 
-# Group annotation strip (replaces the legend): a colour bar beside the tips with
-# each subgroup name written once per contiguous block of tips, so it reads which
-# languages sit under which group without a colour-matching round trip. Most
-# subgroups are monophyletic and form one block; a few interspersed tips (e.g.
-# the Sangiric singleton at the top) make an extra short block, labelled in place.
-bar_x0 <- x_tip * 1.37          # strip sits clear of the left-aligned tip labels
-bar_w  <- x_tip * 0.035
-grp_x  <- bar_x0 + bar_w + x_tip * 0.02
+# ---- 4b. Resolve ambiguous tips: keep the larger phoneme inventory ---------
+# Each ambiguous tip's candidate languages are ranked by inventory_size and
+# the top one kept. Itbayaten/Ivatanen tie exactly (26 phonemes each) — the
+# general rule can't break that one, so it's resolved manually in Itbayaten's
+# favor (documented decision, not derived from the data).
+mapping_resolved <- mapping_table |>
+  group_by(Name) |>
+  slice_max(order_by = inventory_size, n = 1, with_ties = TRUE) |>
+  filter(!(n() > 1 & language == "Ivatanen")) |>
+  ungroup()
 
-bar_runs   <- tip_plot_df %>% arrange(y)
-run_rle    <- rle(as.character(bar_runs$subgroup))
-bar_runs$run <- rep(seq_along(run_rle$lengths), run_rle$lengths)
-grp_lab_df <- bar_runs %>%
-  group_by(run) %>%
-  summarise(subgroup = first(subgroup), y = mean(y), .groups = "drop")
-
-phylo_tree_plot <- ggplot() +
-  geom_segment(data = edge_df, aes(x = x0, xend = x1, y = y1, yend = y1),
-               linewidth = 0.3, colour = "grey30") +
-  geom_segment(data = edge_df, aes(x = x0, xend = x0, y = y0, yend = y1),
-               linewidth = 0.3, colour = "grey30") +
-  geom_text(data = tip_plot_df, aes(x, y, label = ph),
-            hjust = 0, nudge_x = x_tip * 0.015, size = 2, colour = "grey15") +
-  # colour strip: one tile per tip
-  geom_rect(data = tip_plot_df,
-            aes(xmin = bar_x0, xmax = bar_x0 + bar_w,
-                ymin = y - 0.5, ymax = y + 0.5, fill = subgroup)) +
-  # subgroup name beside each contiguous block. Text is dark (not the group
-  # colour): it sits directly against its colour tile, so the tie is already
-  # spatial, and dark type stays legible for the palest subgroups.
-  geom_text(data = grp_lab_df, aes(x = grp_x, y = y, label = subgroup),
-            hjust = 0, size = 2.3, colour = "grey15") +
-  scale_fill_manual(values = subgroup_pal, guide = "none") +
-  # Right limit crops the panel just past the subgroup labels (was far wider,
-  # leaving a broad blank margin); clip = "off" lets any label glyph that pokes
-  # past the limit still draw into the small plot margin rather than being cut.
-  scale_x_continuous(limits = c(-x_tip * 0.02, x_tip * 1.72), expand = c(0, 0)) +
-  coord_cartesian(clip = "off") +
-  labs(title = "Philippine study languages - phylogeny (ABVD / King et al. 2024)") +
-  theme_void() +
-  theme(
-    # theme_void() leaves the background transparent; set it white so text is
-    # legible and the PNG isn't see-through.
-    plot.background     = element_rect(fill = "white", colour = NA),
-    # centre the title over the whole plot width, not just the panel.
-    plot.title.position = "plot",
-    plot.title          = element_text(size = 11, hjust = 0.5),
-    plot.margin         = margin(6, 6, 6, 6)
+resolved_log <- mapping_table |>
+  semi_join(ambiguous_tips, by = "Name") |>
+  distinct(Name, language, inventory_size) |>
+  left_join(
+    mapping_resolved |> distinct(Name, language) |> mutate(kept = TRUE),
+    by = c("Name", "language")
+  ) |>
+  mutate(kept = coalesce(kept, FALSE)) |>
+  arrange(Name, desc(inventory_size))
+message(
+  "\nAmbiguous tips resolved by phoneme inventory size (ties broken manually):\n",
+  paste0(
+    "  ", resolved_log$Name, ": ", resolved_log$language, " (", resolved_log$inventory_size, ")",
+    if_else(resolved_log$kept, " <- kept", ""),
+    collapse = "\n"
   )
-print(phylo_tree_plot)
+)
 
-dir.create(here("figures", "shared"), recursive = TRUE, showWarnings = FALSE)
-ggsave(here("figures", "shared", "phylogenetic_tree.png"),
-       phylo_tree_plot, width = 7.5, height = 9, units = "in", dpi = 300)
+# ---- 5. Prune (original tip labels kept as-is) ------------------------------
+tree_pruned <- drop.tip(tree, dropped_tips)
 
+# `Ph_Languages_pruned` — the Philippine-language subset validated against the
+# pulses tree, consumed by PART B of [0]_CREANZA_RUHLENdatabase.R.
+Ph_Languages_pruned <- mapping_resolved |>
+  filter(language %in% Ph_Languages) |>
+  pull(language) |>
+  unique()
 
-# ── Pairwise phylogenetic (patristic) distance matrix ───────────────────────
-# Tree-only artifact (needs no cossim/geodist data), so it is built here rather
-# than in [4]. cophenetic.phylo() returns tip-to-tip patristic distance keyed by
-# the raw tree labels ("original"). Some study languages are represented by more
-# than one tree tip (e.g. dialect-level samples of "Ata" that both map to the
-# same `ph` name) — collapsed by averaging every original-tip pair's distance
-# within each ph-to-ph pair, so the output is one row/col per language, matching
-# PHONEME_dist_matrix.csv / PHONEME_diss_matrix.csv from [5]_PHONEME_MMRR.R.
-phylo_dist_raw <- cophenetic.phylo(tree_pruned)
+# Original pulses tip labels (not Ruhlen language names) that carry at least
+# one matched Philippine language — used below for the clade plot.
+ph_tip_names <- mapping_resolved |>
+  filter(language %in% Ph_Languages &
+        !language %in% c('Yakan','Timugon','Sangil')) |>
+  pull(Name) |>
+  unique()
 
-phylo_dist_long <- as_tibble(phylo_dist_raw, rownames = "original_1") %>%
-  pivot_longer(-original_1, names_to = "original_2", values_to = "phylo_dist") %>%
-  left_join(tip_df, by = c("original_1" = "original")) %>%
-  rename(ph_1 = ph) %>%
-  left_join(tip_df, by = c("original_2" = "original")) %>%
-  rename(ph_2 = ph) %>%
-  filter(ph_1 != ph_2) %>%
-  summarise(phylo_dist = mean(phylo_dist), .by = c(ph_1, ph_2))
+message(
+  "\nPhilippine languages matched to the pulses tree: ", length(Ph_Languages_pruned),
+  " of ", length(Ph_Languages), " detected by the bounding box.\n",
+  "  Dropped: ", paste0(setdiff(Ph_Languages, Ph_Languages_pruned), collapse = ", ")
+)
 
-PHONEME_phylo_dist_matrix <- phylo_dist_long %>%
-  pivot_wider(names_from = ph_2, values_from = phylo_dist) %>%
-  column_to_rownames("ph_1") %>%
-  as.matrix()
+# ---- 6. Build the [1]/[2] analysis tree + Philippine regime -----------------
+# Sibling tips below MIN_SIBLING_DIVERGENCE force runaway rates in [1]/[2]
+# whenever they disagree on a phoneme, so each such cluster is resolved here by
+# keeping the larger inventory, same tie-break as step 4b.
+MIN_SIBLING_DIVERGENCE <- 0.001
 
-# pivot_wider's column order follows first appearance in the long table, which
-# does not match the row order — reindex columns to match rows so diag() below
-# addresses true self-pairs rather than whatever landed at position [i, i].
-PHONEME_phylo_dist_matrix <- PHONEME_phylo_dist_matrix[, rownames(PHONEME_phylo_dist_matrix)]
+short_nodes <- unique(tree_pruned$edge[tree_pruned$edge.length < MIN_SIBLING_DIVERGENCE, 1])
 
-# ph_1 != ph_2 above drops the diagonal (self-pairs) along with same-ph dialect
-# pairs; 0 is the conventional value and matches [5]'s dist/diss matrices.
-diag(PHONEME_phylo_dist_matrix) <- 0
+sibling_clusters <- lapply(short_nodes, function(nd) {
+  ii <- which(tree_pruned$edge[, 1] == nd)
+  ch <- tree_pruned$edge[ii, 2]
+  short_tips <- ch[tree_pruned$edge.length[ii] < MIN_SIBLING_DIVERGENCE & ch <= Ntip(tree_pruned)]
+  if (length(short_tips) < 2) return(NULL)
+  tree_pruned$tip.label[short_tips]
+})
+sibling_clusters <- Filter(Negate(is.null), sibling_clusters)
 
-write.csv(PHONEME_phylo_dist_matrix,
-          file = here("data", "PHONEME_phylo_dist_matrix.csv"), row.names = TRUE)
+inventory_by_tip <- setNames(mapping_resolved$inventory_size, mapping_resolved$Name)
 
+sibling_conflicts <- bind_rows(lapply(seq_along(sibling_clusters), function(i) {
+  grp <- sibling_clusters[[i]]
+  inv <- inventory_by_tip[grp]
+  tibble(pair_id = i, tip = grp, inventory_size = inv, keep = inv == max(inv))
+}))
+
+stopifnot(
+  "zero/near-zero sibling tips must not tie on inventory size" =
+    all(tapply(sibling_conflicts$keep, sibling_conflicts$pair_id, sum) == 1)
+)
+
+CONFLICTING_TIPS_DROPPED <- sibling_conflicts$tip[!sibling_conflicts$keep]
+
+message(
+  "\nZero/near-zero-divergence sibling conflicts resolved by inventory size:\n",
+  paste0(
+    "  ", sibling_conflicts$tip, " (", sibling_conflicts$inventory_size, ")",
+    if_else(sibling_conflicts$keep, " <- kept", ""),
+    collapse = "\n"
+  )
+)
+
+analysis_tree <- drop.tip(tree_pruned, CONFLICTING_TIPS_DROPPED)
+analysis_tree$root.edge <- 0
+analysis_tree <- multi2di(analysis_tree, random = FALSE)
+
+philippine_tips  <- intersect(ph_tip_names, analysis_tree$tip.label)
+philippine_node  <- getMRCA(analysis_tree, philippine_tips)
+philippine_clade <- extract.clade(analysis_tree, philippine_node)
+
+stopifnot(
+  "Philippine MRCA clade must contain exactly the Philippine tips" =
+    setequal(philippine_clade$tip.label, philippine_tips)
+)
+
+regime_tree <- paintSubTree(
+  tree      = analysis_tree,
+  node      = philippine_node,
+  state     = "Philippine",
+  anc.state = "Background",
+  stem      = FALSE
+)
+
+# ---- 7. Sanity plots, after all tree edits -----------------------------------
+# Plots the tree actually used downstream (post conflict-tip drop), not the
+# earlier pre-edit tree_pruned.
+plot.phylo(analysis_tree, cex = 0.4, no.margin = TRUE)
+
+# The Philippine languages need not be monophyletic, so the smallest common
+# ancestor can sweep in non-Philippine tips too.
+non_ph_in_clade <- setdiff(philippine_clade$tip.label, philippine_tips)
+message(
+  "Philippine-language clade: ", length(philippine_clade$tip.label), " tips (",
+  length(philippine_tips), " Philippine, ", length(non_ph_in_clade),
+  " non-Philippine swept in by the smallest common ancestor)."
+)
+if (length(non_ph_in_clade) > 0) {
+  message("  Non-Philippine tips in the clade: ", paste(non_ph_in_clade, collapse = ", "))
+}
+
+plot.phylo(philippine_clade, cex = 0.6, no.margin = TRUE)
+
+# ---- Final counts ------------------------------------------------------------
+# The stats above this line describe language-level match quality (pulses <->
+# Ruhlen, pre conflict-drop); the analysis tree below is the tip-level result
+# [1]/[2] actually consume, so both are stated explicitly rather than left for
+# the reader to reconcile across units.
+n_ph_languages_final <- mapping_resolved |>
+  filter(Name %in% philippine_tips) |>
+  pull(language) |>
+  n_distinct()
+
+message(
+  "\n=== Final counts ===\n",
+  "Total tips (pulses tree):              ", length(tree$tip.label), "\n",
+  "Dropped tips:                          ", length(dropped_tips), "\n",
+  "Total Austronesian languages (Ruhlen): ", nrow(ruhlen_austronesian_gltc), "\n",
+  "Dropped Austronesian languages:        ", nrow(ruhlen_austronesian_gltc) - n_distinct(mapping_resolved$language), "\n",
+  "  (of which lost the inventory-size tie-break rather than lacking a tip: ",
+  n_distinct(mapping_table$language) - n_distinct(mapping_resolved$language), ")\n",
+  "Total Philippine languages:            ", length(Ph_Languages), "\n",
+  "Dropped Philippine languages:          ", length(Ph_Languages) - length(Ph_Languages_pruned), "\n",
+  "\nFinal analysis tree (after zero/near-zero conflict resolution):\n",
+  "  ", Ntip(analysis_tree), " tips total (", length(CONFLICTING_TIPS_DROPPED),
+  " conflict tips dropped from the ", length(tree_pruned$tip.label), "-tip matched tree)\n",
+  "  ", length(philippine_tips), " Philippine tips / ", n_ph_languages_final, " Philippine languages\n",
+  "  ", Ntip(analysis_tree) - length(philippine_tips), " background tips"
+)
+
+# ---- 8. Export everything for [1]/[2] ----------------------------------------
+# tree_pruned's tips are still the pulses tree's own original labels (step 5).
+# The ambiguity resolved in step 4b means this is now a clean one-to-one
+# lookup: exactly one Ruhlen phoneme record per tip.
+tip_mapping <- mapping_resolved |>
+  dplyr::select(tip = Name, ruhlen_language = language, iso6393, glottocode, inventory_size) |>
+  arrange(tip)
+
+stopifnot("tip_mapping should be one row per tip after ambiguity resolution" =
+            !anyDuplicated(tip_mapping$tip))
+
+write_csv(tip_mapping, here("data", "phoneme_evolutionary_tip_mapping.csv"))
+write.tree(tree_pruned, here("data", "phoneme_evolutionary_tree.nwk"))
+saveRDS(
+  list(analysis_tree = analysis_tree, regime_tree = regime_tree, philippine_tips = philippine_tips),
+  here("data", "phoneme_evolutionary_analysis_tree.rds")
+)
+
+message(
+  "\nExported for [1]/[2]:\n",
+  "  ", length(tree_pruned$tip.label), "-tip matched tree -> data/phoneme_evolutionary_tree.nwk\n",
+  "  ", nrow(tip_mapping), "-row tip mapping -> data/phoneme_evolutionary_tip_mapping.csv\n",
+  "  ", Ntip(analysis_tree), "-tip analysis tree (", length(philippine_tips), " Philippine, ",
+  Ntip(analysis_tree) - length(philippine_tips), " background), Philippine regime painted -> ",
+  "data/phoneme_evolutionary_analysis_tree.rds"
+)

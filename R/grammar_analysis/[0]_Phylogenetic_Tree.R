@@ -12,8 +12,16 @@
 # dropped here; everything else matches exactly or via a documented
 # spelling/dialect-level correspondence in `lookup` below.
 #
-# Input:   data/mcc.tree, data/GRAMBANKdf_full.csv (for the Philippine
-#          language list and ISO codes, via [0]_GRAMBANKdatabase.R)
+# DEPENDENCY / RUN ORDER:
+#   - REQUIRES `Ph_Languages` and `GRAMBANKdf_PH_maximized` from PART A of
+#     [0]_GRAMBANKdatabase.R (run that first, down to its END OF PART A
+#     banner). Consumed in-environment, not read back from CSV: at this point
+#     GRAMBANKdf_full.csv has not been written yet, since PART B (which
+#     writes it) needs the pruned set this script produces.
+#   - PRODUCES `Ph_Languages_pruned`, consumed by PART B of
+#     [0]_GRAMBANKdatabase.R.
+#
+# Input:   data/mcc.tree
 # Outputs: data/GRAMMAR_phylo_dist_matrix.csv (patristic distance matrix,
 #          consumed by [5]_GRAMMAR_MMRR.R), data/GRAMMAR_subgroup_lookup.csv
 #          (language -> subgroup -> colour, consumed by [8]), and
@@ -30,11 +38,12 @@ library(ggplot2)
 library(lingtypology)   # glottolog affiliation -> family subgroup for tip colours
 library(here)
 
-GRAMBANKdf_full <- read_csv(here("data", "GRAMBANKdf_full.csv"), show_col_types = FALSE)
-
-Ph_Languages <- GRAMBANKdf_full %>%
-  filter(Language_Type == "Philippine Language") %>%
-  pull(language)
+stopifnot(
+  "Run PART A of [0]_GRAMBANKdatabase.R first: `Ph_Languages` is not defined." =
+    exists("Ph_Languages"),
+  "Run PART A of [0]_GRAMBANKdatabase.R first: `GRAMBANKdf_PH_maximized` is not defined." =
+    exists("GRAMBANKdf_PH_maximized")
+)
 
 tree <- read.nexus(here('data', 'mcc.tree'))
 
@@ -109,13 +118,13 @@ message(
 # ── Coloured phylogram (tips coloured by Glottolog family subgroup) ──────────
 # The MCC/nexus tree carries no clade annotations, so subgroup membership is
 # looked up from Glottolog via each language's ISO 639-3 code (lingtypology).
-# GRAMBANKdf_full has no iso6393 column (grammar keys on glottocode), so
-# bridge Language_ID -> ISO via iso.gltc(), same mechanism used in
+# GRAMBANKdf_PH_maximized has no iso6393 column (grammar keys on glottocode),
+# so bridge Language_ID -> ISO via iso.gltc(), same mechanism used in
 # [0]_GRAMBANKdatabase.R to bridge the unrelated control set.
 tip_subgroup <- tibble(original = tree_pruned$tip.label) %>%
   left_join(tip_df, by = "original") %>%
   left_join(
-    GRAMBANKdf_full %>%
+    GRAMBANKdf_PH_maximized %>%
       distinct(gram = language, Language_ID) %>%
       mutate(iso6393 = iso.gltc(Language_ID)),
     by = "gram"
