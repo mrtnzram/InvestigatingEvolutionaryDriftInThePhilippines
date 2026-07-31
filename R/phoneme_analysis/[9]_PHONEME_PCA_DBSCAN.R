@@ -1,26 +1,16 @@
 # =============================================================================
 # [9] Phoneme Analysis — PCA + DBSCAN clustering
 #
-# Runs PCA directly on the IDF-weighted phoneme feature matrix (the matrix that
-# feeds [1]'s cosine similarity, not the cosine matrix itself), then DBSCAN-
-# clusters languages in PC1+PC2 space — a genealogy-agnostic grouping, useful
-# to compare against the ABVD-tree-based family subgroups from [0].
+# Runs PCA on the IDF-weighted phoneme feature matrix (the matrix behind [1]'s
+# cosine similarity, not the cosine matrix), then DBSCAN-clusters languages in
+# PC1+PC2 space for a genealogy-agnostic grouping to compare against [0]'s
+# family subgroups. Part A covers the 58 Philippine languages; Part B the full
+# 198-language database.
 #
-#   Part A — Philippine languages only (58).
-#   Part B — exploratory: full database (Philippine + interest + unrelated, 198).
-#
-# DEPENDENCY / RUN ORDER:
-#   - Duplicates [1]'s IDF-weighting logic inline (recomputed here rather than
-#     sourced, since [1] never exposes its weighted matrix — only the collapsed
-#     cosine similarity escapes that function). If [1]'s weighting scheme ever
-#     changes, this script needs revisiting too.
-#   - Requires data/PHONEME_driver_table.csv to already exist (run
-#     [1.5]_PHONEME_drivers.R at least once) — used to translate PCA loadings
-#     from raw phoneme_XXX ids to real IPA symbols.
-#   - Requires data/PHONEME_subgroup_lookup.csv (from [0]_Phylogenetic_Tree.R)
-#     for the family-coloured plot and for deriving DBSCAN's minPts.
-#   - source()s [3]_PHONEME_network_distance.R for the waypoint-map deliverable
-#     (same pattern [8] uses).
+# Run order: needs [1.5] and [0]_Phylogenetic_Tree.R to have been run, and
+# source()s [3]_PHONEME_network_distance.R for the waypoint map. NOTE: [1]'s
+# IDF weighting is duplicated below because [1] never exposes its weighted
+# matrix — a change to that scheme has to be mirrored here.
 #
 # Input:   data/RUHLENdf_PH.csv, data/phoneme_freq_ruhlen_austronesian.csv,
 #          data/PHONEME_driver_table.csv, data/PHONEME_subgroup_lookup.csv,
@@ -66,9 +56,8 @@ rownames(weighted_data) <- RUHLENdf$language   # [1] leaves this NULL; PCA/plots
 # 2. Helper functions
 # =============================================================================
 
-# Drop columns with zero variance in the given row subset. Harmless numerically
-# with scale.=FALSE, but keeps the matrix lean/auditable and guards against a
-# future switch to scale.=TRUE (which WOULD error on a constant column).
+# Drop zero-variance columns for the row subset: a no-op numerically under
+# scale.=FALSE, but scale.=TRUE would error on a constant column.
 drop_zero_variance <- function(mat, subset_name = "") {
   col_var <- apply(mat, 2, var)
   keep <- col_var > 0
@@ -79,9 +68,8 @@ drop_zero_variance <- function(mat, subset_name = "") {
   mat[, keep, drop = FALSE]
 }
 
-# Simplified "kneedle" knee detection on a sorted, monotonically increasing
-# curve: normalize to [0,1]x[0,1], return the index with max perpendicular
-# distance from the chord connecting the first and last points.
+# Simplified "kneedle": normalize the sorted curve to the unit square and take
+# the point furthest from the chord joining its endpoints.
 find_knee <- function(y) {
   x  <- seq_along(y)
   xn <- (x - min(x)) / (max(x) - min(x))
@@ -113,9 +101,8 @@ choose_eps <- function(scores_mat, minPts, plot_path = NULL, title = "") {
   eps
 }
 
-# minPts from the real linguistic subgroup sizes: smallest non-singleton size
-# (a subgroup of 1 shouldn't define "how big a cluster must be" — DBSCAN's own
-# noise category already handles isolates).
+# minPts is the smallest non-singleton subgroup size; singletons are excluded
+# because DBSCAN's noise category already handles isolates.
 compute_minpts <- function(subgroup_lookup) {
   sizes <- table(subgroup_lookup$subgroup)
   as.integer(min(sizes[sizes > 1]))
@@ -135,9 +122,9 @@ build_cluster_pal <- function(cluster_levels) {
   c(pal, "Noise" = "grey60")
 }
 
-# Run PCA (center=TRUE, scale.=FALSE — see header rationale) + DBSCAN (PC1+PC2
-# only) on a language x feature matrix. Returns per-language scores, cluster
-# labels, variance-explained, and the fitted objects for downstream loadings.
+# PCA (scale.=FALSE — the IDF weights are already the intended column scaling)
+# plus DBSCAN on PC1+PC2, returning scores, cluster labels, variance explained
+# and the fitted object for the loadings below.
 run_pca_dbscan <- function(mat, minPts, subset_name, eps_plot_path = NULL) {
   mat <- drop_zero_variance(mat, subset_name)
   pca <- prcomp(mat, center = TRUE, scale. = FALSE)
@@ -333,9 +320,8 @@ print(p_pca_dbscan_full)
 ggsave(here("figures", "phoneme", "pca", "PHONEME_pca_dbscan_full.png"), p_pca_dbscan_full,
        width = 8, height = 6, units = "in", dpi = 300)
 
-# (b) PCA scatter, coloured by family (PH: subgroup, dropping the (phoneme: none)
-#     ungrouped languages; Interest: exact ridge-plot colours; Unrelated: grey70),
-#     shaped by baseline type
+# (b) PCA scatter, coloured by family — PH by subgroup, interest languages in
+#     ridge-plot colours, unrelated in grey.
 ridge_colors <- c(Spanish = "#2ca6a4", Japanese = "#8fb339", English = "#e07a5f")
 
 scores_full_family <- scores_full %>%
@@ -362,9 +348,8 @@ print(p_pca_family_full)
 ggsave(here("figures", "phoneme", "pca", "PHONEME_pca_family_full.png"), p_pca_family_full,
        width = 9, height = 6.5, units = "in", dpi = 300)
 
-# (c) Map: same waypoint network, points coloured by the FULL-database DBSCAN run
-#     (map extent structurally can't show interest/unrelated languages, which sit
-#     far outside lon 116-127 / lat 4-21 — only Philippine points are plotted)
+# (c) Map: same waypoint network, points coloured by the full-database DBSCAN
+#     run; the map extent excludes the interest/unrelated languages by construction.
 map_points_full <- PHONEME_cossim %>%
   dplyr::left_join(scores_full %>% dplyr::select(language, cluster), by = "language")
 stopifnot("Some network languages have no PCA/DBSCAN cluster for Part B." =

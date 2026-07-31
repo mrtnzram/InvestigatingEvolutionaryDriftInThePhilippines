@@ -1,32 +1,21 @@
 # =============================================================================
 # [9] Grammar Analysis — PCA + DBSCAN clustering
 #
-# Runs PCA directly on the IDF-weighted GRAMBANK feature matrix (the matrix
-# that feeds [1]'s cosine similarity, not the cosine matrix itself), then
-# DBSCAN-clusters languages in PC1+PC2 space — a genealogy-agnostic grouping,
-# useful to compare against the ABVD-tree-based family subgroups from [0].
+# Runs PCA on the IDF-weighted GRAMBANK feature matrix (the matrix behind [1]'s
+# cosine similarity, not the cosine matrix), then DBSCAN-clusters languages in
+# PC1+PC2 space for a genealogy-agnostic grouping to compare against [0]'s
+# family subgroups. Part A covers the 39 Philippine languages; Part B the full
+# 179-language database.
 #
-#   Part A — Philippine languages only (39).
-#   Part B — exploratory: full database (Philippine + interest + unrelated, 179).
+# Run order: needs [0]_Phylogenetic_Tree.R and source()s
+# [3]_GRAMMAR_network_distance.R for the waypoint map. NOTE: [1]'s OHE +
+# per-value IDF weighting is duplicated below because [1] never exposes its
+# weighted matrix — a change to that scheme has to be mirrored here. Only 26 of
+# the 39 Philippine languages have a family subgroup, so the family-coloured
+# plots and the maps show 26, matching [8].
 #
-# DEPENDENCY / RUN ORDER:
-#   - Duplicates [1]'s IDF-weighting logic inline (OHE + per-value IDF
-#     substitution, recomputed here rather than sourced, since [1] never
-#     exposes its weighted matrix — only the collapsed cosine similarity
-#     escapes that function). If [1]'s weighting scheme ever changes, this
-#     script needs revisiting too.
-#   - Grammar has no equivalent to phoneme's [1.5]_PHONEME_drivers.R / PNAS IPA
-#     key, so PCA loadings here stay keyed by raw GB###/GB###_# column names
-#     (already reasonably interpretable Grambank feature codes) rather than
-#     joined to a human-readable label table.
-#   - Requires data/GRAMMAR_subgroup_lookup.csv (from [0]_Phylogenetic_Tree.R)
-#     for the family-coloured plot and for deriving DBSCAN's minPts. Only 26 of
-#     grammar's 39 Philippine languages have a family subgroup (13 Sabah/Sama-
-#     Bajau + Karao lack ABVD tree placement) — the "coloured by family" plots
-#     (both Parts) drop those 13, matching [8]'s existing precedent.
-#   - source()s [3]_GRAMMAR_network_distance.R for the waypoint-map deliverable
-#     (same pattern [8] uses); [3] already restricts its network points to the
-#     26 tree-pruned languages, so the map deliverables show 26, not 39/179.
+# Loadings stay keyed by raw GB###/GB###_# codes: grammar has no equivalent to
+# phoneme's [1.5] IPA key.
 #
 # Input:   data/GRAMBANKdf_full.csv, data/gramfeature_freq.csv,
 #          data/GRAMMAR_subgroup_lookup.csv, data/nodes.csv, data/edges.csv (via [3])
@@ -79,9 +68,8 @@ ohe_cols    <- str_subset(names(GRAMBANKdf_PH_ohe), ohe_pattern)
 feature_cols_ohe <- c(binary_cols, ohe_cols)
 GRAMBANKdf_PH <- GRAMBANKdf_PH_ohe
 
-# IDF-substitution weighting (same one-hot + per-value IDF scheme as [1],
-# including its OHE-column fix: value * IDF(base_feature, level) for the OHE
-# dummy columns, IDF(observed value) for the binary columns).
+# IDF-substitution weighting, matching [1]: OHE dummies take
+# IDF(base_feature, level), binary columns take IDF(observed value).
 long_data <- GRAMBANKdf_PH %>%
   dplyr::select(dplyr::all_of(feature_cols_ohe)) %>%
   dplyr::mutate(language = GRAMBANKdf_PH[["language"]]) %>%
@@ -105,11 +93,8 @@ weighted_data <- weighted_long %>%
   as.matrix()
 weighted_data <- weighted_data[GRAMBANKdf_PH$language, feature_cols_ohe, drop = FALSE]
 
-# One known NA cell (Spanish's GB415 — hand-coded from WALS in
-# [0]_GRAMBANKdatabase.R, which had no WALS mapping for that feature). Only
-# affects Part B (Spanish is an interest language, absent from Part A's
-# Philippine-only subset). Impute to 0 (already the OHE dummy columns'
-# native "absent" value) rather than silently dropping the row/column.
+# Spanish's GB415 has no WALS mapping and is the one expected NA; it is imputed
+# to 0 (the OHE columns' native "absent" value) rather than dropping the row.
 stopifnot("More NA cells than expected in the weighted matrix — investigate before imputing." =
             sum(is.na(weighted_data)) <= 1)
 if (sum(is.na(weighted_data)) == 1) {
@@ -306,9 +291,8 @@ print(p_pca_dbscan_ph)
 ggsave(here("figures", "grammar", "pca", "GRAMMAR_pca_dbscan_ph.png"), p_pca_dbscan_ph,
        width = 7, height = 5.5, units = "in", dpi = 300)
 
-# (b) PCA scatter, coloured by language family — inner-join drops the 13
-#     languages with no ABVD tree placement (26 of 39 shown), per [8]'s
-#     existing precedent.
+# (b) PCA scatter, coloured by language family — the inner join drops the 13
+#     languages with no ABVD tree placement, following [8].
 scores_ph_fam <- scores_ph %>%
   inner_join(subgroup_lookup %>% dplyr::select(language, subgroup), by = "language")
 message("Family-coloured plot (Philippine-only): ", nrow(scores_ph_fam), " of ",
@@ -325,9 +309,8 @@ print(p_pca_subgroup_ph)
 ggsave(here("figures", "grammar", "pca", "GRAMMAR_pca_subgroup_ph.png"), p_pca_subgroup_ph,
        width = 7.5, height = 5.5, units = "in", dpi = 300)
 
-# (c) Map: waypoint network, points coloured by DBSCAN cluster. GRAMMAR_cossim
-#     (from [3], sourced above) is already restricted to the 26 tree-pruned
-#     languages, so this map naturally shows 26, not 39.
+# (c) Map: waypoint network, points coloured by DBSCAN cluster; [3] already
+#     restricts GRAMMAR_cossim to the 26 tree-pruned languages.
 map_points_ph <- GRAMMAR_cossim %>%
   dplyr::left_join(scores_ph %>% dplyr::select(language, cluster), by = "language")
 stopifnot("Some network languages have no PCA/DBSCAN cluster for Part A." =
@@ -378,9 +361,8 @@ print(p_pca_dbscan_full)
 ggsave(here("figures", "grammar", "pca", "GRAMMAR_pca_dbscan_full.png"), p_pca_dbscan_full,
        width = 8, height = 6, units = "in", dpi = 300)
 
-# (b) PCA scatter, coloured by family (PH: subgroup, dropping the 13 ungrouped
-#     languages entirely, same rule as Part A; Interest: exact ridge-plot
-#     colours; Unrelated: grey70), shaped by baseline type
+# (b) PCA scatter, coloured by family — PH by subgroup (ungrouped dropped, as in
+#     Part A), interest languages in ridge-plot colours, unrelated in grey.
 ridge_colors <- c(Spanish = "#2ca6a4", Japanese = "#8fb339", English = "#e07a5f")
 
 scores_full_family <- scores_full %>%
@@ -407,9 +389,8 @@ print(p_pca_family_full)
 ggsave(here("figures", "grammar", "pca", "GRAMMAR_pca_family_full.png"), p_pca_family_full,
        width = 9, height = 6.5, units = "in", dpi = 300)
 
-# (c) Map: same waypoint network (26 tree-pruned languages), points coloured by
-#     the FULL-database DBSCAN run (map extent structurally can't show
-#     interest/unrelated languages, far outside lon 116-127 / lat 4-21)
+# (c) Map: same waypoint network, points coloured by the full-database DBSCAN
+#     run; the map extent excludes the interest/unrelated languages by construction.
 map_points_full <- GRAMMAR_cossim %>%
   dplyr::left_join(scores_full %>% dplyr::select(language, cluster), by = "language")
 stopifnot("Some network languages have no PCA/DBSCAN cluster for Part B." =

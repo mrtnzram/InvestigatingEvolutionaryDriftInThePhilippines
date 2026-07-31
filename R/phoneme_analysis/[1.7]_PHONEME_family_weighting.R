@@ -1,15 +1,12 @@
 # =============================================================================
 # [1.7] Phoneme Analysis — Genealogical family weighting of the unrelated null
-# The 137 unrelated controls are unevenly spread across 26 language families
-# (Niger-Congo 19, Afro-Asiatic 17, Sino-Tibetan 15, ... 8 singletons), so a few
-# clades dominate the "unrelated baseline" that Philippine-language similarity is
-# compared against. This down-weights that imbalance: each control gets a
-# frequency weight w = 1/family_size, so every family contributes equal mass to
-# the unrelated null's mean and density — without altering any cosine value.
+# The 137 unrelated controls are unevenly spread across 26 language families, so
+# a few clades dominate the baseline Philippine similarity is compared against.
+# Each control is given a frequency weight w = 1/family_size, equalizing every
+# family's contribution to the null's mean and density without altering any
+# cosine value, and the reweighted null is compared against the raw one.
 #
-# This is a standalone diagnostic of how family weighting reshapes the unrelated
-# null distribution + mean (and [1.6]'s skew cutoff). It does NOT feed the
-# downstream pipeline: [2]-[5] use the raw [1] baselines.
+# Standalone diagnostic: [2]-[5] still use the raw [1] baselines.
 #
 # Inputs:  data/RUHLENdf_PH.csv, data/PHONEME_cosine_matrix.csv,
 #          data/PHONEME_unrelated_families.csv, data/PHONEME_cossim.csv
@@ -84,8 +81,8 @@ ggsave(file.path(fig_dir, "phoneme_unrelated_family_distribution.png"),
 # =============================================================================
 # 2. Family weighting adjustment to the unrelated null (mean + cutoff)
 # =============================================================================
-# n_exceed cutoff (median + 2*sd per PH-language row), unweighted vs family-
-# weighted over the 137 unrelated columns. Count per unrelated language.
+# [1.6]'s cutoff (median + 2*sd per PH-language row), computed unweighted and
+# family-weighted so the two candidate tallies can be compared directly.
 tally_skew <- function(m, w = NULL) {
   cutoff <- if (is.null(w)) apply(m, 1, \(r) median(r) + 2 * sd(r))
             else            apply(m, 1, \(r) weighted_median(r, w) + 2 * weighted_sd(r, w))
@@ -111,9 +108,8 @@ cat(sprintf("\nUnrelated null mean (over 58 PH languages): raw = %.4f, family-we
 # =============================================================================
 # 3. Ridge comparison: raw vs family-weighted baseline distributions
 # =============================================================================
-# Only the Unrelated baseline changes under family weighting (interest languages
-# are single languages, not weighted). cossim_unr(raw) = plain row mean;
-# cossim_unr(family) = family-weighted row mean. Interest baselines identical.
+# Only the Unrelated baseline changes: the interest baselines are single
+# languages, so their raw and corrected columns are identical by construction.
 PHONEME_cossim <- read_csv(here("data", "PHONEME_cossim.csv")) |>
   dplyr::select(-any_of("...1"))
 

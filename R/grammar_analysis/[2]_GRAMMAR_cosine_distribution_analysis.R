@@ -3,15 +3,10 @@
 # Visualizes the distribution of each Philippine language's grammar cosine
 # similarity to Spanish / English / Japanese / unrelated controls (ridge +
 # density plots), then tests whether the baselines stand out from the unrelated
-# controls at two levels:
-#
-#   Population level — Friedman test, Wilcoxon signed-rank test (+ box plot),
-#                      and a BIC-selected Gaussian mixture (bimodality) test that
-#                      marks each language as <baseline>_influenced.
-#   Individual level — Shapiro-Wilk normality of each language's per-language
-#                      unrelated null (+ QQ plots and a null-ridge with the
-#                      observed baselines marked), and an empirical percentile
-#                      of each language against its own null.
+# controls at the population level (Friedman, Wilcoxon, and a BIC-selected
+# Gaussian mixture that marks each language as <baseline>_influenced) and at the
+# individual level (Shapiro-Wilk on each language's own null, plus its empirical
+# percentile against that null).
 #
 # Input:   data/GRAMMAR_cossim.csv         (from [1]_GRAMMAR_cosine_similarity.R)
 #          data/GRAMMAR_cosine_matrix.csv  (per-language null: cols = unrelated)
@@ -32,9 +27,8 @@ library(lme4)
 library(lmerTest)
 
 # --- Loading data ------------------------------------------------------------
-# read_csv names an unnamed leading index column "...1"; drop it if present.
-# Also drop any *_influenced / sig_* columns that a previous run may have left in
-# the file, so the classification joins below stay idempotent (no .x/.y dupes).
+# Drop read_csv's "...1" index column and any *_influenced / sig_* columns left
+# by a previous run, so the classification joins below stay idempotent.
 GRAMMAR_cossim <- read_csv(here("data", "GRAMMAR_cossim.csv")) |>
   dplyr::select(-any_of(c("...1", "span_influenced", "jap_influenced", "eng_influenced",
                    "sig_span", "sig_jap", "sig_eng")))
@@ -104,10 +98,8 @@ cossim_grammar_density_ridge <- ggplot(combined_scores, aes(x = Similarity_Score
     y = "Language"
   ) +
   theme_minimal() +
-  # Extend the axis to the full similarity range (grammar English similarity
-  # reaches ~0.78, so a 0..0.5 axis clipped the labelled ticks). Labelled major
-  # ticks every 0.1; minor ticks every 0.05. ceiling() rounds the top up to the
-  # next 0.05 so the last ridge's tail still sits under a tick.
+  # Axis spans the full similarity range (grammar reaches ~0.78, beyond the 0.5
+  # phoneme scale), rounded up to the next 0.05 so the last tail sits under a tick.
   (\(xmax) scale_x_continuous(
     breaks       = seq(0, xmax, by = 0.10),
     minor_breaks = seq(0, xmax, by = 0.05),
@@ -396,9 +388,7 @@ fit_gmm <- function(delta_vec, baseline_name) {
 gmm_fits <- imap(deltas, fit_gmm)
 
 # ----- the two tibbles ------------------------------------------------------
-# purrr::map explicitly namespaced: library(mclust) is loaded after tidyverse and
-# masks purrr::map with mclust::map (classification error), so a bare map() here
-# fails with a cryptic "invalid 'length' argument".
+# purrr::map must stay namespaced: library(mclust) masks it with mclust::map.
 gmm_summary        <- purrr::map(gmm_fits, "summary") |> list_rbind()
 gmm_classification <- purrr::map(gmm_fits, "per_lang") |> list_rbind()
 
@@ -480,19 +470,16 @@ ggsave(
 )
 
 # --- Null-distribution ridge for influence-selected languages ----------------
-# Three languages influenced by each interest language (Spanish / Japanese /
-# English), each shown as its own unrelated null with dashed markers for where
-# its observed Spanish / Japanese / English similarities fall — so we can see how
-# far into (or beyond) its own null each baseline sits. Grouped on the y-axis by
-# which interest language influenced it.
+# Three languages per interest language, each drawn as its own unrelated null
+# with dashed markers at its observed baseline similarities, grouped on the
+# y-axis by which interest language influenced it.
 pick_influenced <- function(inf_col, obs_col, influence_name) {
   GRAMMAR_cossim |>
     filter(.data[[inf_col]]) |>
     transmute(language, influence = influence_name, observed = .data[[obs_col]]) |>
     arrange(observed) |>
-    # low/mid/high quantile indices; unique() guards small n (e.g. n = 3), where
-    # round()'s banker's rounding can otherwise collapse two indices together
-    # and duplicate a row (breaking the unique per-language `label` downstream).
+    # low/mid/high quantile indices; unique() guards small n, where rounding can
+    # collapse two indices and duplicate a row.
     slice(unique(round(quantile(seq_len(n()), probs = c(0.25, 0.5, 0.75)))))
 }
 
@@ -705,10 +692,9 @@ ggsave(here("figures", "grammar", "distributions", "grammar_influenced_null_engl
        null_influenced_eng,  width = 7, height = 4.5, units = "in", dpi = 300)
 
 # --- Influenced baseline vs. the unrelated baseline (one plot per baseline) ---
-# Two population distributions per plot, over the SAME set of languages that the
-# baseline influenced: their observed similarity to the baseline vs. their own
-# unrelated baseline. Both groups are therefore n = 10 / 20 / 10 for Spanish /
-# Japanese / English. Same ridge style as the overview plot.
+# Over the same set of languages the baseline influenced: their observed
+# similarity to that baseline vs. their own unrelated baseline, so both groups
+# carry the same n. Same ridge style as the overview plot.
 plot_influenced_vs_unrelated <- function(inf_col, obs_col, baseline_name, fill_color) {
   sub <- GRAMMAR_cossim |> filter(.data[[inf_col]])
   scores <- bind_rows(

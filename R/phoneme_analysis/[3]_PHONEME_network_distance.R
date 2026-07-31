@@ -1,29 +1,11 @@
 # ── [3]_PHONEME_network_distance.R ───────────────────────────────────────────
 # Graph network creation + per-language distance calculation.
-# Input:   data/PHONEME_cossim.csv, data/nodes.csv, data/edges.csv
+# Input:   data/PHONEME_cossim_marked.csv (from [2]), data/nodes.csv, data/edges.csv
 # Outputs: data/PHONEME_final.csv (cossim + geodist_H1_span, the final
 #          per-language table for the regression file), data/phoneme_waypoint_plot.rds
 #          (overview arrow plot)
 # Note:    pairwise inter-language distances for the MMRR analysis are computed
 #          separately in [5]_PHONEME_MMRR.R (Dijkstra routing).
-#
-# compute_shortest_path_df(). Instead of routing each language to a
-# single reference point (ref_coords1) via Dijkstra, this computes each
-# language's terrain-penalized cost to ENTER the navigable network — i.e.
-# the connector from the language's coordinate to its nearest graph node.
-#
-# Dropped vs. the old version:
-#   - ref_coords1 / find-nearest-node-to-Manila
-#   - shortest_path_trace() (Dijkstra) — no longer needed; "distance to the
-#     network" terminates the moment a language reaches any node
-#   - per-row plot_path() — replaced by one overview arrow plot
-#
-# Kept:
-#   - land/sea terrain penalty (land_penalty), now factored into one helper
-#     used by both the network edges AND the language connectors, removing
-#     the 3x duplicated land/sea-split logic from the original script
-#   - the final arrow plot (full_tree_sf, main vs. connector, directional
-#     arrowheads), saved as an .rds exactly as before
 # ──────────────────────────────────────────────────────────────────────────────
 
 library(tidyverse)
@@ -59,8 +41,7 @@ split_and_penalize <- function(geom, land_sf, land_penalty) {
   sea_part  <- st_difference(geom, st_geometry(land_sf))
   
   # st_intersection/st_difference at the bare sfc level RETAIN empty results
-  # (unlike the sf data.frame method, which drops them) — filter explicitly
-  # rather than relying on length() to tell empty from non-empty.
+  # (unlike the sf data.frame method), so empties must be filtered explicitly.
   land_part <- land_part[!st_is_empty(land_part)]
   sea_part  <- sea_part[!st_is_empty(sea_part)]
   
@@ -79,14 +60,9 @@ split_and_penalize <- function(geom, land_sf, land_penalty) {
 
 
 # ── 3. Build the network edges (the "main" path) ─────────────────────────────
-# NOTE: geometry is built and converted to a real sfc column (via st_as_sf)
-# in its own stage BEFORE the land/sea split. Under rowwise(), a column
-# built inline as list(st_linestring(...)) is already unwrapped to the bare
-# sfg when referenced later in the SAME mutate() call — so `geometry[[1]]`
-# would index into the geometry's underlying matrix instead of extracting
-# it, handing split_and_penalize() a raw numeric. Once geometry is a proper
-# sfc (post st_as_sf), a second rowwise() stage extracts each row's geometry
-# correctly.
+# Geometry is converted to a real sfc (st_as_sf) in its own stage before the
+# land/sea split: within one rowwise mutate(), a list(st_linestring(...)) column
+# is already unwrapped to the bare sfg, so indexing it hands back raw numerics.
 build_network_edges <- function(nodes, edges, land_sf, land_penalty) {
   
   edges_bi <- bind_rows(edges, edges |> rename(from = to, to = from)) |> distinct()
@@ -136,11 +112,7 @@ MANILA <- data.frame(
 #                   network node (the "get onto the network" leg).
 # geodist_H2_span : penalized cost to Manila, taking whichever is cheaper —
 #                   (connector + network traversal) or a direct line.
-# using_network   : TRUE when the network route won on distance (the analysis
-#                   flag, unaffected by the plotting choice below).
-# The plotted geometry (land_geom/sea_geom, §7 onward) always shows the
-# via-node connector regardless of using_network — see the comment at the end
-# of this function.
+# using_network   : TRUE when the network route won on distance.
 compute_network_distance_df <- function(df, nodes, edges, land_sf,
                                         refdf1 = MANILA,
                                         land_penalty = 4.44) {
@@ -259,14 +231,9 @@ compute_network_distance_df <- function(df, nodes, edges, land_sf,
       
       geodist_H2_span = pmin(network_to_manila, direct_to_manila, na.rm = TRUE)
     ) |>
-    # Geometry ALWAYS shows the via-node connector (point -> nearest node),
-    # regardless of whether the network or the direct line actually won on
-    # distance above. This is a visualization-only choice — geodist_H2_span and
-    # using_network (just computed) are the true analysis outputs, unchanged by
-    # this, and still get written to PHONEME_final.csv as-is; only the
-    # geometry that feeds connector_sf/arrow_connectors in §7 (never written to
-    # CSV) is affected, so every language visibly enters the network in the
-    # plot instead of some arrows jumping straight to Manila.
+    # Geometry always keeps the via-node connector even when the direct line won
+    # on distance — a plotting-only choice, so every language visibly joins the
+    # network; geodist_H2_span/using_network above stay the true analysis outputs.
     rowwise() |>
     mutate(
       land_geom    = list(.split_node$land_geom),
@@ -312,10 +279,8 @@ PHONEME_cossim |>
   arrange(geodist_H2_span) |>
   print(n = 20)
 
-# Write the geodist-augmented table (flat columns only; drops the geometry /
-# list-columns) for [4]_PHONEME_regression.R to consume. The *_influenced /
-# sig_* columns are carried forward when present (written by [2]); any_of() keeps
-# this runnable if [2] hasn't been sourced yet.
+# Flat columns only (geometry list-columns dropped) for [4] to consume; any_of()
+# keeps the [2]-written *_influenced columns optional so this runs before [2].
 PHONEME_cossim |>
   select(language, latitude, longitude, starts_with("cossim_"),
          any_of(c("span_influenced", "jap_influenced", "eng_influenced")),
@@ -324,26 +289,13 @@ PHONEME_cossim |>
 
 
 # ── 7. Assemble full_tree_sf (main edges + per-language connectors) ─────────
-# Mirrors the original land_segments_sf / sea_segments_sf / connector_sf
-# assembly, but built once via map()/list_rbind() instead of manual loops,
-# and with a single connector per language (no "end" connector, since there
-# is no longer a ref_coords1 target). §5 now always retains the via-node
-# connector geometry (a visualization choice — see the comment there), so
-# every connector here is "via network node"; row_attrs is passed a constant
-# TRUE rather than PHONEME_cossim$using_network (which still holds the real,
-# possibly-FALSE analysis flag, just no longer tied to which geometry is drawn).
+# row_attrs is a constant TRUE, not PHONEME_cossim$using_network: §5 always keeps
+# the via-node geometry, so every connector drawn here is "via network node".
 geom_rows <- function(geom_list, crosses_land_value, source_value,
                       row_attrs = NULL) {
-  # NOTE: purrr::map is explicitly namespaced — library(maps) is loaded after
-  # library(tidyverse), so the unqualified map() resolves to maps::map()
-  # (cartographic plotting), not purrr::map() (list mapping), and silently
-  # fails with a cryptic "database type not supported" error.
-  #
-  # to_sfg_list() normalizes whatever split_and_penalize() stored for a row
-  # — a bare sfg, a (possibly multi-piece) sfc, or NULL — into a flat list of
-  # bare sfg objects, which is the only thing st_sfc() accepts. as.list() on
-  # an sfc is the one operation sf guarantees always drops correctly to sfg;
-  # relying on `[[1]]` further upstream wasn't safe across this rowwise chain.
+  # purrr::map must stay namespaced: library(maps) masks it with maps::map().
+  # to_sfg_list() normalizes a row's stored geometry (bare sfg, multi-piece sfc,
+  # or NULL) into the flat list of sfg objects st_sfc() requires.
   to_sfg_list <- function(x) {
     if (is.null(x))         return(list())
     if (inherits(x, "sfc")) return(as.list(x))
@@ -394,16 +346,8 @@ arrow_connectors <- full_tree_sf |>
 
 
 # ── 9. Overview plot: network + language points + directional arrows ────────
-# Every connector now draws via its nearest network node (§5/§7), even for
-# languages whose cheaper H2 route was actually a direct line to Manila — this
-# is a visualization-only choice so every language visibly joins the network in
-# the plot. The color scale is left in place for continuity, but with all
-# connector rows now TRUE, the legend collapses to a single "via network node"
-# entry.
-# Main network edges are drawn plain (no arrowheads): they represent a
-# bidirectional route between nodes, so a directed arrow on one edge conflicts
-# visually with the arrow that would be needed on its reverse — only the
-# language -> node connectors are directional and keep their arrowheads.
+# Main network edges draw plain: they are bidirectional, so only the directional
+# language -> node connectors carry arrowheads.
 plot_network <- function(full_tree_sf, arrow_connectors,
                          points_df, refdf1 = MANILA,
                          lon_range = c(116, 127), lat_range = c(4, 21)) {

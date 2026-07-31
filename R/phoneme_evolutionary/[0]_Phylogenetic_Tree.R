@@ -1,51 +1,18 @@
 # =============================================================================
 # [0] Phoneme Evolutionary — Match the pulses tree to the Ruhlen phoneme data
 #
-# Reads the pulses tree (data/pulses_summary.trees, 400 tips), and joins its
-# tips to the Ruhlen/Creanza phoneme languages via Glottocode: Ruhlen's
-# iso6393 -> Glottocode (lingtypology::gltc.iso()), then Glottocode is the
-# shared key with data/pulses_languages.csv (whose Name column supplies the
-# tree's own tip labels). Unlike the old mcc.tree script, no hand-built
-# tip-name lookup table is needed — the pulses tree tips already correspond
-# almost 1:1 to Ruhlen's own language names (e.g. "AttaPamplona",
-# "DumagatCasiguran"), and the join is done at the Glottocode level instead.
+# Joins the pulses tree tips to the Ruhlen/Creanza phoneme languages on
+# Glottocode, prunes the tree to matched tips, resolves near-zero-divergence
+# sibling conflicts, and paints the Philippine regime for [1]/[2]. Tips keep
+# the pulses tree's own labels throughout, so tip labels stay unique.
 #
-# DEPENDENCY / RUN ORDER:
-#   - REQUIRES `Ph_Languages` and `ruhlen_raw` from PART A of
-#     [0]_CREANZA_RUHLENdatabase.R (run that first, down to its END OF PART A
-#     banner).
-#   - PRODUCES `Ph_Languages_pruned`, consumed by PART B of
-#     [0]_CREANZA_RUHLENdatabase.R.
-#   - PRODUCES `tree_pruned` (Austronesian-wide, tips kept under the pulses
-#     tree's OWN original labels — not renamed to Ruhlen language names, so
-#     tip labels stay guaranteed-unique), then resolves zero/near-zero
-#     divergence conflicts into `analysis_tree` and paints its Philippine
-#     regime into `regime_tree`, with sanity plots of both.
-#   - WRITES data/phoneme_evolutionary_tree.nwk (Newick, tree_pruned),
-#     data/phoneme_evolutionary_tip_mapping.csv (one row per tip: tip ->
-#     Ruhlen language -> iso6393/glottocode/inventory_size), and
-#     data/phoneme_evolutionary_analysis_tree.rds (analysis_tree, regime_tree,
-#     philippine_tips), consumed by [1]/[2].
+# Run order: requires `Ph_Languages` and `ruhlen_raw` from PART A of
+# [0]_CREANZA_RUHLENdatabase.R, and produces `Ph_Languages_pruned` for its PART B.
 #
-# Data quirks handled here:
-#   - `Baliledo` in pulses_languages.csv ships with a blank Glottocode. It is
-#     manually assigned "bali1288" (Glottolog's "Baliledu", a Central-East
-#     Sumbanese dialect with no ISO code of its own — confirmed by the tree
-#     placing Baliledo next to Pondok in the Sumba clade). Baliledo has no
-#     corresponding entry anywhere in the Ruhlen dataset, so this fix does not
-#     make it match a phoneme record — it is still dropped when the tree is
-#     pruned to matched tips, same as every other unmatched tip. The manual
-#     Glottocode is assigned purely so that omission is visible/intentional
-#     rather than a silent NA.
-#   - A handful of Glottocodes are shared by two distinct (non-identical)
-#     Ruhlen phoneme records under the same ISO code (e.g. ivat1242 covers
-#     both "Itbayaten" and "Ivatanen" — 8 of 728 phonemes differ between
-#     them). Tips are kept under their own original pulses label (so this
-#     never produces a duplicate tip label), but each such tip's Ruhlen match
-#     is ambiguous between the two records until step 4b resolves it: keep
-#     whichever record has the larger phoneme inventory (Kapuas/Katingan:
-#     24 vs. 19, clean). Itbayaten/Ivatanen tie exactly at 26 — that specific
-#     tie is broken manually in Itbayaten's favor, not derived from the data.
+# Inputs:  data/pulses_summary.trees, data/pulses_languages.csv
+# Outputs: data/phoneme_evolutionary_tree.nwk,
+#          data/phoneme_evolutionary_tip_mapping.csv,
+#          data/phoneme_evolutionary_analysis_tree.rds
 # =============================================================================
 
 library(tibble)
@@ -83,6 +50,8 @@ if (nrow(unresolved) > 0) {
 }
 
 # ---- 2. pulses_languages.csv, with the Baliledo Glottocode patched --------
+# Baliledo ships with a blank Glottocode; assigned by hand so its (expected)
+# absence from Ruhlen shows up as an intentional drop rather than a silent NA.
 pulses_languages <- read_csv(here("data", "pulses_languages.csv"), show_col_types = FALSE) |>
   mutate(Glottocode = if_else(Name == "Baliledo", "bali1288", Glottocode))
 
@@ -111,10 +80,8 @@ message(
   paste0("  ", dup_language$language, " (", dup_language$n, " tips)", collapse = "\n")
 )
 
-# Tips are kept under their own original pulses label (no renaming — see
-# header), so duplicate tip labels are impossible by construction. What CAN
-# happen is the reverse: one tip's Glottocode matches more than one distinct
-# Ruhlen phoneme record, leaving that tip's phoneme match ambiguous.
+# One tip's Glottocode can match more than one distinct Ruhlen phoneme record
+# (e.g. ivat1242 covers both Itbayaten and Ivatanen), leaving its match ambiguous.
 ambiguous_tips <- mapping_table |>
   distinct(Name, language) |>
   count(Name, sort = TRUE) |>
@@ -132,10 +99,8 @@ message(
 )
 
 # ---- 4b. Resolve ambiguous tips: keep the larger phoneme inventory ---------
-# Each ambiguous tip's candidate languages are ranked by inventory_size and
-# the top one kept. Itbayaten/Ivatanen tie exactly (26 phonemes each) — the
-# general rule can't break that one, so it's resolved manually in Itbayaten's
-# favor (documented decision, not derived from the data).
+# Keep the candidate with the larger inventory; Itbayaten/Ivatanen tie exactly,
+# so that one pair is broken manually rather than by the rule.
 mapping_resolved <- mapping_table |>
   group_by(Name) |>
   slice_max(order_by = inventory_size, n = 1, with_ties = TRUE) |>
@@ -247,8 +212,7 @@ regime_tree <- paintSubTree(
 )
 
 # ---- 7. Sanity plots, after all tree edits -----------------------------------
-# Plots the tree actually used downstream (post conflict-tip drop), not the
-# earlier pre-edit tree_pruned.
+# Plots analysis_tree (post conflict-tip drop), not the earlier tree_pruned.
 plot.phylo(analysis_tree, cex = 0.4, no.margin = TRUE)
 
 # The Philippine languages need not be monophyletic, so the smallest common
@@ -266,10 +230,8 @@ if (length(non_ph_in_clade) > 0) {
 plot.phylo(philippine_clade, cex = 0.6, no.margin = TRUE)
 
 # ---- Final counts ------------------------------------------------------------
-# The stats above this line describe language-level match quality (pulses <->
-# Ruhlen, pre conflict-drop); the analysis tree below is the tip-level result
-# [1]/[2] actually consume, so both are stated explicitly rather than left for
-# the reader to reconcile across units.
+# Counts above are language-level (pre conflict-drop); those below are tip-level
+# on the tree [1]/[2] consume, so both units are reported explicitly.
 n_ph_languages_final <- mapping_resolved |>
   filter(Name %in% philippine_tips) |>
   pull(language) |>
@@ -293,9 +255,7 @@ message(
 )
 
 # ---- 8. Export everything for [1]/[2] ----------------------------------------
-# tree_pruned's tips are still the pulses tree's own original labels (step 5).
-# The ambiguity resolved in step 4b means this is now a clean one-to-one
-# lookup: exactly one Ruhlen phoneme record per tip.
+# Step 4b's resolution makes this a clean one-to-one lookup: one Ruhlen record per tip.
 tip_mapping <- mapping_resolved |>
   dplyr::select(tip = Name, ruhlen_language = language, iso6393, glottocode, inventory_size) |>
   arrange(tip)

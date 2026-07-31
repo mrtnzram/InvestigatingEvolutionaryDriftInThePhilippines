@@ -5,8 +5,9 @@
 # and its mean similarity to the unrelated controls, and writes the matrix +
 # per-language scores for the downstream [2]–[7] analyses and EEMS plotting.
 #
-# Input:   data/RUHLENdf_PH.csv, data/phoneme_freq_ruhlen.csv
-# Outputs: data/PHONEME_cosine_matrix.csv, data/PHONEME_cossim.csv
+# Input:   data/RUHLENdf_PH.csv, data/phoneme_freq_ruhlen_austronesian.csv
+# Outputs: data/PHONEME_cosine_matrix.csv, data/PHONEME_cossim.csv,
+#          data/base_plot_phoneme_cosine.rds (cosine base map, for [7])
 # Next:    [2]_PHONEME_cosine_distribution_analysis.R,
 #          [3]_PHONEME_network_distance.R (then regression / MMRR)
 # =============================================================================
@@ -52,46 +53,38 @@ phoneme_freq <- read_csv(here("data", "phoneme_freq_ruhlen_austronesian.csv"))
 
 calculate_weighted_cosine_similarity <- function(RUHLENdf, phoneme_freq, phoneme_cols, id_col = "language") {
 
-  # Extract and align the binary data and IDF weights
-  # Ensure the phoneme frequencies are in the same order as the phoneme columns
+  # Reorder the frequency table to the phoneme-column order so the IDF weights
+  # line up with the binary matrix columns.
   aligned_freq <- phoneme_freq %>%
     dplyr::filter(phoneme %in% phoneme_cols) %>%
     dplyr::arrange(match(phoneme, phoneme_cols))
 
   idf_weights <- aligned_freq$IDF
 
-  # Extract the binary phoneme data
   binary_data <- RUHLENdf %>%
     dplyr::select(dplyr::all_of(phoneme_cols)) %>%
-    as.matrix() # Convert to a matrix for faster calculations
+    as.matrix()
 
-  # Extract language IDs for matrix naming
   language_ids <- RUHLENdf[[id_col]]
 
-  # Step 2: Create a weighted phoneme matrix
-  # Multiply each column of the binary matrix by its corresponding IDF weight
+  # Scale each phoneme column by its IDF weight before the similarity loop.
   weighted_data <- sweep(binary_data, 2, idf_weights, FUN = "*")
 
-  # Step 3: Calculate the cosine similarity matrix
   n_languages <- nrow(weighted_data)
   cosine_matrix <- matrix(0, nrow = n_languages, ncol = n_languages,
                           dimnames = list(language_ids, language_ids))
 
-  # A small epsilon to avoid division by zero for languages with no phonemes
+  # epsilon guards against division by zero for a language with no phonemes.
   epsilon <- 1e-9
 
-  # Loop through all unique pairs of languages
   for (i in 1:n_languages) {
     for (j in i:n_languages) {
 
       vec_a <- weighted_data[i, ]
       vec_b <- weighted_data[j, ]
 
-      # Cosine Similarity Formula: (A . B) / (||A|| * ||B||)
-      # Numerator is the dot product
       dot_product <- sum(vec_a * vec_b)
 
-      # Denominator is the product of the magnitudes (Euclidean norms)
       magnitude_a <- sqrt(sum(vec_a^2))
       magnitude_b <- sqrt(sum(vec_b^2))
 
@@ -100,14 +93,14 @@ calculate_weighted_cosine_similarity <- function(RUHLENdf, phoneme_freq, phoneme
       score <- dot_product / denominator
 
       cosine_matrix[i, j] <- score
-      cosine_matrix[j, i] <- score # Matrix is symmetric
+      cosine_matrix[j, i] <- score  # symmetric
     }
   }
 
   return(cosine_matrix)
 }
 
-attested_phonemes <- phoneme_freq_austronesian$phoneme
+attested_phonemes <- phoneme_freq$phoneme
 
 cosine_matrix <- calculate_weighted_cosine_similarity(
   RUHLENdf,
@@ -162,3 +155,35 @@ PHONEME_cossim <- RUHLENdf |>
   left_join(df_unr,  by = 'language')
 
 write.csv(PHONEME_cossim, file = here("data", "PHONEME_cossim.csv"), row.names = TRUE)
+
+# ---- Cosine base map --------------------------------------------------------
+# The per-language scores on a Philippines map, saved for [7] to overlay the
+# waypoint routes onto. Built here rather than in [6] so the geographic
+# distribution can be read straight off [1], before FEEMS or the arrows exist.
+world_map  <- map_data("world")
+map_subset <- world_map %>% filter(region %in% c("Philippines", "Malaysia"))
+
+global_lim <- c(0, max(PHONEME_cossim$cossim_span, na.rm = TRUE))
+
+base_plot_cosine <- ggplot() +
+  geom_polygon(data = map_subset, aes(x = long, y = lat, group = group),
+               fill = "gray95", color = "gray70") +
+  geom_point(data = PHONEME_cossim,
+             aes(x = longitude, y = latitude, color = cossim_span),
+             size = 4, alpha = 0.7) +
+  geom_point(data = PHONEME_cossim, aes(x = longitude, y = latitude),
+             size = 4, shape = 21, color = "black") +
+  scale_color_gradient(low = "white", high = "navy", limits = global_lim) +
+  guides(color = guide_colorbar(title = "Cosine Similarity",
+                                title.position = "top", title.hjust = 0.5)) +
+  coord_fixed(xlim = c(115, 130), ylim = c(4, 22)) +
+  scale_x_continuous(breaks = seq(115, 130, by = 2)) +
+  scale_y_continuous(breaks = seq(4, 22, by = 2)) +
+  labs(x = "Longitude", y = "Latitude") +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12))
+
+base_plot_cosine
+saveRDS(base_plot_cosine, file = here("data", "base_plot_phoneme_cosine.rds"))

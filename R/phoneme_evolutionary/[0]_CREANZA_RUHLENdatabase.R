@@ -6,13 +6,10 @@
 # writes the feature matrix and IDF frequency table in a schema compatible with
 # the original PHOIBLE pipeline.
 #
-# Unlike the phoneme_analysis pipeline's copy of this script, PHOIBLEdf_PH here
-# also persists every Austronesian language in Ruhlen (Language_type =
-# "Austronesian"), not just the Philippine/interest/unrelated-control study
-# set — this experiment needs the Austronesian-wide phoneme table to pair with
-# the Austronesian-wide pulses tree in [0]_Phylogenetic_Tree.R. Writes to
-# evolutionary-suffixed files so the shared R/phoneme_analysis pipeline (which
-# reads data/RUHLENdf_PH.csv directly) is unaffected.
+# Unlike the phoneme_analysis copy, this also persists every Austronesian
+# language in Ruhlen, to pair with the Austronesian-wide pulses tree in
+# [0]_Phylogenetic_Tree.R. Outputs are evolutionary-suffixed so the
+# phoneme_analysis pipeline's own files are untouched.
 #
 # Source: Creanza et al. 2015 PNAS, SI Dataset 1 — 2082 languages × 728 phonemes
 # Phoneme column names (phoneme_001–phoneme_728) correspond to the positional
@@ -21,14 +18,8 @@
 # Outputs: data/RUHLENdf_PH_evolutionary.csv, data/phoneme_freq_ruhlen_evolutionary.csv,
 #          data/phoneme_key_pnas.csv
 #
-# RUN ORDER (this script has a dependency on the phylogenetic tree):
-#   1. Run PART A below (down to the `Ph_Languages` definition).
-#   2. Run [0]_Phylogenetic_Tree.R — it consumes `Ph_Languages` and produces
-#      `Ph_Languages_pruned` (the tree-validated subset used downstream).
-#   3. Run PART B below (everything after the banner), which needs
-#      `Ph_Languages_pruned`.
-# The Grambank unrelated-control set is now built locally (see PART B); no
-# grammar script needs to be sourced.
+# Run order: PART A, then [0]_Phylogenetic_Tree.R (which turns `Ph_Languages`
+# into `Ph_Languages_pruned`), then PART B.
 # =============================================================================
 
 library(lingtypology)
@@ -84,9 +75,8 @@ message("Philippine languages detected by bounding box (n = ", length(Ph_Languag
 
 # =============================================================================
 # >>> END OF PART A <<<
-# STOP here and run [0]_Phylogenetic_Tree.R, which consumes `Ph_Languages`
-# (defined above) and returns `Ph_Languages_pruned` — the tree-validated subset.
-# PART B below requires `Ph_Languages_pruned` to be in the environment.
+# STOP here and run [0]_Phylogenetic_Tree.R: it consumes `Ph_Languages` and
+# returns the `Ph_Languages_pruned` PART B needs.
 # =============================================================================
 stopifnot(
   "Run [0]_Phylogenetic_Tree.R first: `Ph_Languages_pruned` is not defined." =
@@ -110,12 +100,9 @@ ph_regions <- ruhlen_raw |>
   pull(region) |>
   unique()
 
-# Bounding box buffer (km) — controls for areal contact effects, following
-# the convention in typological sampling of excluding/modeling languages
-# within ~1000 km to avoid areal (contact-induced) similarity confounding
-# genealogical signal. See Jaeger, Graff, Croft & Pontillo (2011),
-# "Mixed effect models for genetic and areal dependencies in linguistic
-# typology," Linguistic Typology 15(2): 281-319.
+# Bounding-box buffer (km) excluding languages close enough for areal contact to
+# confound genealogical signal. See Jaeger, Graff, Croft & Pontillo (2011),
+# Linguistic Typology 15(2): 281-319.
 buffer_km <- 1000
 
 ph_coords <- ruhlen_raw |>
@@ -156,17 +143,13 @@ ruhlen_candidates <- ruhlen_raw |>
   )
 
 # ---- Build GRAMBANKdf_unrelated locally (no grammar script needed) ----
-# The "unrelated" baseline must be languages that are covered in BOTH the Ruhlen
-# phoneme data and the Grambank grammar data, so the two analyses share a control
-# set. This block reproduces the unrelated-set definition from
-# [0]_GRAMBANKdatabase.R, but WITHOUT its iterative matrix-reduction loop: the
-# only value that filter consumed from the reduced matrix is the macroarea(s) of
-# the Philippine languages (`relatedmacroareas`), which is simply "Papunesia".
+# The unrelated baseline must be covered in BOTH Ruhlen and Grambank so the two
+# analyses share a control set. Reproduces [0]_GRAMBANKdatabase.R's definition
+# without its matrix-reduction loop, which only supplied `relatedmacroareas`.
 languages <- read_csv(here("data", "languages.csv"), show_col_types = FALSE)
 
-# Macroarea(s) of the Philippine languages — the sole input the unrelated-set
-# filter needs from Grambank's (here-dropped) reduction step. Resolves to
-# "Papunesia"; deriving it from the bbox keeps this self-contained.
+# Macroarea(s) of the Philippine languages (resolves to "Papunesia"), derived
+# from the bounding box so this block stays self-contained.
 relatedmacroareas <- languages |>
   filter(Latitude > 4.5 & Latitude < 21 & Longitude > 115 & Longitude < 128) |>
   pull(Macroarea) |>
@@ -250,11 +233,9 @@ unrelated_clean <- setdiff(Unrelated_Langauges, contact_contaminated)
 length(unrelated_clean)
 
 # -- All Languages ------------------------------------------------------------
-# Evolutionary experiment: also persist every Austronesian language in Ruhlen
-# (not just the Philippine/interest/unrelated study set), tagged below as
-# Language_type = "Austronesian" for anything not already claimed by one of
-# the other three categories. This is the phoneme table matched against the
-# Austronesian-wide pulses tree in [0]_Phylogenetic_Tree.R.
+# Every Austronesian language in Ruhlen, tagged Language_type = "Austronesian"
+# unless already claimed by one of the other three categories. This is the table
+# matched against the pulses tree in [0]_Phylogenetic_Tree.R.
 Austronesian_Languages <- ruhlen_raw |>
   filter(language_family == "Austronesian") |>
   pull(language)
@@ -298,13 +279,10 @@ map.feature(PHOIBLEdf_PH$language, PHOIBLEdf_PH$Language_type)
 write_csv(PHOIBLEdf_PH, here("data", "RUHLENdf_PH_evolutionary.csv"))
 
 # ---- 6. Compute global phoneme frequencies and IDF weights ----
-# Denominator: every Austronesian language in Ruhlen, Philippine languages
-# included (n = 284) — identical to the phoneme_analysis pipeline, so
+# Denominator: every Austronesian language in Ruhlen (n = 284), Philippine
+# languages included — identical to the phoneme_analysis pipeline, so
 # phoneme_freq_ruhlen_evolutionary.csv and phoneme_freq_ruhlen_austronesian.csv
 # are the same table under two names.
-#
-# This block previously excluded `Ph_Languages_pruned`, which made the two
-# tables disagree (241 vs 284) on 49 of 728 phoneme counts.
 
 compute_phoneme_freq <- function(data, n_total = nrow(data)) {
   data |>
@@ -364,8 +342,8 @@ if (length(missing_from_key) > 0)
           paste(head(missing_from_key, 10), collapse = ", "))
 
 # Persist the keymap so downstream scripts join against it instead of re-parsing
-# sd02.txt. Deliberately not evolutionary-suffixed: this is a straight decode of
-# the SI file with no study-set filtering, so it is identical for every pipeline.
+# sd02.txt. Not evolutionary-suffixed: it is a straight decode of the SI file
+# with no study-set filtering, so every pipeline shares it.
 write_csv(pnas_key, here("data", "phoneme_key_pnas.csv"))
 
 message("Phoneme keymap: ", nrow(pnas_key), " phonemes -> data/phoneme_key_pnas.csv")

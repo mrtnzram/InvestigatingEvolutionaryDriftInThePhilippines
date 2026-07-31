@@ -19,12 +19,9 @@ library(scales)
 gram_surface   <- read.csv(here("data", "grammar_surface_raster.csv"))
 GRAMMAR_cossim <- read.csv(here("data", "GRAMMAR_cossim.csv"))
 
-# Overlay only the 26 tree-pruned Philippine languages, matching [7]'s waypoint
-# arrows (from [3]) and [8]'s subgroup network — the 13 languages without an ABVD
-# tree tip are not shown as points. The FEEMS surface itself is still estimated
-# from all 39 languages (grammar_feems.ipynb) — dropping the southern Bornean
-# samples would leave that part of the map purely interpolated — so only the
-# discrete cosine-similarity markers are restricted here, not the raster.
+# Only the cosine-similarity markers are restricted to the 26 tree-pruned
+# languages, matching [7] and [8]; the raster still comes from all 39, since
+# dropping the southern Bornean samples would leave that area interpolated.
 tree_langs     <- read.csv(here("data", "GRAMMAR_subgroup_lookup.csv"))$language
 GRAMMAR_cossim <- GRAMMAR_cossim[GRAMMAR_cossim$language %in% tree_langs, ]
 

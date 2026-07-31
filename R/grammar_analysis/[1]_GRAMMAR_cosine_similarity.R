@@ -5,12 +5,9 @@
 # inventories, extracts each Philippine language's similarity to Spanish /
 # Japanese / English and its mean similarity to the unrelated controls.
 #
-# Adaptation note (vs. phoneme [1]): GRAMBANK features are multi-level
-# categorical, not binary, so the >2-level columns are one-hot encoded first
-# (fastDummies) and IDF weights are looked up per (feature, value) pair from
-# gramfeature_freq.csv (unlike phoneme's per-column IDF sweep). Once encoded,
-# the weighting (IDF substituted for each present feature-value) and cosine
-# calculation are the same as phoneme [1].
+# Unlike phoneme [1], GRAMBANK features are multi-level categorical, so >2-level
+# columns are one-hot encoded and IDF is looked up per (feature, value) pair
+# rather than swept per column; the cosine step itself is unchanged.
 #
 # Input:   data/GRAMBANKdf_full.csv, data/gramfeature_freq.csv
 # Outputs: data/GRAMMAR_cosine_matrix.csv, data/GRAMMAR_cossim.csv
@@ -94,15 +91,10 @@ calculate_weighted_cosine_similarity <- function(GRAMBANKdf_PH, gramfeature_freq
     mutate(language = GRAMBANKdf_PH[[id_col]]) %>%
     pivot_longer(cols = -language, names_to = "feature", values_to = "value")
 
-  # OHE dummy columns (e.g. "GB065_1") don't exist by that name in
-  # gramfeature_freq, which is keyed by the ORIGINAL feature + its raw value
-  # (e.g. "GB065", 1) — a naive join here leaves every OHE'd feature 100% NA,
-  # silently dropping it from the cosine calculation entirely. Parse the dummy
-  # name back to (base feature, level) and weight it as value * IDF(level) —
-  # the standard one-hot + IDF scheme: a language's vector gets a weighted
-  # spike in the dimension matching its actual category, zero elsewhere.
-  # Binary (non-OHE) columns keep the original substitution scheme: IDF of
-  # whichever value (0/1) was actually observed.
+  # gramfeature_freq is keyed by (original feature, raw value), so a dummy name
+  # like "GB065_1" must be parsed back to (base feature, level) before the join —
+  # joining on the dummy name leaves every OHE'd feature NA. Binary columns keep
+  # the plain substitution: IDF of whichever value was observed.
   is_ohe <- long_data$feature %in% ohe_cols
   long_data <- long_data %>%
     mutate(

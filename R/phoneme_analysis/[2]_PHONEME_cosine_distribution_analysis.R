@@ -3,15 +3,10 @@
 # Visualizes the distribution of each Philippine language's phoneme cosine
 # similarity to Spanish / English / Japanese / unrelated controls (ridge +
 # density plots), then tests whether the baselines stand out from the unrelated
-# controls at two levels:
-#
-#   Population level — Friedman test, Wilcoxon signed-rank test (+ box plot),
-#                      and a BIC-selected Gaussian mixture (bimodality) test that
-#                      marks each language as <baseline>_influenced.
-#   Individual level — Shapiro-Wilk normality of each language's per-language
-#                      unrelated null (+ QQ plots and a null-ridge with the
-#                      observed baselines marked), and an empirical percentile
-#                      of each language against its own null.
+# controls at the population level (Friedman, Wilcoxon, and a BIC-selected
+# Gaussian mixture that marks each language as <baseline>_influenced) and at the
+# individual level (Shapiro-Wilk on each language's own null, plus its empirical
+# percentile against that null).
 #
 # Inputs:  data/PHONEME_cossim.csv         (from [1]_PHONEME_cosine_similarity.R)
 #          data/PHONEME_cosine_matrix.csv  (per-language null: cols = unrelated)
@@ -31,9 +26,8 @@ library(lme4)
 library(lmerTest)
 
 # --- Loading data ------------------------------------------------------------
-# read_csv names an unnamed leading index column "...1"; drop it if present.
-# Also drop any *_influenced / sig_* columns that a previous run may have left in
-# the file, so the classification joins below stay idempotent (no .x/.y dupes).
+# Drop read_csv's "...1" index column and any *_influenced / sig_* columns left
+# by a previous run, so the classification joins below stay idempotent.
 PHONEME_cossim <- read_csv(here("data", "PHONEME_cossim.csv")) |>
   dplyr::select(-any_of(c("...1", "span_influenced", "jap_influenced", "eng_influenced",
                    "sig_span", "sig_jap", "sig_eng")))
@@ -384,9 +378,7 @@ fit_gmm <- function(delta_vec, baseline_name) {
 gmm_fits <- imap(deltas, fit_gmm)
 
 # ----- the two tibbles ------------------------------------------------------
-# purrr::map explicitly namespaced: library(mclust) is loaded after tidyverse and
-# masks purrr::map with mclust::map (classification error), so a bare map() here
-# fails with a cryptic "invalid 'length' argument".
+# purrr::map must stay namespaced: library(mclust) masks it with mclust::map.
 gmm_summary        <- purrr::map(gmm_fits, "summary") |> list_rbind()
 gmm_classification <- purrr::map(gmm_fits, "per_lang") |> list_rbind()
 
@@ -468,11 +460,9 @@ ggsave(
 )
 
 # --- Null-distribution ridge for influence-selected languages ----------------
-# Three languages influenced by each interest language (Spanish / Japanese /
-# English), each shown as its own unrelated null with dashed markers for where
-# its observed Spanish / Japanese / English similarities fall — so we can see how
-# far into (or beyond) its own null each baseline sits. Grouped on the y-axis by
-# which interest language influenced it.
+# Three languages per interest language, each drawn as its own unrelated null
+# with dashed markers at its observed baseline similarities, grouped on the
+# y-axis by which interest language influenced it.
 pick_influenced <- function(inf_col, obs_col, influence_name) {
   PHONEME_cossim |>
     filter(.data[[inf_col]]) |>
@@ -690,10 +680,9 @@ ggsave(here("figures", "phoneme", "distributions", "phoneme_influenced_null_engl
        null_influenced_eng,  width = 7, height = 4.5, units = "in", dpi = 300)
 
 # --- Influenced baseline vs. the unrelated baseline (one plot per baseline) ---
-# Two population distributions per plot, over the SAME set of languages that the
-# baseline influenced: their observed similarity to the baseline vs. their own
-# unrelated baseline. Both groups are therefore n = 10 / 20 / 10 for Spanish /
-# Japanese / English. Same ridge style as the overview plot.
+# Over the same set of languages the baseline influenced: their observed
+# similarity to that baseline vs. their own unrelated baseline, so both groups
+# carry the same n. Same ridge style as the overview plot.
 plot_influenced_vs_unrelated <- function(inf_col, obs_col, baseline_name, fill_color) {
   sub <- PHONEME_cossim |> filter(.data[[inf_col]])
   scores <- bind_rows(

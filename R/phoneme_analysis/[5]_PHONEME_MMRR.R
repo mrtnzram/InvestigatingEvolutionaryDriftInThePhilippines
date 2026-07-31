@@ -1,33 +1,24 @@
 # =============================================================================
 # [5] Phoneme Analysis — Multiple Matrix Regression with Randomization (MMRR)
 #
-# Control analysis for internal linguistic diffusion. Regresses pairwise
-# GENERAL phonemic dissimilarity between the Philippine languages jointly on
-# two pairwise predictors:
+# Control analysis for internal linguistic diffusion. Regresses pairwise general
+# phonemic dissimilarity (1 - cosine, not Spanish-specific) jointly on
+# terrain-penalized migration distance and patristic phylogenetic distance,
+# with permutation p-values, so geography and shared ancestry — collinear here —
+# are assessed together rather than by a single-predictor Mantel test.
 #
-#     Y_ling = b0 + b1 * X_geo + b2 * X_phylo + e
-#
-#   Y_ling  : 1 - cosine similarity (the same general dissimilarity the old
-#             Mantel test used — NOT Spanish-specific, NOT a delta measure)
-#   X_geo   : terrain-penalized migration distance through the waypoint network
-#   X_phylo : patristic (cophenetic) phylogenetic distance from the ABVD tree
-#
-# This isolates internal diffusion — geographic and/or genealogical — from the
-# external (colonial-contact) signal that is this study's primary focus.
-# Replacing the single-predictor Mantel test with MMRR lets geography and shared
-# ancestry be assessed jointly, since geographically close languages are often
-# also close relatives (see the geo/phylo collinearity flagged in [4] §9).
-#
-# This file keeps the original Dijkstra routing (shortest_path_trace) to build
-# the full pairwise migration-distance matrix — it is intentionally NOT the
-# simplified "distance to nearest node" used in [3]_PHONEME_network_distance.R,
-# because MMRR needs genuine language-to-language distances.
+# Note: the pairwise distance matrix is built by Dijkstra routing over the full
+# language-to-language network, not the nearest-node distance used in [3]. Each
+# pair takes the cheaper of the via-network route and a direct terrain-penalized
+# line (§6), under a single land penalty shared by every leg (§3).
 #
 # Inputs:  data/PHONEME_cosine_matrix.csv, data/RUHLENdf_PH.csv,
 #          data/nodes.csv, data/edges.csv,
 #          data/PHONEME_phylo_dist_matrix.csv  (written by [0]_Phylogenetic_Tree.R)
 # Outputs: data/PHONEME_dist_matrix.csv, data/PHONEME_diss_matrix.csv,
-#          data/PHONEME_mmrr_results.csv,
+#          data/PHONEME_mmrr_results.csv        (joint two-predictor model)
+#          data/PHONEME_mmrr_single_results.csv (single-predictor models)
+#          figures/phoneme/mmrr/phoneme_mmrr_single_*.png  (3 single-predictor)
 #          figures/phoneme/mmrr/phoneme_mmrr_pairplot.png,
 #          figures/phoneme/mmrr/phoneme_mmrr_partial_regression.png
 # =============================================================================
@@ -89,10 +80,15 @@ land_sf <- sf_polygon(obj = world_map, polygon_id = "group", x = "long", y = "la
   st_set_crs(4326)
 
 # ---- 3. Terrain-penalized network edges + weighted graph --------------------
-# NOTE: edges are penalized at 44.18 (matching the original [1] route weighting),
-# while the language connectors below use 4.44. This penalty mismatch is carried
-# over verbatim from the monolith to preserve results — flag for review.
-edge_land_penalty <- 44.18
+# ONE terrain penalty for every leg of every route — network edges, language
+# connectors, and the direct language-to-language line in §6. Land travel costs
+# LAND_PENALTY x sea travel per metre, which is a property of the terrain, not
+# of which layer a segment belongs to. This resolves the mismatch inherited from
+# the original monolith (edges at 44.18 vs connectors at 4.44), which made a
+# metre of land 10x dearer on the network than on a connector and left the
+# routing internally inconsistent. 4.44 is the value [3] already uses.
+LAND_PENALTY <- 4.44
+edge_land_penalty <- LAND_PENALTY
 
 edges <- edges |>
   rowwise() |>
@@ -140,13 +136,9 @@ graph <- lapply(all_ids, function(id) {
 names(graph) <- all_ids
 
 # ---- 4. Routing helpers -----------------------------------------------------
-# Every node in nodes.csv participates in the edge graph (no orphans), so a
-# language's geographically nearest node is always a routable entry point onto
-# the network. shortest_path_trace() is a hand-rolled Dijkstra kept verbatim
-# from the original Mantel script so the X_geo matrix is reproducible
-# bit-for-bit. For a faster equivalent, igraph::distances() on the same weighted
-# graph returns identical shortest-path costs (see [3] for the igraph pattern);
-# left as-is to avoid any numeric drift in the published results.
+# shortest_path_trace() is a hand-rolled Dijkstra kept verbatim from the original
+# Mantel script so X_geo stays bit-for-bit reproducible; igraph::distances() on
+# the same weighted graph (the [3] pattern) is the faster equivalent.
 find_nearest_node <- function(coords) {
   distances <- distHaversine(matrix(c(nodes$longitude, nodes$latitude), ncol = 2),
                              coords)
@@ -195,7 +187,7 @@ shortest_path_trace <- function(start_id, end_id, graph) {
 }
 
 # ---- 5. Per-language connector penalties (coord -> nearest node) -------------
-land_penalty <- 4.44
+land_penalty <- LAND_PENALTY   # same terrain penalty as the network edges (§3)
 
 phil_df <- RUHLENdf |>
   filter(Language_type == "Philippine Language") |>
@@ -225,22 +217,61 @@ connector_df <- phil_df |>
   ungroup()
 
 # ---- 6. Pairwise terrain-penalized distance matrix (X_geo) ------------------
+# Each pair takes the cheaper of two candidate routes (a true least-cost choice,
+# mirroring the pmin() [3] uses for its H2 measure):
+#
+#   via-network : connector1 + shortest path(node1 -> node2) + connector2
+#   direct      : the terrain-penalized straight line between the two languages
+#
+# Without the direct option every pair was forced out to the network and back,
+# which is indefensible for nearby languages: the 58 languages share only 17
+# nearest nodes, so 184 pairs (11%) have node1 == node2 and the network leg
+# contributes 0 — leaving a pure out-and-back detour. Ivatanen and Itbayaten sit
+# at identical coordinates yet scored 257 km; South Kalinga and Central Kalinga
+# are 10 km apart and scored 725 km. Both legs are penalized with the same
+# LAND_PENALTY (§3), so the comparison is like-for-like.
 phil_pairs <- expand_grid(lang1 = phil_df$language, lang2 = phil_df$language) |>
   filter(lang1 != lang2) |>
   left_join(phil_df |> select(language, node1 = nearest_node), by = c("lang1" = "language")) |>
   left_join(phil_df |> select(language, node2 = nearest_node), by = c("lang2" = "language")) |>
   left_join(connector_df |> select(language, penalty1 = connector_penalty), by = c("lang1" = "language")) |>
-  left_join(connector_df |> select(language, penalty2 = connector_penalty), by = c("lang2" = "language"))
+  left_join(connector_df |> select(language, penalty2 = connector_penalty), by = c("lang2" = "language")) |>
+  left_join(phil_df |> select(language, lon1 = longitude, lat1 = latitude), by = c("lang1" = "language")) |>
+  left_join(phil_df |> select(language, lon2 = longitude, lat2 = latitude), by = c("lang2" = "language"))
+
+# Direct-line cost, split into land/sea exactly like the connectors in §5.
+# Degenerate zero-length lines (languages recorded at identical coordinates)
+# would make st_linestring/st_intersection misbehave, so they short-circuit to 0.
+direct_penalized_cost <- function(lon1, lat1, lon2, lat2) {
+  if (isTRUE(all.equal(c(lon1, lat1), c(lon2, lat2)))) return(0)
+  geom <- st_sfc(st_linestring(rbind(c(lon1, lat1), c(lon2, lat2))), crs = 4326)
+  land_part <- st_intersection(geom, land_sf)
+  sea_part  <- st_difference(geom, land_sf)
+  land_part <- land_part[!st_is_empty(land_part)]
+  sea_part  <- sea_part[!st_is_empty(sea_part)]
+  land_len <- if (length(land_part) > 0) as.numeric(sum(st_length(land_part))) else 0
+  sea_len  <- if (length(sea_part)  > 0) as.numeric(sum(st_length(sea_part)))  else 0
+  land_len * LAND_PENALTY + sea_len
+}
 
 phil_pairs <- phil_pairs |>
   rowwise() |>
   mutate(
     trace = list(shortest_path_trace(node1, node2, graph)),
     tree_dist = trace$distance,
-    geodist_H1_span = if (is.na(tree_dist)) NA_real_ else
-      (penalty1 + tree_dist + penalty2) / 1000
+    via_network_cost = if (is.na(tree_dist)) NA_real_ else penalty1 + tree_dist + penalty2,
+    direct_cost      = direct_penalized_cost(lon1, lat1, lon2, lat2),
+    # na.rm: an unreachable network route must not veto the direct one.
+    geodist_H1_span  = pmin(via_network_cost, direct_cost, na.rm = TRUE) / 1000,
+    used_direct      = !is.na(direct_cost) &
+      (is.na(via_network_cost) | direct_cost < via_network_cost)
   ) |>
   ungroup()
+
+message(sprintf(
+  "X_geo routing: %d of %d ordered pairs (%.0f%%) took the direct line rather than the network.",
+  sum(phil_pairs$used_direct), nrow(phil_pairs), 100 * mean(phil_pairs$used_direct)
+))
 
 dist_matrix <- phil_pairs |>
   select(lang1, lang2, geodist_H1_span) |>
@@ -249,31 +280,25 @@ dist_matrix <- phil_pairs |>
   as.matrix()
 
 PHONEME_dist_matrix <- dist_matrix[ph_lang, ph_lang]
-# phil_pairs excludes lang1 == lang2, so pivot_wider() leaves the diagonal NA;
-# set those self-distances to 0. With a fully connected node graph every
-# off-diagonal pair is reachable, so no other NAs arise here.
+# phil_pairs excludes lang1 == lang2, so the diagonal comes back NA from
+# pivot_wider(); the graph is connected, so no other NAs arise.
 PHONEME_dist_matrix[is.na(PHONEME_dist_matrix)] <- 0
 
-# Dijkstra routes i->j and j->i sum identical edge weights but in a different
-# order, so the raw matrix can carry ~1e-12 floating-point asymmetry. Symmetrize
-# so the MMRR symmetry guard below is exact (unfold() reads only the lower
-# triangle regardless, so this does not change the fit).
+# i->j and j->i sum the same weights in a different order, leaving ~1e-12 of
+# asymmetry; symmetrize so the MMRR guard below is exact.
 PHONEME_dist_matrix <- (PHONEME_dist_matrix + t(PHONEME_dist_matrix)) / 2
 
 # ---- 7. Phylogenetic distance matrix (X_phylo) + alignment ------------------
-# Patristic (cophenetic) distances written by [0]_Phylogenetic_Tree.R, keyed by
-# language name. check.names = FALSE preserves names-with-spaces so they match
-# the cosine/dist matrices exactly.
+# check.names = FALSE preserves names-with-spaces so the labels still match the
+# cosine/dist matrices exactly.
 PHONEME_phylo_dist_matrix <- read.csv(
   here("data", "PHONEME_phylo_dist_matrix.csv"),
   row.names = 1, check.names = FALSE
 ) |>
   as.matrix()
 
-# Align all three matrices to a common language set + identical ordering before
-# vectorizing. The intersection is defensive: with the current data all 58
-# Philippine languages are shared, but this keeps the script correct if the tree
-# set ever changes upstream.
+# Align all three matrices to a common language set and ordering before
+# vectorizing; the intersection is defensive against upstream tree-set changes.
 common <- Reduce(intersect, list(
   rownames(PHONEME_diss_matrix),
   rownames(PHONEME_dist_matrix),
@@ -294,10 +319,8 @@ Y_ling  <- PHONEME_diss_matrix[common, common]
 X_geo   <- PHONEME_dist_matrix[common, common]
 X_phylo <- PHONEME_phylo_dist_matrix[common, common]
 
-# Self-distances are exactly zero by definition. 1 - cosine leaves ~1e-10 of
-# floating-point noise on Y_ling's diagonal (cosine self-similarity is 1 up to
-# rounding); zero all three diagonals so the guards below are exact. unfold()
-# only reads the strict lower triangle, so this never affects the fit.
+# 1 - cosine leaves ~1e-10 of noise on Y_ling's diagonal, so all three diagonals
+# are zeroed to make the guards below exact.
 diag(Y_ling) <- 0
 diag(X_geo) <- 0
 diag(X_phylo) <- 0
@@ -318,7 +341,6 @@ message("MMRR input: ", nrow(Y_ling), " languages, ",
         choose(nrow(Y_ling), 2), " pairwise comparisons.")
 
 # ---- 8. Matrix heatmaps (quick visual QC) -----------------------------------
-# Modernized off reshape2::melt -> as_tibble(rownames) + pivot_longer.
 melt_matrix <- function(m) {
   as_tibble(m, rownames = "Var1") |>
     pivot_longer(-Var1, names_to = "Var2", values_to = "value")
@@ -340,16 +362,13 @@ print(
 )
 
 # ---- 9. MMRR (Wang 2013) ----------------------------------------------------
-# Canonical Multiple Matrix Regression with Randomization from the Wang Lab
-# (landscapegenetics.org; Dryad doi:10.5061/dryad.kt71r/1; packaged as
-# algatr::mmrr). Reproduced here, lightly adapted, so the analysis has no
-# external dependency. Reference: Wang, I.J. (2013) "Examining the full effects
-# of landscape heterogeneity on spatial genetic variation." Evolution 67:3403.
+# Wang Lab's canonical MMRR (Dryad doi:10.5061/dryad.kt71r/1, packaged as
+# algatr::mmrr), reproduced here so the script has no external dependency.
+# Reference: Wang, I.J. (2013) "Examining the full effects of landscape
+# heterogeneity on spatial genetic variation." Evolution 67:3403.
 #
-# Ordinary regression p-values are invalid because pairwise matrix cells are not
-# independent (each language participates in many pairs). Significance is instead
-# assessed by relabeling the rows AND columns of Y with a single permutation
-# vector (Y[rand, rand]) — this preserves symmetry (Y_ij = Y_ji) and the zero
+# Pairwise cells are not independent, so significance comes from relabeling Y's
+# rows and columns with one permutation vector — preserving symmetry and the zero
 # diagonal — and refitting with the predictors held fixed.
 
 # unfold(): lower-triangle entries of a matrix as a vector; scale = TRUE
@@ -395,6 +414,83 @@ MMRR <- function(Y, X, nperm = 9999, scale = TRUE) {
        Fstatistic = Fstat, Fpvalue = Fp, r.squared = r.squared)
 }
 
+# ---- 9a. Single-predictor MMRRs (run BEFORE the joint model) ----------------
+# Same MMRR() above, just handed a one-element predictor list — the permutation
+# scheme is identical, so with one predictor this reduces to a permutation-tested
+# simple regression on the vectorized lower triangles, i.e. exactly the Mantel
+# test this script replaced. Because unfold() standardizes, the single-predictor
+# beta IS the Pearson r and R^2 = beta^2.
+#
+# These are reported alongside the joint model on purpose. Geography and
+# phylogeny are collinear, so each can be strongly significant alone while
+# NEITHER clears the threshold once the other is in the model — the joint fit
+# tests only each predictor's UNIQUE contribution. Reporting the joint model by
+# itself would understate the result; reporting only these would overstate how
+# separable the two effects are. The third fit (geo ~ phylo) quantifies exactly
+# that overlap.
+single_mmrr <- function(Ymat, Xmat, y_lab, x_lab, title, file, nperm = 9999) {
+  set.seed(1)
+  fit <- MMRR(Ymat, list(x = Xmat), nperm = nperm)
+  beta <- unname(fit$coefficients["x"])
+  pval <- unname(fit$tpvalue["x"])
+  r2   <- fit$r.squared
+
+  # Permutation p has a floor of 1/(nperm+1); show it as "<" rather than an
+  # exact value it cannot resolve.
+  p_txt <- if (pval <= 1 / (nperm + 1)) {
+    sprintf("p < %.4f", 1 / (nperm + 1))
+  } else {
+    sprintf("p = %.4f", pval)
+  }
+
+  # Axes are plotted in RAW units (km, patristic, 1 - cosine) so they read
+  # cleanly; standardizing only rescales the axes, leaving the fit identical.
+  df <- tibble(x = unfold(Xmat, scale = FALSE), y = unfold(Ymat, scale = FALSE))
+
+  p <- ggplot(df, aes(x, y)) +
+    geom_point(alpha = 0.25, size = 0.7, colour = "steelblue") +
+    geom_smooth(method = "lm", se = TRUE, colour = "firebrick", linewidth = 0.9) +
+    labs(
+      title    = title,
+      subtitle = sprintf("beta = %+.3f (standardized)   %s   R² = %.4f",
+                         beta, p_txt, r2),
+      x = x_lab, y = y_lab
+    ) +
+    theme_bw() +
+    theme(plot.title    = element_text(face = "bold", size = 12),
+          plot.subtitle = element_text(size = 10, colour = "grey25"))
+
+  print(p)
+  ggsave(here("figures", "phoneme", "mmrr", file), p,
+         width = 6.5, height = 4.5, units = "in", dpi = 300)
+
+  tibble(model = title, beta = beta, p_value = pval, r_squared = r2)
+}
+
+PHONEME_mmrr_single <- bind_rows(
+  single_mmrr(Y_ling, X_geo,
+              y_lab = "Phonemic dissimilarity (1 - cosine)",
+              x_lab = "Relative migration distance (km)",
+              title = "Linguistic dissimilarity vs Geographic distance",
+              file  = "phoneme_mmrr_single_dissimilarity_vs_geography.png"),
+  single_mmrr(Y_ling, X_phylo,
+              y_lab = "Phonemic dissimilarity (1 - cosine)",
+              x_lab = "Patristic phylogenetic distance",
+              title = "Linguistic dissimilarity vs Phylogenetic distance",
+              file  = "phoneme_mmrr_single_dissimilarity_vs_phylogeny.png"),
+  # Collinearity check: the shared structure that flattens both joint betas.
+  single_mmrr(X_geo, X_phylo,
+              y_lab = "Relative migration distance (km)",
+              x_lab = "Patristic phylogenetic distance",
+              title = "Geographic distance vs Phylogenetic distance",
+              file  = "phoneme_mmrr_single_geography_vs_phylogeny.png")
+)
+print(PHONEME_mmrr_single)
+write.csv(PHONEME_mmrr_single,
+          file = here("data", "PHONEME_mmrr_single_results.csv"), row.names = FALSE)
+
+
+# ---- 9b. Joint two-predictor MMRR -------------------------------------------
 set.seed(1)  # reproducible permutation p-values
 mmrr_fit <- MMRR(Y_ling, list(geo = X_geo, phylo = X_phylo), nperm = 9999)
 print(mmrr_fit)
@@ -424,22 +520,16 @@ mmrr_df <- tibble(
   phylo = as.numeric(unfold(X_phylo))
 )
 
-# (a) Pairplot / scatterplot matrix, laid out as a single 3x3 facet_grid so every
-# cell shares its column (x) and row (y) scale and the panel edges line up exactly
-# — unlike a patchwork of nine independent plots, whose differing axes never
-# aligned. Variable names are the facet strips (top = column var, right = row
-# var). Lower triangle: scatter + linear fit. Upper triangle: Pearson r (the
-# geo<->phylo collinearity that motivates the joint model, mirroring the check in
-# [4] §9). Diagonal: the variable's marginal density. Built directly rather than
-# with GGally::ggpairs to keep the script dependency-free.
+# (a) Pairplot as a single 3x3 facet_grid so every cell shares its column (x) and
+# row (y) scale. Lower triangle: scatter + linear fit; upper: Pearson r;
+# diagonal: marginal density. Built directly to avoid a GGally dependency.
 pair_labs <- c(ling = "Dissimilarity", geo = "Geo distance", phylo = "Phylo distance")
 pair_vars <- names(pair_labs)
 pair_idx  <- setNames(seq_along(pair_vars), pair_vars)
 as_pair_factor <- function(v) factor(pair_labs[v], levels = pair_labs)
 
-# Cell text is centred on each variable's midpoint so it sits inside every
-# free-scaled panel (the standardized inputs centre near 0 but are mildly
-# right-skewed, so the panel middle is not exactly 0).
+# Cell text is centred on each variable's midpoint, not 0: the standardized
+# inputs are mildly right-skewed, so the panel middle is not exactly 0.
 pair_mid <- colMeans(sapply(mmrr_df[pair_vars], range))
 
 # Lower triangle (row index > col index): scatter of col-var (x) vs row-var (y).
@@ -458,20 +548,16 @@ cor_df <- expand_grid(row = pair_vars, col = pair_vars) |>
     row = as_pair_factor(row), col = as_pair_factor(col)
   )
 
-# Anchor every panel's free scale to the col-var (x) and row-var (y) ranges. The
-# text/density-only cells — the first row and last column carry no scatter —
-# would otherwise collapse to a degenerate axis; this pins all panels to the true
-# variable ranges, as a proper scatterplot matrix does.
+# Anchor every panel's free scale to the col-var (x) and row-var (y) ranges;
+# without it the text/density-only cells collapse to a degenerate axis.
 anchor_df <- expand_grid(row = pair_vars, col = pair_vars) |>
   mutate(dat = map2(row, col, ~ tibble(x = range(mmrr_df[[.y]]), y = range(mmrr_df[[.x]])))) |>
   unnest(dat) |>
   mutate(row = as_pair_factor(row), col = as_pair_factor(col))
 
-# Diagonal: marginal density of each variable. The row's y-scale is the
-# variable's value range (not a 0-1 density axis), so the density height is
-# rescaled into the lower ~85% of the panel (baseline at the variable's min) —
-# the shape shows without breaking the shared scales. from/to clip the curve to
-# the data range so its tails stay inside the anchored panel.
+# Diagonal densities are rescaled into the lower 85% of the panel because the
+# row's y-scale is the variable's value range, not a 0-1 density axis; from/to
+# clip the curve so its tails stay inside the anchored panel.
 density_df <- map_dfr(pair_vars, function(v) {
   rng <- range(mmrr_df[[v]])
   d   <- density(mmrr_df[[v]], from = rng[1], to = rng[2])
@@ -503,12 +589,9 @@ print(pairplot)
 ggsave(here("figures", "phoneme", "mmrr", "phoneme_mmrr_pairplot.png"),
        pairplot, width = 6.5, height = 6, units = "in", dpi = 300)
 
-# (b) Added-variable (partial regression) plots. Chosen over a coefficient plot:
-# with two predictors and a single dataset these show the ACTUAL isolation-by-
-# distance relationship holding the other predictor constant (the scientific
-# claim), and each panel's fitted slope equals the corresponding MMRR beta. A
-# 2-point coefficient plot conveys less, and permutation yields a null
-# distribution rather than a natural CI around the estimate.
+# (b) Added-variable (partial regression) plots: each panel shows the
+# isolation-by-distance relationship holding the other predictor constant, and
+# its fitted slope equals the corresponding MMRR beta.
 #   geo | phylo : resid(Y ~ X_phylo) vs resid(X_geo ~ X_phylo), slope = beta_geo
 #   phylo | geo : resid(Y ~ X_geo)   vs resid(X_phylo ~ X_geo), slope = beta_phylo
 av_plot <- function(y, x, other, xlab, ylab, beta, pval) {

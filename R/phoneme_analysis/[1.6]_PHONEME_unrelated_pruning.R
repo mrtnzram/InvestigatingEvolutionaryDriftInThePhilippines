@@ -1,15 +1,11 @@
 # =============================================================================
 # [1.6] Phoneme Analysis — Unrelated-language pruning candidates
-# For each Philippine language, finds the right-skew cutoff (median + 2*sd) of
-# its own distribution of cosine similarity to the 137 unrelated controls, then
-# flags which unrelated languages exceed that cutoff. Tallying the flags across
-# all 58 Philippine languages ranks the unrelated controls by how often they
-# show up as an anomalous outlier — candidates for further pruning of the
-# unrelated set (likely contact-contamination leaks that survived the
-# contact_contaminated filter in [0]_CREANZA_RUHLENdatabase.R).
+# For each Philippine language, flags which of the 137 unrelated controls exceed
+# the right-skew cutoff (median + 2*sd) of its own similarity distribution, then
+# tallies the flags to rank controls as candidates for further pruning — likely
+# contact-contamination leaks that survived [0]'s contact_contaminated filter.
 #
-# This script only identifies and ranks candidates; it does not modify
-# RUHLENdf_PH.csv, PHONEME_cosine_matrix.csv, or any downstream pipeline file.
+# Identifies and ranks candidates only; modifies no downstream pipeline file.
 #
 # Inputs:  data/RUHLENdf_PH.csv, data/PHONEME_cosine_matrix.csv
 # Output:  data/PHONEME_unrelated_skew_candidates.csv (137 rows: language, n_exceed)
@@ -35,9 +31,8 @@ load_null_matrix <- function(ph_lang, unr_lang) {
 null_mat <- load_null_matrix(ph_lang, unr_lang)
 
 # --- Per-PH-language cutoff (median + 2*sd) -----------------------------------
-# Each row is one PH language's distribution of similarity to the 137 unrelated
-# controls. The cutoff is row-specific: a PH language's own median/sd, not a
-# pooled/global statistic.
+# The cutoff is row-specific — each PH language's own median/sd, not a pooled
+# global statistic.
 cutoff_tbl <- tibble(
   language     = rownames(null_mat),
   row_median   = apply(null_mat, 1, median),
@@ -85,8 +80,7 @@ ggsave(
 )
 
 # --- Ranked candidate tibble ---------------------------------------------------
-# Tally exceed[] by column (by unrelated language): how many of the 58 PH-
-# language distributions each unrelated language exceeded the cutoff in.
+# Tally by column: how many PH-language distributions each control exceeded.
 skew_candidates <- tibble(
   language  = colnames(null_mat),
   n_exceed  = colSums(exceed)

@@ -1,14 +1,11 @@
 # =============================================================================
 # [0] Grammar Analysis — Preliminary coverage inspection & matrix reduction
 #
-# Diagnostic script, run once before [0]_GRAMBANKdatabase.R. Builds a
-# provisional Philippine + interest-language GRAMBANK feature matrix (Spanish
-# excluded — GRAMBANK has no Spanish coverage, see [0]_GRAMBANKdatabase.R),
-# inspects feature/language coverage, and iteratively prunes sparse
-# features/languages until the matrix stabilizes. The settled thresholds
-# (feature_thresh, language_thresh) and the resulting retained feature set are
-# what [0]_GRAMBANKdatabase.R applies (as a single deterministic pass, not a
-# re-run of this exploration) to build the pipeline's real feature matrix.
+# Diagnostic script, run once before [0]_GRAMBANKdatabase.R. Builds a provisional
+# Philippine + interest-language GRAMBANK matrix (no Spanish — GRAMBANK has no
+# Spanish coverage), then iteratively prunes sparse features/languages until it
+# stabilizes. The thresholds settled here are what [0]_GRAMBANKdatabase.R applies
+# as a single deterministic pass.
 #
 # Input:   data/languages.csv, data/values.csv
 # Outputs: none (diagnostic; console/plot output only)

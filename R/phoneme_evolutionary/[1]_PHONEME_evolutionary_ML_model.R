@@ -2,16 +2,10 @@
 # [1] Phoneme Evolutionary Maximum Likelihood Models
 #
 # Runs a two-stage Markov model selection over every analysable Austronesian
-# phoneme on the pulses tree:
-#   1. ER vs. ARD (ape::ace + anova LRT)
-#   2. 1-regime vs. 2-regime, Philippine clade painted as its own regime
-#      (phytools::fitMk vs. fitmultiMk + manual LRT), using whichever of
-#      ER/ARD won stage 1.
-#
-# Selection is by LRT at alpha = 0.05, overridden to the simpler model whenever
-# the more complex fit returns a non-finite standard error.
-#
-# Only phonemes present in >2 and <100% of tips are analysed; the rest are
+# phoneme on the pulses tree — ER vs. ARD, then 1-regime vs. 2-regime with the
+# Philippine clade painted as its own regime — selecting by LRT at alpha = 0.05
+# and falling back to the simpler model when the complex fit returns a
+# non-finite standard error. Phonemes present in <=2 tips or in all of them are
 # unidentifiable and go to the dropped table.
 #
 # Rates are instantaneous CTMC rates in [0, Inf), not probabilities; saturated
@@ -22,8 +16,6 @@
 #
 # Outputs: data/PHONEME_evolutionary_model_selection.csv
 #          data/PHONEME_evolutionary_dropped_phonemes.csv
-#
-# Runtime: ~6-8 minutes (4 model fits per phoneme).
 # =============================================================================
 
 library(ape)

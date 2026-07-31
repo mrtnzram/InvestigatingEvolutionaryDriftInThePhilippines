@@ -4,20 +4,15 @@
 # Reads the MCC tree (data/mcc.tree), reconciles its tip labels with the
 # Ruhlen/phoneme language names, and prunes it to the Philippine study set.
 #
-# DEPENDENCY / RUN ORDER:
-#   - REQUIRES `Ph_Languages` from PART A of [0]_CREANZA_RUHLENdatabase.R
-#     (run that first, down to its END OF PART A banner).
-#   - PRODUCES `Ph_Languages_pruned`, consumed by PART B of
-#     [0]_CREANZA_RUHLENdatabase.R.
-#   - ALSO PRODUCES `tree_pruned` and `tree_df_matched`, consumed by
-#     [4]_PHONEME_PGLS.R (the Bayesian phylogenetic regression).
-#   - WRITES data/PHONEME_phylo_dist_matrix.csv (pairwise patristic distance
-#     matrix, tree-only) — the phylogenetic predictor in [5]_PHONEME_MMRR.R's
-#     multiple matrix regression.
-#   - WRITES figures/shared/phylogenetic_tree.png (phylogram with tips coloured
-#     by Glottolog family subgroup).
-#   - WRITES data/PHONEME_subgroup_lookup.csv (language -> subgroup -> colour),
-#     the shared palette reused by [8]_PHONEME_tree_vs_network.R.
+# Run order: requires `Ph_Languages` from PART A of [0]_CREANZA_RUHLENdatabase.R,
+# and produces `Ph_Languages_pruned` for its PART B.
+#
+# Input:   data/mcc.tree
+# Outputs: data/PHONEME_phylo_dist_matrix.csv (patristic distances, the
+#          phylogenetic predictor in [5]), data/PHONEME_subgroup_lookup.csv
+#          (language -> subgroup -> colour, consumed by [8]), and
+#          figures/shared/phylogenetic_tree.png.
+# In-env:  tree_pruned, tree_df_matched — consumed by [4]_PHONEME_PGLS.R.
 # =============================================================================
 
 library(tibble)
@@ -173,13 +168,10 @@ Ph_Languages_pruned <- tree_df_matched %>%
 
 
 # ── Coloured phylogram (tips coloured by Glottolog family subgroup) ──────────
-# The MCC/nexus tree carries no clade annotations, so subgroup membership is
-# looked up from Glottolog via each language's ISO 639-3 code (lingtypology).
-# The affiliation path's 4th level is the finer Philippine subgroup (e.g.
-# "Meso-Cordilleran", "Central Philippine", "Manobo"); languages with a shorter
-# path fall back to their deepest available level. All study languages resolve.
-# Drawn as a ggplot phylogram straight from ape's own layout coordinates, so no
-# ggtree/Bioconductor dependency is needed.
+# The MCC/nexus tree carries no clade annotations, so subgroups come from
+# Glottolog via each language's ISO 639-3 code. The affiliation path's 4th level
+# is the Philippine subgroup; shorter paths fall back to their deepest level.
+# Drawn from ape's own layout coordinates to avoid a ggtree dependency.
 tip_subgroup <- tibble(original = tree_pruned$tip.label) %>%
   left_join(tip_df, by = "original") %>%
   left_join(
@@ -199,10 +191,8 @@ tip_subgroup <- tibble(original = tree_pruned$tip.label) %>%
 # Palette assigned in order of clade size (largest first).
 subgroup_levels <- tip_subgroup %>% count(subgroup, sort = TRUE) %>% pull(subgroup)
 
-# Palette for the 18 level-4 subgroups. palette.colors("Polychrome 36") supplies
-# up to 36 maximally-distinct qualitative colours with no extra dependency; drop
-# the lightest (invisible on white), then desaturate so the strip reads as muted
-# rather than harshly saturated. Named by subgroup so colour <-> group is stable.
+# Palette for the level-4 subgroups: Polychrome 36 minus its lightest colours
+# (invisible on white), desaturated, and named by subgroup so the mapping is stable.
 soften <- function(cols, s_mult = 0.55, v_mult = 0.95) {
   h <- grDevices::rgb2hsv(grDevices::col2rgb(cols))
   grDevices::hsv(h["h", ], h["s", ] * s_mult, pmin(h["v", ] * v_mult, 1))
@@ -213,18 +203,15 @@ subgroup_pal <- setNames(
   soften(.poly[.lum < 200])[seq_along(subgroup_levels)], subgroup_levels
 )
 
-# Export the per-language subgroup -> colour lookup so other scripts colour the
-# same languages with the identical palette (e.g. [8]'s tree-vs-network figure
-# needs the map points to match these tip colours exactly). One row per language
-# (ph); tip_subgroup's dialect duplicates collapse away via distinct().
+# Export the subgroup -> colour lookup so [8]'s map points match these tip
+# colours exactly; distinct() collapses tip_subgroup's dialect duplicates.
 tip_subgroup %>%
   distinct(language = ph, subgroup) %>%
   mutate(colour = unname(subgroup_pal[subgroup])) %>%
   write.csv(here("data", "PHONEME_subgroup_lookup.csv"), row.names = FALSE)
 
-# Let ape compute the rectangular phylogram layout, then read the tip/node
-# coordinates back out instead of re-deriving them. plot = FALSE fills
-# .PlotPhyloEnv without drawing (the null device just absorbs the device call).
+# Let ape compute the phylogram layout and read its coordinates back out:
+# plot = FALSE fills .PlotPhyloEnv without drawing, absorbed by the null device.
 grDevices::pdf(NULL)
 plot.phylo(tree_pruned, plot = FALSE)
 grDevices::dev.off()
@@ -243,11 +230,9 @@ tip_plot_df <- tip_subgroup %>%
     subgroup = factor(subgroup, levels = subgroup_levels)
   )
 
-# Group annotation strip (replaces the legend): a colour bar beside the tips with
-# each subgroup name written once per contiguous block of tips, so it reads which
-# languages sit under which group without a colour-matching round trip. Most
-# subgroups are monophyletic and form one block; a few interspersed tips (e.g.
-# the Sangiric singleton at the top) make an extra short block, labelled in place.
+# Group annotation strip replaces the legend: a colour bar beside the tips,
+# labelled once per contiguous block, so non-monophyletic subgroups get one
+# label per block rather than a single ambiguous entry.
 bar_x0 <- x_tip * 1.37          # strip sits clear of the left-aligned tip labels
 bar_w  <- x_tip * 0.035
 grp_x  <- bar_x0 + bar_w + x_tip * 0.02
@@ -270,15 +255,13 @@ phylo_tree_plot <- ggplot() +
   geom_rect(data = tip_plot_df,
             aes(xmin = bar_x0, xmax = bar_x0 + bar_w,
                 ymin = y - 0.5, ymax = y + 0.5, fill = subgroup)) +
-  # subgroup name beside each contiguous block. Text is dark (not the group
-  # colour): it sits directly against its colour tile, so the tie is already
-  # spatial, and dark type stays legible for the palest subgroups.
+  # Label text is dark rather than the group colour: it abuts its own tile, so
+  # the tie is already spatial and dark type stays legible for pale subgroups.
   geom_text(data = grp_lab_df, aes(x = grp_x, y = y, label = subgroup),
             hjust = 0, size = 2.3, colour = "grey15") +
   scale_fill_manual(values = subgroup_pal, guide = "none") +
-  # Right limit crops the panel just past the subgroup labels (was far wider,
-  # leaving a broad blank margin); clip = "off" lets any label glyph that pokes
-  # past the limit still draw into the small plot margin rather than being cut.
+  # Right limit crops the panel just past the subgroup labels; clip = "off" lets
+  # an overhanging glyph draw into the margin instead of being cut.
   scale_x_continuous(limits = c(-x_tip * 0.02, x_tip * 1.72), expand = c(0, 0)) +
   coord_cartesian(clip = "off") +
   labs(title = "Philippine study languages - phylogeny (ABVD / King et al. 2024)") +
@@ -300,13 +283,10 @@ ggsave(here("figures", "shared", "phylogenetic_tree.png"),
 
 
 # ── Pairwise phylogenetic (patristic) distance matrix ───────────────────────
-# Tree-only artifact (needs no cossim/geodist data), so it is built here rather
-# than in [4]. cophenetic.phylo() returns tip-to-tip patristic distance keyed by
-# the raw tree labels ("original"). Some study languages are represented by more
-# than one tree tip (e.g. dialect-level samples of "Ata" that both map to the
-# same `ph` name) — collapsed by averaging every original-tip pair's distance
-# within each ph-to-ph pair, so the output is one row/col per language, matching
-# PHONEME_dist_matrix.csv / PHONEME_diss_matrix.csv from [5]_PHONEME_MMRR.R.
+# Tree-only artifact, so it is built here rather than in [4]. Some study
+# languages have more than one tree tip; those are collapsed by averaging every
+# original-tip pair within each ph-to-ph pair, giving one row/col per language
+# to match the [5] matrices.
 phylo_dist_raw <- cophenetic.phylo(tree_pruned)
 
 phylo_dist_long <- as_tibble(phylo_dist_raw, rownames = "original_1") %>%
@@ -323,9 +303,8 @@ PHONEME_phylo_dist_matrix <- phylo_dist_long %>%
   column_to_rownames("ph_1") %>%
   as.matrix()
 
-# pivot_wider's column order follows first appearance in the long table, which
-# does not match the row order — reindex columns to match rows so diag() below
-# addresses true self-pairs rather than whatever landed at position [i, i].
+# pivot_wider orders columns by first appearance, not by row order, so reindex
+# to make diag() address true self-pairs.
 PHONEME_phylo_dist_matrix <- PHONEME_phylo_dist_matrix[, rownames(PHONEME_phylo_dist_matrix)]
 
 # ph_1 != ph_2 above drops the diagonal (self-pairs) along with same-ph dialect

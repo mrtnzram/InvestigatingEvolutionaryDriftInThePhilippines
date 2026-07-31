@@ -1,29 +1,18 @@
 # =============================================================================
 # [8] Grammar Analysis — EXPERIMENTAL: waypoint network vs. phylogeny
 #
-# Diagnostic, NOT part of the core pipeline. Puts two panels side by side to
-# eyeball a single hypothesis: has the waypoint / relative-migration network
-# essentially recreated the language phylogeny?
+# Diagnostic, NOT part of the core pipeline. Pairs the [0] phylogeny PNG with
+# [3]'s waypoint-network map, both coloured by the same level-4 Glottolog
+# subgroup palette, to eyeball whether the network recreates the phylogeny, and
+# saves the network panel separately with a matching legend strip.
 #
-#   Left  — figures/shared/grammar_phylogenetic_tree.png (from [0]); tips coloured by
-#           level-4 Glottolog family subgroup.
-#   Right — [3]'s plot_network() map, with the language points coloured by the
-#           SAME subgroup palette (they are uncoloured shape-21 dots in [3]).
+# Run order: requires [0]_Phylogenetic_Tree.R (for the tree PNG and the shared
+# subgroup lookup) and source()s [3]_GRAMMAR_network_distance.R for the network
+# objects.
 #
-# If the network recreates the tree, same-coloured points should cluster
-# geographically on the right the way same-coloured tips cluster on the left.
-#
-# DEPENDENCY / RUN ORDER:
-#   - REQUIRES [0]_Phylogenetic_Tree.R to have been run: needs
-#     figures/shared/grammar_phylogenetic_tree.png AND data/GRAMMAR_subgroup_lookup.csv
-#     (the shared subgroup -> colour map, so both panels match exactly).
-#   - source()s [3]_GRAMMAR_network_distance.R to rebuild the network objects.
-# Output: figures/shared/grammar_tree_vs_network.png (paired comparison)
-#         figures/grammar/mst_waypoints/GRAMMAR_network_by_subgroup.png (network
-#         panel alone, with a tree-style stacked colour-tile legend, titled for
-#         the Manila Galleon trade-route framing) — filed under grammar/, not
-#         shared/, since it's specific to the grammar network (mirrors the
-#         PHONEME_ version under figures/phoneme/mst_waypoints/).
+# Inputs:  figures/shared/grammar_phylogenetic_tree.png, data/GRAMMAR_subgroup_lookup.csv
+# Outputs: figures/shared/grammar_tree_vs_network.png,
+#          figures/grammar/mst_waypoints/GRAMMAR_network_by_subgroup.png
 # =============================================================================
 
 library(tidyverse)
@@ -35,10 +24,9 @@ library(grid)
 library(here)
 
 # ---- 1. Network objects from [3] --------------------------------------------
-# [3] is self-contained (reads data/) and, as a side effect of sourcing, leaves
-# full_tree_sf, arrow_connectors, GRAMMAR_cossim, world_map, MANILA
-# and plot_network() in the environment. NOTE: [3] attaches library(maps), which
-# masks purrr::map — this script uses only dplyr verbs, so that is harmless here.
+# Sourcing [3] leaves full_tree_sf, arrow_connectors, GRAMMAR_cossim, world_map,
+# MANILA and plot_network() in the environment. NOTE: [3] attaches library(maps),
+# which masks purrr::map — harmless here, since only dplyr verbs are used.
 source(here("R", "grammar_analysis", "[3]_GRAMMAR_network_distance.R"), echo = FALSE)
 
 # ---- 2. Shared subgroup palette (identical to the tree) ----------------------
@@ -46,15 +34,13 @@ subgroup_lookup <- read_csv(here("data", "GRAMMAR_subgroup_lookup.csv"),
                             show_col_types = FALSE)
 pal <- setNames(subgroup_lookup$colour, subgroup_lookup$subgroup)
 
-# Attach subgroup to the language points. Unlike phoneme (where all 58 network
-# languages have a tree tip), several grammar Philippine languages have NO tree
-# placement (the ABVD tree lacks Sabah/Sama-Bajau coverage — see
-# [0]_Phylogenetic_Tree.R's pruning report, 13 of 39 dropped) and so have no
-# subgroup colour. Those points are dropped from this diagnostic (not from the
-# core pipeline) rather than erroring, with a message reporting how many.
+# Attach subgroup to the language points. Philippine languages the ABVD tree
+# cannot place (no Sabah/Sama-Bajau coverage) have no subgroup colour, so they
+# are dropped from this diagnostic only — the core pipeline still keeps them.
 points_coloured <- GRAMMAR_cossim %>%
   dplyr::left_join(dplyr::select(subgroup_lookup, language, subgroup),
                    by = "language")
+
 n_no_subgroup <- sum(is.na(points_coloured$subgroup))
 if (n_no_subgroup > 0) {
   message(
@@ -67,16 +53,9 @@ if (n_no_subgroup > 0) {
 }
 
 # ---- 3. Coloured network panel ----------------------------------------------
-# plot_network()'s body from [3], simplified for this comparison: the language
-# points are shape-21 discs filled by subgroup (grey outline for contrast on the
-# land polygons), and the connector arrows are drawn a uniform light grey, a
-# little thinner than the main network edges, instead of [3]'s black/firebrick
-# "H2 route" colouring. No legends: the subgroup fill is suppressed (the left
-# panel's labelled colour strip is the shared key) and the connectors no longer
-# carry a colour scale, so the map stays uncluttered. Main network edges have no
-# arrowheads — they're a bidirectional route between nodes, so a directed arrow
-# on one edge conflicts visually with the arrow its reverse would need; only the
-# (directional) language -> node connectors keep arrowheads.
+# [3]'s plot_network() with the points filled by subgroup and the connectors a
+# uniform grey instead of the "H2 route" colouring. Legends are suppressed: the
+# tree panel's colour strip is the shared key for both panels.
 plot_network_coloured <- function(full_tree_sf, arrow_connectors,
                                   points_df, refdf1 = MANILA,
                                   lon_range = c(116, 127), lat_range = c(4, 21),
@@ -104,7 +83,7 @@ network_panel <- plot_network_coloured(full_tree_sf, arrow_connectors,
                                        points_coloured, refdf1 = MANILA)
 
 # ---- 4. Left panel: the phylogeny PNG as a raster ---------------------------
-tree_png  <- png::readPNG(here("figures", "shared", "phylogenetic_tree.png"))
+tree_png  <- png::readPNG(here("figures", "shared", "grammar_phylogenetic_tree.png"))
 tree_grob <- grid::rasterGrob(tree_png, interpolate = TRUE)
 
 # ---- 5. Combine + save ------------------------------------------------------
@@ -121,15 +100,10 @@ ggsave(here("figures", "shared", "grammar_tree_vs_network.png"),
        combined, width = 15, height = 9, units = "in", dpi = 300)
 
 # ---- 6. Standalone network figure, with a tree-style legend strip -----------
-# The right-hand panel on its own (no phylogeny alongside), for use outside the
-# tree-vs-network comparison. It needs its own legend since the tree's colour
-# strip isn't present to serve as the shared key here — built to match that
-# strip's look (a stacked colour tile + name per subgroup) rather than
-# ggplot's default small-swatch legend, so the two figures read as one family.
-# Rows are ordered by each subgroup's mean latitude (north first), not by
-# clade size, so the legend reads top-to-bottom the same way the subgroups sit
-# on the map (e.g. the northern Cordillera cluster near the top of the legend,
-# the Mindanao clusters near the bottom).
+# The network panel alone needs its own key, built as a stacked colour tile per
+# subgroup to match the tree's strip rather than ggplot's default swatches.
+# Rows are ordered by mean latitude (north first) so the legend reads
+# top-to-bottom the way the subgroups sit on the map.
 subgroup_lat <- points_coloured %>%
   dplyr::group_by(subgroup) %>%
   dplyr::summarise(mean_lat = mean(latitude), .groups = "drop")
@@ -164,9 +138,7 @@ network_with_legend <- (network_standalone | legend_strip) +
   )
 print(network_with_legend)
 
-# figures/grammar/mst_waypoints/, not figures/shared/: this network is specific
-# to the grammar cosine-similarity dataset ([3]_GRAMMAR_network_distance.R),
-# matching the existing PHONEME_/GRAMMAR_ split for the other waypoint figures
-# in these two folders.
+# Filed under figures/grammar/, not shared/: this network is specific to the
+# grammar dataset, matching the PHONEME_/GRAMMAR_ split of the other waypoint figures.
 ggsave(here("figures", "grammar", "mst_waypoints", "GRAMMAR_network_by_subgroup.png"),
        network_with_legend, width = 11, height = 9, units = "in", dpi = 300)

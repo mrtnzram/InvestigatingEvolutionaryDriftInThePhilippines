@@ -1,24 +1,15 @@
 # =============================================================================
 # [0] Grammar Analysis — Build the GRAMBANK feature database
 #
-# Builds the Philippine + interest-language feature matrix from GRAMBANK
-# (applying the reduction thresholds settled by [0]_prelim.R), hard-codes
-# Spanish (absent from GRAMBANK — see below), and derives the unrelated
-# control set dynamically so it mirrors the phoneme analysis: the control
-# set is exactly phoneme's Ruhlen-derived unrelated languages that also have
-# GRAMBANK coverage on the retained features (same "present in both
-# datasets" criterion used in [0]_CREANZA_RUHLENdatabase.R PART B).
+# Builds the Philippine + interest-language feature matrix from GRAMBANK using
+# the reduction thresholds settled by [0]_prelim.R, hard-codes Spanish (absent
+# from GRAMBANK), and derives the unrelated control set as phoneme's
+# Ruhlen-derived controls that also have GRAMBANK coverage, so both analyses
+# share one control set.
 #
-# RUN ORDER (this script has a dependency on the phylogenetic tree, mirroring
-# [0]_CREANZA_RUHLENdatabase.R):
-#   1. Run [0]_prelim.R first (informs feature_thresh/language_thresh below).
-#   2. Run PART A below (down to the `Ph_Languages` definition) — applies the
-#      settled thresholds deterministically, it does not re-explore.
-#   3. Run [0]_Phylogenetic_Tree.R — it consumes `Ph_Languages` and
-#      `GRAMBANKdf_PH_maximized` and produces `Ph_Languages_pruned` (the
-#      tree-validated subset used downstream).
-#   4. Run PART B below (everything after the banner), which needs
-#      `Ph_Languages_pruned`.
+# Run order: [0]_prelim.R, PART A, then [0]_Phylogenetic_Tree.R (which turns
+# `Ph_Languages` and `GRAMBANKdf_PH_maximized` into `Ph_Languages_pruned`),
+# then PART B.
 #
 # Input:   data/languages.csv, data/values.csv, data/RUHLENdf_PH.csv
 #          (phoneme's control-set source, for the dynamic unrelated set)
@@ -61,11 +52,9 @@ GRAMBANKdf_PH <- GRAMBANKdf_PH %>%
 GRAMBANKdf_PH <- GRAMBANKdf_PH %>%
   rename(language = Name)
 
-# Apply the reduction thresholds settled by [0]_prelim.R (feature_thresh = 80,
-# language_thresh = 50): a single deterministic pass, not a re-exploration.
-# NOTE: as in [0]_prelim.R, the loop is NOT run to its own convergence — it
-# over-prunes to nothing by iteration 3. The stable, usable snapshot is
-# iter_2 (50 features, 41 languages), taken explicitly below.
+# Apply [0]_prelim.R's settled thresholds in one deterministic pass. NOTE: the
+# loop is deliberately not run to convergence — it over-prunes to nothing by
+# iteration 3, so the iter_2 snapshot is taken explicitly below.
 metadata_cols <- c("Language_ID", "language", "Family_name", "Macroarea", "Longitude", "Latitude")
 feature_thresh <- 80
 language_thresh <- 50
@@ -95,10 +84,8 @@ Ph_Languages <- GRAMBANKdf_PH_maximized %>%
 
 # =============================================================================
 # >>> END OF PART A <<<
-# STOP here and run [0]_Phylogenetic_Tree.R, which consumes `Ph_Languages` and
-# `GRAMBANKdf_PH_maximized` (both defined above) and returns
-# `Ph_Languages_pruned` — the tree-validated subset.
-# PART B below requires `Ph_Languages_pruned` to be in the environment.
+# STOP here and run [0]_Phylogenetic_Tree.R: it consumes `Ph_Languages` and
+# `GRAMBANKdf_PH_maximized` and returns the `Ph_Languages_pruned` PART B needs.
 # =============================================================================
 stopifnot(
   "Run [0]_Phylogenetic_Tree.R first: `Ph_Languages_pruned` is not defined." =
@@ -107,11 +94,9 @@ stopifnot(
 
 # ----------------------------- PART B (run after tree) -----------------------
 
-# Drop Philippine languages that didn't survive tree pruning (no tree tip, or
-# unresolved name mismatch) — mirrors [0]_CREANZA_RUHLENdatabase.R PART B,
-# where the final Philippine set is Ph_Languages_pruned rather than the full
-# coverage-reduced candidate set. Interest languages (English/Japanese) are
-# untouched — the tree only covers Philippine languages.
+# Drop Philippine languages that didn't survive tree pruning, mirroring
+# [0]_CREANZA_RUHLENdatabase.R PART B. Interest languages are untouched, since
+# the tree only covers Philippine languages.
 n_before_pruning <- sum(GRAMBANKdf_PH_maximized$Language_Type == "Philippine Language")
 
 GRAMBANKdf_PH_maximized <- GRAMBANKdf_PH_maximized %>%
@@ -124,10 +109,8 @@ message(
 )
 
 # ---- 4. Spanish — hard-coded, not queried ----
-# Spanish is absent from GRAMBANK; these feature values are hand-sourced from
-# WALS (lifted from the previously hand-curated data/GRAMBANKdf_PH.csv).
-# NOTE: the source coordinates had Longitude/Latitude swapped (Spain is
-# ~40N, ~4W); corrected here.
+# Spanish is absent from GRAMBANK, so these feature values are hand-sourced from
+# WALS. NOTE: the source coordinates had Longitude/Latitude swapped; fixed here.
 spanish_row <- tibble(
   Language_ID = "stan1288", language = "Spanish",
   Family_name = "Indo-European", Macroarea = "Eurasia",
@@ -153,10 +136,8 @@ GRAMBANK_query <- grambank.feature(c('gb020','gb021','gb022','gb023','gb028','gb
                                      'gb321','gb415'), na.rm = FALSE)
 
 # ---- 6. Derive the unrelated control set — mirror phoneme exactly ----
-# The control set must be present in BOTH datasets. Read phoneme's already-
-# derived unrelated set (data/RUHLENdf_PH.csv) and keep only those languages
-# that also have GRAMBANK coverage on the queried features, bridging Ruhlen
-# ISO codes to GRAMBANK glottocodes (same mechanism phoneme [0] PART B uses).
+# The control set must be present in BOTH datasets: take phoneme's unrelated set
+# and keep those with GRAMBANK coverage, bridging Ruhlen ISO to GRAMBANK glottocode.
 RUHLENdf_PH <- read_csv(here("data", "RUHLENdf_PH.csv"), show_col_types = FALSE)
 
 ruhlen_unrelated <- RUHLENdf_PH %>%

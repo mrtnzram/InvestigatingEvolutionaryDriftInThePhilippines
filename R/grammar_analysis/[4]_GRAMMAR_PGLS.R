@@ -1,25 +1,15 @@
 # =============================================================================
 # [4] Grammar Analysis — Bayesian phylogenetic regression
 #
-# Fits three models of Spanish-grammar cosine similarity vs. terrain-penalized
-# migration distance, each with the phylogenetic covariance in the likelihood:
+# Fits linear, exponential-decay and cubic-spline models of Spanish-grammar
+# cosine similarity vs. terrain-penalized migration distance with ulam(), each
+# under a multi_normal likelihood carrying the same Pagel's-lambda-scaled
+# phylogenetic covariance, then compares them by WAIC/PSIS-LOO. Lambda is fixed
+# at the PGLS ML estimate and shared across models, so WAIC differences reflect
+# only the mean structure.
 #
-#     y ~ multi_normal(mu, sigma^2 * R_lambda)
+# Run order: requires `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
 #
-#   1. Linear        mu = a + b*x
-#   2. Exp. decay    mu = a*exp(-b*x)
-#   3. Cubic spline  mu = a + B %*% w,  B = bs(x, df = 5)
-#
-# R_lambda is Pagel's-lambda-scaled phylogenetic correlation. Lambda is FIXED at
-# the PGLS ML estimate (lambda_hat) and the same R_lambda feeds all three models,
-# so WAIC differences reflect only the mean structure. Models are fit with ulam()
-# (HMC/NUTS via cmdstan).
-#
-#
-# DEPENDENCY / RUN ORDER:
-#   - REQUIRES `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
-#   - Pairwise patristic distance matrix now lives in [0] (moved there); this
-#     script no longer produces it.
 # Input:   data/GRAMMAR_final.csv (from [3]_GRAMMAR_network_distance.R)
 # Outputs: data/GRAMMAR_pgls_results.csv   (PGLS lambda / slope table)
 #          data/GRAMMAR_waic_compare.csv   (WAIC model comparison + nRMSE)
@@ -34,10 +24,8 @@ library(splines)
 library(loo)
 library(here)
 
-# rethinking pulls in `posterior` (via the cmdstanr backend), which exports its
-# own sd() for rvar objects and re-masks stats::filter; nothing here uses rvars
-# (extract.samples() returns plain matrices) or time-series filtering, so
-# stats::sd/dplyr::filter are the ones this script actually needs.
+# rethinking pulls in `posterior`, which masks sd() and filter(); nothing here
+# uses rvars or time-series filtering, so the base/dplyr versions are the ones needed.
 if (requireNamespace("conflicted", quietly = TRUE)) {
   conflicted::conflicts_prefer(stats::sd, .quiet = TRUE)
   conflicted::conflicts_prefer(dplyr::filter, .quiet = TRUE)
@@ -58,11 +46,9 @@ tip_map <- tree_df_matched |> dplyr::select(original, gram)
 
 
 # ── 1. Comparative dataset + PGLS lambda estimate ───────────────────────────
-# comparative.data() joins the per-language data to the tree and (vcv = TRUE)
-# returns the phylogenetic VCV already ordered to match its $data — this is the
-# ordering we reuse below so y, x and R_lambda never fall out of sync. Languages
-# represented by more than one tree tip (dialect samples) are duplicated by the
-# tip_map join, giving one data point per tip, matching the PGLS fit.
+# comparative.data(vcv = TRUE) returns the VCV already ordered to match its
+# $data, and that ordering is reused below so y, x and R_lambda stay in sync.
+# The tip_map join duplicates multi-tip languages, giving one point per tip.
 df <- GRAMMAR_final |>
   dplyr::select(language, cossim = cossim_span, geodist_H1_span) |>
   left_join(tip_map, by = c("language" = "gram")) |>
@@ -101,12 +87,9 @@ write.csv(GRAMMAR_pgls_results,
 
 
 # ── 2. Build the fixed phylogenetic correlation R_lambda ────────────────────
-# cov2cor puts the VCV on a correlation scale (diagonal 1); Pagel's lambda then
-# shrinks the off-diagonals: R_lambda = lambda*R + (1-lambda)*I. sigma^2 in the
-# models scales it up to the residual covariance. Response/predictor and the VCV
-# are both reindexed to the VCV tip order (`ord`) so nothing falls out of sync.
-# The matrix is stripped of its caper "VCV.array" class and dimnames before it
-# enters ulam(): those attributes break ulam's data-dimension registration.
+# R_lambda = lambda*R + (1-lambda)*I on the correlation-scaled VCV; sigma^2 in
+# the models scales it up to the residual covariance. The matrix must be stripped
+# of its caper "VCV.array" class and dimnames, which break ulam's dimension registration.
 ord  <- rownames(comp_data$vcv)
 cd   <- comp_data$data[ord, , drop = FALSE]
 y    <- cd$cossim
@@ -127,9 +110,8 @@ dat <- list(N = N, y = y, x = x, Rlambda = Rlambda)
 
 
 # ── 3. Model 1: linear ──────────────────────────────────────────────────────
-# multi_normal likelihood with the fixed phylogenetic covariance K. Priors are
-# on the cosine-similarity scale (mean ~0.12): intercept near that, slope tight
-# around 0, small residual sigma. log_lik = FALSE — WAIC is built in §6.
+# Priors sit on the cosine-similarity scale (mean ~0.12); log_lik = FALSE
+# because WAIC is built from the whitened likelihood in §6 instead.
 m_lin <- ulam(
   alist(
     y ~ multi_normal(mu, K),
@@ -182,8 +164,8 @@ precis(m_spline, pars = c("a", "sigma"))
 
 
 # ── 6. Model comparison (WAIC + PSIS-LOO via loo) ───────────────────────────
-# Pointwise log-likelihood from the Cholesky whitening (see header). Lc is the
-# lower Cholesky factor of the fixed R_lambda; forwardsolve() applies Lc^{-1}.
+# Pointwise log-likelihood by Cholesky whitening: Lc is the lower factor of the
+# fixed R_lambda, and forwardsolve() applies Lc^{-1} to the residuals.
 Lc     <- t(chol(Rlambda))        # lower-triangular: Rlambda = Lc %*% t(Lc)
 Lc_diag <- diag(Lc)
 
@@ -216,12 +198,9 @@ cat("\n--- PSIS-LOO comparison ---\n"); print(loo::loo_compare(loo_list))
 
 
 # ── 7. Posterior predictions + 95% credible intervals ───────────────────────
-# Means are computed directly from posterior draws (robust for the multi_normal
-# models); the credible ribbon is the 95% quantile interval of mu across draws.
-# Model fitting stays on the Mm (x_km/1000) scale (§2, unchanged — priors were
-# tuned to it); DISPLAY_UNIT_KM only rescales what's plotted/printed below, so
-# axis values and equation coefficients read in "per 100 km" rather than
-# "per km" (e.g. -0.0033 instead of -0.000033) without re-fitting anything.
+# The ribbon is the 95% quantile interval of mu across posterior draws. Fitting
+# stays on the Mm scale of §2 (the priors are tuned to it); DISPLAY_UNIT_KM only
+# rescales what is plotted and printed, so coefficients read in "per 100 km".
 DISPLAY_UNIT_KM <- 100
 xseq_km <- seq(min(x_km), max(x_km), length.out = 100)
 xseq    <- xseq_km / 1000
@@ -251,9 +230,8 @@ ribbon_sp  <- summarise_mu(mu_sp,  xseq_disp)
 
 scatter_df <- data.frame(geodist_H1_span = x_km / DISPLAY_UNIT_KM, cossim_span = y)
 
-# nRMSE at the observed points (posterior-mean fit vs. y, scaled by the
-# response range). Computed here, once, so both the plot subtitles below and
-# §8's comparison table use the same numbers.
+# nRMSE at the observed points, computed once here so the plot subtitles and
+# §8's comparison table report the same numbers.
 mu_lin_obs <- sapply(x, function(xx) post_lin$a + post_lin$b * xx)
 mu_exp_obs <- sapply(x, function(xx) post_exp$a * exp(-post_exp$b * xx))
 mu_sp_obs  <- as.numeric(post_sp$a) + post_sp$w %*% t(matrix(as.numeric(Bmat), nrow = N))
@@ -264,9 +242,8 @@ nrmse_lin <- nrmse(mu_lin_obs)
 nrmse_exp <- nrmse(mu_exp_obs)
 nrmse_sp  <- nrmse(mu_sp_obs)
 
-# Posterior-mean equations for the plot subtitles. Slopes/decay rates are
-# converted from the models' fitting scale (x in Mm = 1000 km) to the
-# DISPLAY_UNIT_KM (100 km) scale used by the plots: x_Mm = x_disp * (DISPLAY_UNIT_KM/1000).
+# Posterior-mean equations for the plot subtitles, with slopes/decay rates
+# converted from the Mm fitting scale to the DISPLAY_UNIT_KM plotting scale.
 disp_per_mm <- DISPLAY_UNIT_KM / 1000  # e.g. 0.1 when DISPLAY_UNIT_KM = 100
 a_lin <- mean(post_lin$a); b_lin_disp <- mean(post_lin$b) * disp_per_mm
 eq_lin <- sprintf("y = %.4f %s %.4f*x", a_lin, ifelse(b_lin_disp >= 0, "+", "-"), abs(b_lin_disp))
@@ -327,11 +304,8 @@ write.csv(report, file = here("data", "GRAMMAR_waic_compare.csv"), row.names = F
 
 
 # ── 9. Collinearity: geographic vs. phylogenetic distance ───────────────────
-# Same pairwise conversion for both: geographic distance from the per-language
-# geodist_H1_span (the model predictor), phylogenetic distance from the raw VCV
-# (V_phylo, built in §2) via D_ij = V_ii + V_jj - 2*V_ij. A high correlation here
-# is the mechanical reason lambda_hat ~ 1 flattens the slope: geography and
-# phylogeny carry almost the same information about language pairs.
+# Geographic distance from the model predictor, phylogenetic distance from the
+# raw VCV of §2 via D_ij = V_ii + V_jj - 2*V_ij.
 stopifnot(
   "V_phylo is not square/NxN — rerun from §2 (comp_data build) in a clean session." =
     is.matrix(V_phylo) && nrow(V_phylo) == N && ncol(V_phylo) == N

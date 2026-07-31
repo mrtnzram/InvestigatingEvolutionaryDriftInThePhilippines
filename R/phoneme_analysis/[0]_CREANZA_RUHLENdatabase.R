@@ -12,14 +12,8 @@
 #
 # Outputs: data/RUHLENdf_PH.csv, data/phoneme_freq_ruhlen.csv
 #
-# RUN ORDER (this script has a dependency on the phylogenetic tree):
-#   1. Run PART A below (down to the `Ph_Languages` definition).
-#   2. Run [0]_Phylogenetic_Tree.R — it consumes `Ph_Languages` and produces
-#      `Ph_Languages_pruned` (the tree-validated subset used downstream).
-#   3. Run PART B below (everything after the banner), which needs
-#      `Ph_Languages_pruned`.
-# The Grambank unrelated-control set is now built locally (see PART B); no
-# grammar script needs to be sourced.
+# Run order: PART A, then [0]_Phylogenetic_Tree.R (which turns `Ph_Languages`
+# into `Ph_Languages_pruned`), then PART B.
 # =============================================================================
 
 library(lingtypology)
@@ -74,9 +68,8 @@ message("Philippine languages detected by bounding box (n = ", length(Ph_Languag
 
 # =============================================================================
 # >>> END OF PART A <<<
-# STOP here and run [0]_Phylogenetic_Tree.R, which consumes `Ph_Languages`
-# (defined above) and returns `Ph_Languages_pruned` — the tree-validated subset.
-# PART B below requires `Ph_Languages_pruned` to be in the environment.
+# STOP here and run [0]_Phylogenetic_Tree.R: it consumes `Ph_Languages` and
+# returns the `Ph_Languages_pruned` PART B needs.
 # =============================================================================
 stopifnot(
   "Run [0]_Phylogenetic_Tree.R first: `Ph_Languages_pruned` is not defined." =
@@ -100,12 +93,9 @@ ph_regions <- ruhlen_raw |>
   pull(region) |>
   unique()
 
-# Bounding box buffer (km) — controls for areal contact effects, following
-# the convention in typological sampling of excluding/modeling languages
-# within ~1000 km to avoid areal (contact-induced) similarity confounding
-# genealogical signal. See Jaeger, Graff, Croft & Pontillo (2011),
-# "Mixed effect models for genetic and areal dependencies in linguistic
-# typology," Linguistic Typology 15(2): 281-319.
+# Bounding-box buffer (km) excluding languages close enough for areal contact to
+# confound genealogical signal. See Jaeger, Graff, Croft & Pontillo (2011),
+# Linguistic Typology 15(2): 281-319.
 buffer_km <- 1000
 
 ph_coords <- ruhlen_raw |>
@@ -146,17 +136,13 @@ ruhlen_candidates <- ruhlen_raw |>
   )
 
 # ---- Build GRAMBANKdf_unrelated locally (no grammar script needed) ----
-# The "unrelated" baseline must be languages that are covered in BOTH the Ruhlen
-# phoneme data and the Grambank grammar data, so the two analyses share a control
-# set. This block reproduces the unrelated-set definition from
-# [0]_GRAMBANKdatabase.R, but WITHOUT its iterative matrix-reduction loop: the
-# only value that filter consumed from the reduced matrix is the macroarea(s) of
-# the Philippine languages (`relatedmacroareas`), which is simply "Papunesia".
+# The unrelated baseline must be covered in BOTH Ruhlen and Grambank so the two
+# analyses share a control set. Reproduces [0]_GRAMBANKdatabase.R's definition
+# without its matrix-reduction loop, which only supplied `relatedmacroareas`.
 languages <- read_csv(here("data", "languages.csv"), show_col_types = FALSE)
 
-# Macroarea(s) of the Philippine languages — the sole input the unrelated-set
-# filter needs from Grambank's (here-dropped) reduction step. Resolves to
-# "Papunesia"; deriving it from the bbox keeps this self-contained.
+# Macroarea(s) of the Philippine languages (resolves to "Papunesia"), derived
+# from the bounding box so this block stays self-contained.
 relatedmacroareas <- languages |>
   filter(Latitude > 4.5 & Latitude < 21 & Longitude > 115 & Longitude < 128) |>
   pull(Macroarea) |>
@@ -278,17 +264,9 @@ map.feature(PHOIBLEdf_PH$language, PHOIBLEdf_PH$Language_type)
 write_csv(PHOIBLEdf_PH, here("data", "RUHLENdf_PH.csv"))
 
 # ---- 6. Compute global phoneme frequencies and IDF weights ----
-# Denominator: every Austronesian language in Ruhlen, Philippine languages
-# included (n = 284). Philippine languages are deliberately NOT excluded — they
-# are part of the Austronesian baseline a phoneme's rarity is measured against.
-#
-# This block previously filtered on `!language %in% Philippine_langs`, which
-# never removed anything: `Philippine_langs` is not defined in this script (it
-# defines `Ph_Languages` above) and exists only in the grammar scripts, where it
-# is a Grambank data frame rather than a vector of Ruhlen language names. Every
-# result downstream of this file was therefore already computed on the full 284,
-# so dropping the dead filter changes no output — it only makes the code state
-# what it actually does.
+# Denominator: every Austronesian language in Ruhlen (n = 284). Philippine
+# languages are deliberately kept in — they are part of the Austronesian
+# baseline a phoneme's rarity is measured against.
 
 compute_phoneme_freq <- function(data, n_total = nrow(data)) {
   data |>

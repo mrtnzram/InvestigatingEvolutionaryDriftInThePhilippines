@@ -5,17 +5,6 @@
 # the interest-language baselines, and which phonemes carry meaningful vs.
 # unmeaningful variance across the Philippine languages.
 #
-# Sections:
-#   0b. PHOIBLE Austronesian IDF (from scratch via lingtypology) + Americanist->IPA crosswalk
-#   1.  Cross-reference phoneme names (phoneme_id -> IPA / class, from the PNAS key)
-#   2.  Japanese phoneme drivers (centroid + max-pair decomposition, worked example)
-#   3.  Final phoneme drivers table — prevalences + baseline indicators + variance;
-#       right-skew leverage + bidirectional flag (data/PHONEME_driver_table.csv).
-#   4.  Ruhlen vs PHOIBLE IDF comparison — IDF_ruhlen vs IDF_phoible (both [0,1]),
-#       idf_shift + variance_shift_dir, to see how Ruhlen's phoneme-flag adjustments
-#       reweight phonemes. PHOIBLE's individual modified segments are scored against
-#       the Ruhlen modification-type flag they belong to (data/PHONEME_driver_phoible.csv).
-#
 # Inputs:  data/RUHLENdf_PH.csv                    (binary phoneme matrix + Language_type)
 #          data/phoneme_freq_ruhlen_austronesian.csv (Ruhlen IDF + Austronesian freq)
 #          data/phoneme_freq_ruhlen.csv            (global Ruhlen prevalence)
@@ -73,13 +62,11 @@ U         <- V / row_norms
 # =============================================================================
 # Section 0b — PHOIBLE Austronesian IDF + Americanist->IPA crosswalk
 # =============================================================================
-# IDF_phoible is computed over PHOIBLE's own Austronesian languages (glottolog
-# family) minus the Philippine bounding box (n = 88), with the SAME Laplace IDF
-# formula as IDF_ruhlen. Ruhlen uses Americanist symbols (č, š, ñ, dot-under
-# retroflex) while PHOIBLE uses strict IPA, so a crosswalk (typology-descr.pdf
-# Table 1 / §7 / §19) aligns the BASE phonemes. Ruhlen collapses each modification
-# into ONE indicator while PHOIBLE encodes each modified segment individually —
-# that asymmetry is handled downstream (Section 3) by matching on modification type.
+# IDF_phoible uses the same Laplace formula as IDF_ruhlen, over PHOIBLE's
+# Austronesian languages outside the Philippine bounding box (n = 88). Ruhlen
+# writes Americanist symbols and PHOIBLE strict IPA, so a crosswalk aligns the
+# base phonemes; the modification asymmetry between the two is resolved in
+# Section 4 by matching on modification type.
 #
 # The PHOIBLE pull uses lingtypology (network) and is cached; delete the CSV to rebuild.
 phoible_cache <- here("data", "phoible_freq_austronesian.csv")
@@ -183,9 +170,9 @@ pnas_key <- read_tsv(I(raw[hdr_i:length(raw)]), show_col_types = FALSE) |>
 japanese_id <- "Japanese"
 
 # ---- 2a. Centroid decomposition -------------------------------------------
-# Compare Japanese against the CENTROID of a trimmed "core" of PH languages
-# (those within 1 SD of the mean unrelated similarity, to drop outliers). The
-# per-phoneme product U[JP, p] * centroid[p] sums to mean cos(JP, core PH).
+# Compare Japanese against the centroid of a trimmed core of PH languages (within
+# 1 SD of the mean unrelated similarity); U[JP, p] * centroid[p] sums to
+# mean cos(JP, core PH).
 mean_unr <- mean(PHONEME_cossim$cossim_unr, na.rm = TRUE)
 sd_unr   <- sd(PHONEME_cossim$cossim_unr,   na.rm = TRUE)
 
@@ -272,11 +259,9 @@ print(driver_compare, n = 25)
 # =============================================================================
 # Section 3 — Final phoneme drivers table (cross-baseline)
 # =============================================================================
-# One row per Ruhlen phoneme: how prevalent it is across the four reference sets,
-# which baselines carry it, its Bernoulli variance per set, and a leverage score +
-# bidirectional flag for whether it drives the right skew of the per-language
-# unrelated null and/or a baseline's observed similarity. (The Ruhlen-vs-PHOIBLE IDF
-# comparison is a SEPARATE table, built in Section 4 below.)
+# One row per Ruhlen phoneme: prevalence and Bernoulli variance across the four
+# reference sets, which baselines carry it, and a leverage score + flag for
+# whether it drives the unrelated null's right tail, a baseline, or both.
 driver_table <- tibble(
   phoneme              = feat,
   IDF                  = idf_aligned,
@@ -297,42 +282,29 @@ driver_table <- tibble(
   left_join(pnas_key |> select(phoneme = phoneme_id, ipa, class, global_n),
             by = "phoneme") |>
   mutate(
-    # Bernoulli variance p(1-p) per reference set: how much the phoneme varies
-    # within that set (0 = uniform, i.e. present in ~all or ~none; max 0.25 at p=0.5)
+    # Bernoulli variance p(1-p): how much the phoneme varies within each set.
     ph_variance           = ph_prevalence           * (1 - ph_prevalence),
     austronesian_variance = austronesian_prevalence * (1 - austronesian_prevalence),
     unrelated_variance    = unrelated_prevalence    * (1 - unrelated_prevalence),
     global_variance       = global_prevalence       * (1 - global_prevalence),
-    # unrelated-vs-baseline overlap ("present in unrelated" = >=1 unrelated lang has it):
-    #  - unrelated_not_baseline: in the unrelated set but in NO baseline
-    #  - n_baselines_shared_unrelated: if in the unrelated set, how many baselines also
-    #    carry it (0-3); 0 when the phoneme is absent from the unrelated set
+    # Unrelated-vs-baseline overlap, where "present in unrelated" means at least
+    # one unrelated language carries it.
     unrelated_not_baseline       = unrelated_prevalence > 0 & !(span_has | jap_has | eng_has),
     n_baselines_shared_unrelated = if_else(unrelated_prevalence > 0,
                                            as.integer(span_has + jap_has + eng_has), 0L),
     any_baseline = span_has | jap_has | eng_has,
     # ---- right-skew leverage on the per-language unrelated null --------------
-    # Each PH language's null = its cosine to the 211 unrelated languages, and the
-    # null is right-skewed. A shared phoneme contributes IDF^2 to the cosine
-    # numerator; over the unrelated set that term is Bernoulli(q) with q =
-    # unrelated_prevalence, so its (proportional) contribution to the null's 3rd
-    # central moment is IDF^6 * q(1-q)(1-2q): positive (right) for q < 0.5, ZERO at
-    # q = 0 (a phoneme in ~no unrelated lang can't form a tail) and at q = 0.5,
-    # peaking near q ~ 0.21 (a moderate minority). Gated to phonemes present in at
-    # least one PH inventory (ph_prevalence > 0), since only those can drive a PH
-    # language's null. High leverage = rare-in-Austronesian (high IDF), carried by
-    # some PH language, shared with a moderate minority of unrelated languages.
+    # Proportional contribution to the null's 3rd central moment,
+    # IDF^6 * q(1-q)(1-2q) with q = unrelated_prevalence. Gated on
+    # ph_prevalence > 0, since only phonemes a PH language carries can drive its null.
     null_skew_leverage = if_else(
       ph_prevalence > 0,
       IDF^6 * unrelated_prevalence * (1 - unrelated_prevalence) * (1 - 2 * unrelated_prevalence),
       0
     )
   ) |>
-  # bidirectional driver flag: a rare, high-leverage phoneme points two ways --
-  # toward the unrelated null's right tail (inflating the comparison distribution),
-  # and/or toward a baseline (inflating the OBSERVED similarity). "both" phonemes
-  # inflate the observed baseline AND the null it is tested against, so they are the
-  # ones to scrutinize. The leverage cutoff (top decile of candidates) is tunable.
+  # Bidirectional driver flag: "both" phonemes inflate the observed baseline AND
+  # the null it is tested against. The top-decile leverage cutoff is tunable.
   mutate(
     drives_unrelated_tail = null_skew_leverage >=
       quantile(null_skew_leverage[ph_prevalence > 0 & unrelated_prevalence > 0], 0.9),
@@ -363,17 +335,12 @@ write.csv(driver_table, here("data", "PHONEME_driver_table.csv"), row.names = FA
 # =============================================================================
 # Section 4 — Ruhlen vs PHOIBLE IDF comparison (separate table)
 # =============================================================================
-# Compares each phoneme's IDF under Ruhlen vs PHOIBLE (both min-max normalized to
-# [0,1]) to see how Ruhlen's phoneme-flag adjustments reweight phonemes. Ruhlen
-# collapses each modification into ONE indicator; PHOIBLE encodes each modified
-# segment individually. So for a PHOIBLE individual modified segment, idf_shift is
-# scored against the Ruhlen modification-type flag it belongs to (matched on
-# modification signature), i.e. IDF_ruhlen(mod flag) - IDF_phoible(segment). Filtering
-# class == "mod_consonant" therefore shows IDF_ruhlen null + the individual PHOIBLE
-# values, with idf_shift carrying the collapsed Ruhlen flag's weight.
+# Compares each phoneme's IDF under Ruhlen vs PHOIBLE, both min-max normalized to
+# [0,1]. Ruhlen collapses each modification into one indicator where PHOIBLE
+# encodes every modified segment separately, so a PHOIBLE modified segment is
+# scored against the Ruhlen modification-type flag it matches by signature.
 #
-# NOTE: this table does NOT feed [1]'s cosine (which is computed separately from the
-# raw Ruhlen austronesian IDF); the [0,1] normalization here is display-only.
+# NOTE: display-only — [1]'s cosine uses the raw Ruhlen Austronesian IDF, not this.
 
 # fixed [0,1] scales (all Ruhlen phonemes / all attested PHOIBLE segments)
 ruhlen_idf_range  <- range(idf_aligned, na.rm = TRUE)

@@ -1,0 +1,116 @@
+label_full,population,island_group,region,province,locality,latitude,longitude,precision_tier,basis
+PhBas_Itbayaten,Itbayaten,Luzon,Batanes,Batanes,Itbayat,20.7833,121.85,B,S9: Batanic islands; Itbayaten of Itbayat Is.
+PhBas_Ivatan,Ivatan,Luzon,Batanes,Batanes,Basco,20.4489,121.97,A,"S10 LGU: Basco, Batanes; S9 Basco Ivatan dialect"
+PhBas_Ibatan,Ibatan,Luzon,Cagayan Valley,Cagayan (Babuyan Is.),Babuyan Claro Island,19.5225,121.9403,A,S9: indigenous group of Babuyan Claro Island (ancestral domain 2007)
+PhIlo_Ilocano,Ilocano,Luzon,Ilocos,Ilocos Sur,Vigan (prov. centroid proxy),17.5747,120.3869,C,"S9: homeland Ilocos Norte/Sur, La Union, Abra"
+PhCag_Gddang,Gddang,Luzon,Cordillera,Mountain Province,Paracelis,17.27,121.47,A,"S9: upland Ga'dang in Paracelis, Mt.Prov & Potia, Ifugao; S10 LGU Paracelis"
+PhCag_Gaddang,Gaddang,Luzon,Cagayan Valley,Nueva Vizcaya,Bayombong / Solano / Bagabag,16.4833,121.15,B,"S9: lowland Gaddang in Bagabag, Bayombong, Solano NV"
+PhCag_Ibanag,Ibanag,Luzon,Cagayan Valley,Cagayan,Tuguegarao,17.6131,121.7269,C,S9: major group of Cagayan & Isabela; Southern Ibanag in Tuguegarao
+PhCag_Malaweg,Malaweg,Luzon,Cagayan Valley,Cagayan,Rizal,17.9167,121.45,A,"S9: Malaweg ICCs found in the municipality of Rizal, Cagayan"
+PhCag_Itawis,Itawis,Luzon,Cagayan Valley,Cagayan,Tuao,17.7167,121.45,B,"S9: Enrile, Iguig, Penablanca, Tuao, Piat, Tuguegarao, Amulung, Solana, Baggao, Alcala"
+PhCag_Yogad,Yogad,Luzon,Cagayan Valley,Isabela,Echague,16.7042,121.6772,A,"S9: Yogad ICCs mainly in the municipality of Echague, Isabela"
+PhCor_Apayao,Apayao,Luzon,Cordillera,Apayao,Conner,17.75,121.3333,A,"S10 LGU: Conner, Apayao; S9 main group of Apayao province"
+PhCor_Kalinga,Kalinga,Luzon,Cordillera,Kalinga,Tabuk City,17.4547,121.4442,A,"S10 LGU: Tabuk, Kalinga"
+PhCor_Itneg,Itneg,Luzon,Cordillera,Abra,Bangued,17.5983,120.6178,A,"S10 LGU: Bangued, Abra; S9 main group of Abra"
+PhCor_Kankanaey,Kankanaey,Luzon,Cordillera,Mountain Province,Sagada,17.0833,120.9,A,"S10 LGU: Sagada, Mt.Prov; S9 Sagada/Besao/Bauko/Tadian/Sabangan"
+PhCor_Bontoc,Bontoc,Luzon,Cordillera,Mountain Province,Bontoc,17.0897,120.9764,A,"S10 LGU: Bontoc, Mt.Prov; S9 most Bontoc in Bontoc municipality"
+PhCor_Balangao,Balangao,Luzon,Cordillera,Mountain Province,Natonin,17.2333,121.2167,B,"S9: eastern Mt.Prov, mainly Natonin, some Paracelis & Barlig"
+PhCor_AyanganIfugao,AyanganIfugao,Luzon,Cordillera,Ifugao,Mayoyao,16.9789,121.2033,B,S9: Ayangan settled in eastern sections of Ifugao province
+PhCor_TuwaliIfugao,TuwaliIfugao,Luzon,Cordillera,Ifugao,Kiangan,16.7789,121.0889,B,"S9: Tuwali mostly in Hungduan & Kiangan; S10 LGU Lagawe, Ifugao"
+PhCor_Kalanguya,Kalanguya,Luzon,Cordillera,Ifugao,Tinoc,16.6333,120.9333,B,"S9: around Mt Pulag - Tinoc/Asipulo/Kiangan/Hungduan, Kayapa, Bokod"
+PhCor_Ibaloi,Ibaloi,Luzon,Cordillera,Benguet,La Trinidad,16.4597,120.5875,A,"S10 LGU: La Trinidad, Benguet"
+PhCor_Bugkalot,Bugkalot,Luzon,Cagayan Valley,Nueva Vizcaya,Alfonso Castaneda,15.95,121.2167,C,S9: Nueva Vizcaya & Nueva Ecija along Caraballo / S. Sierra Madre
+PhCor_Pangasinan,Pangasinan,Luzon,Ilocos,Pangasinan,Lingayen,16.0214,120.2317,C,S9: province of Pangasinan; Pangasinan State Univ acknowledged (S10)
+PhCen_Sambal,Sambal,Luzon,Central Luzon,Zambales,Iba,15.3275,119.9781,C,S9: Sambal found throughout Zambales province
+PhCen_Bolinao,Bolinao,Luzon,Ilocos,Pangasinan,Bolinao,16.3833,119.8833,A,"S10 LGU: Bolinao, Pangasinan; S9 Bolinao & Anda municipalities"
+PhCen_Kapampangan,Kapampangan,Luzon,Central Luzon,Pampanga,City of San Fernando,15.0333,120.6833,C,S9: mainly Pampanga province
+PhCen_Tagalog,Tagalog,Luzon,NCR,Metro Manila,Metro Manila,14.5995,120.9842,C,S9: capital region + Calabarzon; regional centroid proxy
+PhBik_Bicolano,Bicolano,Luzon,Bicol,Camarines Sur,Naga City,13.6218,123.1948,B,S9: Bicol region; S10 Ateneo de Naga University partner
+PhMyn_MangyanBuhid,MangyanBuhid,Mindoro,Mimaropa,Oriental Mindoro,Bongabong / Roxas uplands,12.7458,121.43,B,"S9: Mansalay, Roxas, Bongabong, Bansud (OrMdo); San Jose, Rizal (OccMdo)"
+PhMyn_MangyanBangon,MangyanBangon,Mindoro,Mimaropa,Oriental Mindoro,Bansud / Gloria uplands,12.8619,121.42,B,"S9: ICCs in Bansud, Bongabong and Gloria, Oriental Mindoro"
+PhMyn_MangyanHanunuo,MangyanHanunuo,Mindoro,Mimaropa,Oriental Mindoro,Mansalay,12.5225,121.4,B,"S9: Mansalay, Bulalacao, parts of Bongabong, SE Mindoro"
+PhMyn_MangyanIraya,MangyanIraya,Mindoro,Mimaropa,Oriental Mindoro,San Teodoro,13.4297,121.0158,B,"S9: Puerto Galera, San Teodoro, Baco; Abra de Ilog, Paluan, Mamburao, Sta Cruz"
+PhBuk_BinukidnonNegros,BinukidnonNegros,Negros,Western Visayas,Negros Occidental,Kabankalan,9.9892,122.8147,A,S9: group in this study are Karolanos of Kabankalan; S10 LGU Kabankalan
+PhBuk_Sulodnon,Sulodnon,Panay,Western Visayas,Capiz / Iloilo / Antique,Interior Panay (Tapaz-Lambunao-Valderrama),11.15,122.4,B,"S9: interior municipalities Tapaz Capiz, Lambunao Iloilo, Valderrama Antique"
+PhVis_Kinaray-a,Kinaray-a,Panay,Western Visayas,Antique,San Jose de Buenavista,10.7444,121.9394,C,S9: mainly Antique province
+PhVis_Hilgaynon,Hilgaynon,Panay,Western Visayas,Iloilo,Iloilo City,10.7202,122.5621,C,S9: Panay island; Iloilo City an administrative centre
+PhVis_Cebuano,Cebuano,Cebu,Central Visayas,Cebu,Cebu City,10.3157,123.8854,C,"S9: from Cebu, spread to Bohol/Negros Or./Leyte"
+PhVis_Boholano,Boholano,Bohol,Central Visayas,Bohol,Tagbilaran City,9.65,123.85,C,S9: island province of Bohol
+PhVis_Waray,Waray,Samar-Leyte,Eastern Visayas,Leyte,Tacloban City,11.2444,125.0,C,"S9: Samar, N Leyte, Biliran, Ticao"
+PhVis_Tausug,Tausug,Sulu,BARMM,Sulu,Jolo,6.0522,121.0022,C,S9: indigenous group of Sulu island province
+PhVis_Surigaonon,Surigaonon,Mindanao,Caraga,Surigao del Norte,Surigao City,9.7894,125.4939,C,S9: people living in Surigao
+PhVis_Cuyonon,Cuyonon,Cuyo Is.,Mimaropa,Palawan,Cuyo,10.85,121.0167,B,S9: mainly Cuyo Islands between Palawan and Panay
+PhKlm_Agutaya,Agutaya,Cuyo Is.,Mimaropa,Palawan,Agutaya,11.1512,120.9395,B,"S9: ~50% of Agutaynen live in Agutaya municipality, Cuyo archipelago"
+PhPal_Palawano,Palawano,Palawan,Mimaropa,Palawan,Brooke's Point,8.7833,117.8333,B,S9: Brooke's Point / Bataraza / Quezon-Rizal southern Palawan
+PhPal_Tagbanwa,Tagbanwa,Palawan,Mimaropa,Palawan,Aborlan,9.4333,118.55,B,"S9: central & northern Palawan - Quezon, Aborlan, Puerto Princesa"
+PhPal_Molbog,Molbog,Palawan,Mimaropa,Palawan,Balabac,7.9861,117.0639,B,"S9: Balabac & Bataraza, mainly Balabac and Ramos Islands"
+PhSam_SamaDilautTaluksangay,SamaDilautTaluksangay,Mindanao,Zamboanga Peninsula,Zamboanga City,Brgy Taluksangay,6.9667,122.15,A,"S9: Sama Dilaut ICCs of Brgys Mampang & Taluksangay, Zamboanga City"
+PhSam_SamaDilautMampang,SamaDilautMampang,Mindanao,Zamboanga Peninsula,Zamboanga City,Brgy Mampang,6.92,122.1,A,"S9: Sama Dilaut ICCs of Brgys Mampang & Taluksangay, Zamboanga City"
+PhSam_SamaDilautBonggao,SamaDilautBonggao,Tawi-Tawi,BARMM,Tawi-Tawi,Bongao,5.0292,119.7731,A,"S9: Sama Dilaut ICC of Bongao, Tawi-Tawi"
+PhSam_SamaDeyaBonggao,SamaDeyaBonggao,Tawi-Tawi,BARMM,Tawi-Tawi,Bongao,5.0292,119.7731,A,"S9: Sama Deya ICC included in this study is from Bongao, Tawi-Tawi"
+PhSam_SamaKabingaan,SamaKabingaan,Mindanao,Zamboanga Peninsula,Zamboanga City,Zamboanga City coastal brgys,6.9214,122.079,C,S9: coastal brgys of Zamboanga peninsula & Sulu islands (Kabinga'an dialect)
+PhSam_SamaBangingi,SamaBangingi,Sulu,BARMM,Sulu,Banguingui (Tongkil Is.),6.07,121.78,C,S9: coastal Zamboanga peninsula & Sulu archipelago; Balangingi dialect
+PhSam_Yakan,Yakan,Basilan,BARMM,Basilan,Lamitan City,6.65,122.1333,C,S9: indigenous group of Basilan island province
+PhCre_Chavacano,Chavacano,Mindanao,Zamboanga Peninsula,Zamboanga City,Zamboanga City,6.9214,122.079,A,S9: Chavacano speakers in this study are from Zamboanga City; S10 LGU
+PhSub_Subanon,Subanon,Mindanao,Zamboanga Peninsula,Zamboanga City,Zamboanga City,6.9214,122.079,A,S9: Western Subanon ICC of Zamboanga City; S10 LGU Zamboanga City
+PhSub_Subanen,Subanen,Mindanao,Zamboanga Peninsula,Zamboanga del Sur,Lakewood,7.8683,123.1206,A,"S9: Southern Subanen ICC of Lakewood municipality, Zamboanga del Sur"
+PhDan_Iranun,Iranun,Mindanao,BARMM,Maguindanao,Parang,7.3667,124.2667,B,"S9: coastal Maguindanao - Parang, Matanog, Sultan Kudarat, Sultan Mastura, Barira"
+PhDan_Meranao,Meranao,Mindanao,BARMM,Lanao del Sur,Marawi City,8.0,124.2833,A,S9: settled around Lake Lanao; S10 MSU-Marawi / IPDM partner
+PhDan_Maguindanaon,Maguindanaon,Mindanao,BARMM,Maguindanao,Datu Piang / Shariff Aguak,6.95,124.43,B,"S9: largest concentration in Dinaig, Datu Piang, Maganoy, Buluan"
+PhMns_Mandaya,Mandaya,Mindanao,Davao,Davao Oriental,Baganga / Cateel,7.65,126.5,B,"S9: Manay, Caraga, Baganga, Cateel of Davao Oriental"
+PhMns_Mansaka,Mansaka,Mindanao,Davao,Davao del Norte,Tagum City,7.4478,125.8078,A,S9: Tagum City + Compostela Valley towns; S10 LGU Tagum City
+PhMns_Kamayo,Kamayo,Mindanao,Caraga,Surigao del Sur,Bislig City,8.2117,126.3181,B,"S9: southern Surigao del Sur, large concentration in Bislig; S10 LGU Lingig"
+PhMns_Tagakaolo,Tagakaolo,Mindanao,Davao,Davao Occidental,Malita,6.4167,125.6167,B,"S9: mostly Davao del Sur / Davao Occidental & Sarangani; S10 LGU Malungon, JAS"
+PhMns_Kalagan,Kalagan,Mindanao,Davao,Davao del Sur,Padada,6.6333,125.35,A,"S9: Minuslim Kalagan of Padada (DdS), Tagum/Madaum/Matiao, Pantukan, Lupon"
+PhMbo_Kagayanen,Kagayanen,Cagayancillo,Mimaropa,Palawan,Cagayancillo,9.5817,121.2072,A,"S9: mainly reside in Cagayancillo, island between Negros and Palawan"
+PhMbo_Cinamiguin,Cinamiguin,Camiguin,Northern Mindanao,Camiguin,Sagay / Guinsiliban,9.1039,124.7486,B,"S9: ICCs in Sagay and Guinsiliban municipalities, Camiguin Island"
+PhMbo_BukidnonTalaandig,BukidnonTalaandig,Mindanao,Northern Mindanao,Bukidnon,Lantapan (Songco),8.0167,125.0333,B,"S9: Talaandig 'dwellers of steep places', Bukidnon; S10 LGU Malaybalay"
+PhMbo_BukidnonBinukid,BukidnonBinukid,Mindanao,Northern Mindanao,Bukidnon,Malaybalay City,8.1575,125.1278,A,S9: ICCs at foot of Mt Sumilao and in Malaybalay town; S10 LGU Malaybalay
+PhMbo_BukidnonHigaonon,BukidnonHigaonon,Mindanao,Northern Mindanao,Bukidnon,Impasugong,8.3,125.0,C,S9: one of seven groups of Bukidnon; historically north-central Mindanao coast
+PhMbo_BukidnonManobo,BukidnonManobo,Mindanao,Northern Mindanao,Bukidnon,Bukidnon (prov. centroid),8.05,125.1,C,"S9: reside in northcentral Mindanao, one of seven Bukidnon groups"
+PhMbo_BukidnonUmayamnon,BukidnonUmayamnon,Mindanao,Northern Mindanao,Bukidnon,Cabanglasan (Pulangi headwaters),8.15,125.3,B,S9: headwaters of Pulangi R. (Bukidnon) & Umayam R. (Agusan del Sur)
+PhMbo_BukidnonTigwahanon,BukidnonTigwahanon,Mindanao,Northern Mindanao,Bukidnon,San Fernando,7.8858,125.3153,A,"S9: ICCs found in the municipality of San Fernando, Bukidnon"
+PhMbo_BukdinonMatigsalug,BukdinonMatigsalug,Mindanao,Northern Mindanao,Bukidnon,San Fernando / Kitaotao,7.8,125.2,B,"S9: Matigsalug in San Fernando & Kitaotao, Bukidnon"
+PhMbo_DavaoMatigsalug,DavaoMatigsalug,Mindanao,Davao,Davao City,Marilog District,7.3333,125.3333,B,"S9: Marilog, Calinan, Paquibato districts, Davao City"
+PhMbo_AtaManobo,AtaManobo,Mindanao,Davao,Davao del Norte,Talaingod,7.5333,125.6167,B,"S9: Kapalong, Asuncion, Talaingod (DdN) and Paquibato district, Davao City"
+PhMbo_ManoboTagabawa,ManoboTagabawa,Mindanao,Davao,Davao del Sur,Bansalan / Sta Cruz (Mt Apo foothills),6.83,125.3,B,"S9: foothills of Mt Apo - Toril District, Bansalan, Kapatagan, Sta Cruz"
+PhMbo_OvuManuvo,OvuManuvo,Mindanao,Davao,Davao City,Marilog District,7.3333,125.3333,A,"S9: the Uvo Manuvu included in this study are from Marilog district, Davao City"
+PhMbo_ManoboAgusan,ManoboAgusan,Mindanao,Caraga,Agusan del Sur,Bunawan (Agusan Marsh),8.1667,125.9833,B,S9: Agusan del Sur/Norte & Surigao del Norte; Agusan Marsh significant
+PhMbo_Manguangan,Manguangan,Mindanao,Davao,Davao de Oro,Monkayo,7.8167,126.05,C,S9: Manobo-related ICCs of Davao del Norte province
+PhMbo_Dibabaon,Dibabaon,Mindanao,Davao,Davao de Oro,Montevista,7.7333,126.0667,C,S9: Manobo-related ICCs of Davao del Norte province
+PhMbo_ManoboRK,ManoboRK,Mindanao,Caraga,Surigao del Sur,"Brgy Rajah Cabungsuan, Lingig",8.0367,126.355,A,"S9: resides in Brgy Rajah Cabungsuan, Lingig, Surigao del Sur; S10 LGU Lingig"
+PhMbo_ManoboIlianen,ManoboIlianen,Mindanao,Soccsksargen,Cotabato,Carmen / Kabacan,7.2,124.8,B,"S9: northern Cotabato province; S10 LGU Kabacan, Cotabato"
+PhMbo_Lambanguian,Lambanguian,Mindanao,BARMM,Maguindanao,Upi / South Upi,6.87,124.22,A,"S9: most Lambangian ICCs in Upi and South Upi, Maguindanao; S10 LGU both"
+PhMbo_ManoboDulangan,ManoboDulangan,Mindanao,Soccsksargen,Sultan Kudarat,Kalamansig / Lebak,6.62,124.06,A,"S9: Esperanza, Kalamansig, Lebak, Sen Ninoy Aquino, Palimbang; S10 LGU Lebak+Kalamansig"
+PhMbo_ManoboSarangani,ManoboSarangani,Mindanao,Soccsksargen,Sarangani,Glan,5.8167,125.2,A,"S9: ICCs in Glan, Sarangani and Jose Abad Santos, Davao Occ.; S10 LGU both"
+PhBil_BagoboKlata,BagoboKlata,Mindanao,Davao,Davao City,Calinan / Baguio District,7.16,125.42,B,"S9: Catalunan, Tugbok, Calinan and Baguio districts of Davao City"
+PhBil_BlaanKoronadal,BlaanKoronadal,Mindanao,Soccsksargen,South Cotabato,Koronadal City,6.5031,124.8469,A,"S9: Koronadal Blaan (To Kalon); S10 LGU Koronadal, South Cotabato"
+PhBil_BlaanSarangani,BlaanSarangani,Mindanao,Soccsksargen,Sarangani,Malungon,6.2861,125.2836,A,"S9: Blaan of Sarangani province; S10 LGU Malungon, Sarangani"
+PhBil_Obo,Obo,Mindanao,Soccsksargen,South Cotabato,Lake Sebu,6.22,124.7069,A,S9: Obo resides in the municipality of Lake Sebu
+PhBil_Tboli,Tboli,Mindanao,Soccsksargen,South Cotabato,T'boli (poblacion),6.2183,124.8233,A,"S9: ICCs in Lake Sebu and Tboli municipalities; S10 LGU Tboli, South Cotabato"
+PhBil_Teduray,Teduray,Mindanao,BARMM,Maguindanao,Upi / South Upi,6.95,124.2333,A,S9: mainly in the municipalities of Upi and South Upi; S10 LGU both
+PhSan_Sangil,Sangil,Sarangani Is.,Davao,Davao Occidental,Sarangani (Balut/Sarangani Is.),5.4,125.4,C,"S9 fig grouping; S10 LGU Jose Abad Santos, Davao Occidental"
+PhNeg_AytaAmbala,AytaAmbala,Luzon,Central Luzon,Bataan,Dinalupihan,14.8783,120.4653,B,S9: Ayta Ambala in Bataan (Dinalupihan) and Zambales towns
+PhNeg_AytaMagbukon,AytaMagbukon,Luzon,Central Luzon,Bataan,Abucay / Bagac (Bataan),14.68,120.44,B,"S9: found exclusively in Bataan - Abucay, Bagac, Balanga, Limay, Mariveles, Morong, Orani, Orion, Samal"
+PhNeg_AytaMag-indi,AytaMag-indi,Luzon,Central Luzon,Pampanga,Floridablanca / Porac,15.03,120.53,B,"S9: ICCs in Floridablanca and Porac, Pampanga and San Marcelino, Zambales"
+PhNeg_AytaMag-antsi,AytaMag-antsi,Luzon,Central Luzon,Pampanga,"Sapang Bato, Angeles City",15.1667,120.5333,A,"S9: Bamban/Capas Tarlac, Zambales towns, Mabalacat, Sapang Bato Angeles City; S10 City College of Angeles"
+PhNeg_AytaSambal,AytaSambal,Luzon,Central Luzon,Zambales,Botolan,15.29,120.03,B,S9: ICCs found in Botolan and Cabangan municipalities of Zambales
+PhNeg_AgtaDupaningan,AgtaDupaningan,Luzon,Cagayan Valley,Cagayan,"Palaui Island, Sta. Ana",18.55,122.13,A,S9: Dupaningan in this study are the Agta ICC of Palaui Island (Palaui Agta)
+PhNeg_AgtaLabin,AgtaLabin,Luzon,Cagayan Valley,Cagayan,Lal-lo,18.2,121.65,A,"S9: Agta Labin participants included in the study are from Lal-lo, Cagayan"
+PhNeg_AttaRizal,AttaRizal,Luzon,Cagayan Valley,Cagayan,Rizal,17.9167,121.45,A,"S9: the Atta ICC included in this study are from Rizal, Cagayan"
+PhNeg_AgtaMaddela,AgtaMaddela,Luzon,Cagayan Valley,Quirino,Maddela,16.3667,121.6667,B,S9: Agta Maddela (locally Agta Ilagen) of Quirino province
+PhNeg_AgtaCasiguran,AgtaCasiguran,Luzon,Cagayan Valley,Quirino,"Brgy Dissimungal, Nagtipunan",16.2,121.65,A,"S9: participants are from Barangay Dissimungal, Nagtipunan, Quirino"
+PhNeg_Arta,Arta,Luzon,Cagayan Valley,Quirino,Nagtipunan (with Agta Casiguran ICC),16.25,121.65,A,S9: Arta mostly live together with the Agta Casiguran ICCs of Quirino
+PhNeg_AgtaDumagat,AgtaDumagat,Luzon,Calabarzon,Quezon,General Nakar,14.7514,121.5561,A,"S9: the Agta Dumagat ICC included in the study is from General Nakar, Quezon"
+PhNeg_AgtaRemontado,AgtaRemontado,Luzon,Calabarzon,Rizal,"Brgy Daraitan, Tanay",14.6333,121.4333,A,"S9: the Agta Remontado ICC in this study is from Brgy Daraitan, Tanay, Rizal"
+PhNeg_AgtaLopez,AgtaLopez,Luzon,Calabarzon,Quezon,"Brgy Villa Espina, Lopez",13.8833,122.26,A,"S9: Agta Lopez resides in Barangay Villa Espina, Lopez, Quezon"
+PhNeg_AgtaManide,AgtaManide,Luzon,Bicol,Camarines Norte,Jose Panganiban,14.2903,122.6939,A,"S9: Manide participants in this study are from Jose Panganiban, Camarines Norte"
+PhNeg_AgtaIriga,AgtaIriga,Luzon,Bicol,Camarines Sur,Iriga City (Mt Iriga / Lake Buhi W),13.4239,123.4111,B,"S9: named after Mt Iriga, Camarines Sur; Lake Buhi West"
+PhNeg_AgtaIsarog,AgtaIsarog,Luzon,Bicol,Camarines Sur,Mt Isarog (Goa / Tigaon),13.6592,123.3767,B,"S9: named after Mt Isarog, Camarines Sur"
+PhNeg_AgtaIraya,AgtaIraya,Luzon,Bicol,Camarines Sur,Buhi (Mt Iraya / Lake Buhi E),13.4333,123.5167,B,"S9: Inagta of Mt Iraya, Lake Buhi East, Camarines Sur"
+PhNeg_AgtaMatnog,AgtaMatnog,Luzon,Bicol,Sorsogon,Matnog,12.5875,124.0833,A,S9: label coined after the municipality where they reside
+PhNeg_AgtaBulusan,AgtaBulusan,Luzon,Bicol,Sorsogon,Bulusan,12.7508,124.1333,A,S9: label coined after the municipality where they reside
+PhNeg_AtiPanay,AtiPanay,Panay,Western Visayas,Iloilo,"Nagpana, Barotac Viejo",11.05,122.8,A,"S9: Ati ICC of Nagpana, Barotac Viejo, Iloilo; S10 LGU Barotac Viejo"
+PhNeg_AtiNegros,AtiNegros,Negros,Western Visayas,Negros Occidental,"Marikudo, Isabela",10.2044,122.9908,A,"S9: Ati ICC of Marikudo, Isabela, Negros Occidental"
+PhNeg_Batak,Batak,Palawan,Mimaropa,Palawan,N. Puerto Princesa (Tanabag/Langogan),10.3,119.05,C,S9: the Negrito group of Palawan Island; <500 individuals
+PhNeg_Mamanwa,Mamanwa,Mindanao,Caraga,Agusan del Norte,Kitcharao / Santiago,9.45,125.6,C,"S9: ICCs in Surigao del Norte, Surigao del Sur and Agusan del Norte"

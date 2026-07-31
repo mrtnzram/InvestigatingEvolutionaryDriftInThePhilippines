@@ -1,29 +1,18 @@
 # =============================================================================
 # [8] Phoneme Analysis — EXPERIMENTAL: waypoint network vs. phylogeny
 #
-# Diagnostic, NOT part of the core pipeline. Puts two panels side by side to
-# eyeball a single hypothesis: has the waypoint / relative-migration network
-# essentially recreated the language phylogeny?
+# Diagnostic, NOT part of the core pipeline. Pairs the [0] phylogeny PNG with
+# [3]'s waypoint-network map, both coloured by the same level-4 Glottolog
+# subgroup palette, to eyeball whether the network recreates the phylogeny, and
+# saves the network panel separately with a matching legend strip.
 #
-#   Left  — figures/shared/phylogenetic_tree.png (from [0]); tips coloured by
-#           level-4 Glottolog family subgroup.
-#   Right — [3]'s plot_network() map, with the language points coloured by the
-#           SAME subgroup palette (they are uncoloured shape-21 dots in [3]).
+# Run order: requires [0]_Phylogenetic_Tree.R (for the tree PNG and the shared
+# subgroup lookup) and source()s [3]_PHONEME_network_distance.R for the network
+# objects.
 #
-# If the network recreates the tree, same-coloured points should cluster
-# geographically on the right the way same-coloured tips cluster on the left.
-#
-# DEPENDENCY / RUN ORDER:
-#   - REQUIRES [0]_Phylogenetic_Tree.R to have been run: needs
-#     figures/shared/phylogenetic_tree.png AND data/PHONEME_subgroup_lookup.csv
-#     (the shared subgroup -> colour map, so both panels match exactly).
-#   - source()s [3]_PHONEME_network_distance.R to rebuild the network objects.
-# Output: figures/shared/tree_vs_network.png (paired comparison)
-#         figures/phoneme/mst_waypoints/PHONEME_network_by_subgroup.png (network
-#         panel alone, with a tree-style stacked colour-tile legend, titled for
-#         the Manila Galleon trade-route framing) — filed under phoneme/, not
-#         shared/, since it's specific to the phoneme network; a parallel
-#         GRAMMAR_ version will live in figures/grammar/mst_waypoints/ later.
+# Inputs:  figures/shared/phylogenetic_tree.png, data/PHONEME_subgroup_lookup.csv
+# Outputs: figures/shared/tree_vs_network.png,
+#          figures/phoneme/mst_waypoints/PHONEME_network_by_subgroup.png
 # =============================================================================
 
 library(tidyverse)
@@ -35,10 +24,9 @@ library(grid)
 library(here)
 
 # ---- 1. Network objects from [3] --------------------------------------------
-# [3] is self-contained (reads data/) and, as a side effect of sourcing, leaves
-# full_tree_sf, arrow_connectors, PHONEME_cossim, world_map, MANILA
-# and plot_network() in the environment. NOTE: [3] attaches library(maps), which
-# masks purrr::map — this script uses only dplyr verbs, so that is harmless here.
+# Sourcing [3] leaves full_tree_sf, arrow_connectors, PHONEME_cossim, world_map,
+# MANILA and plot_network() in the environment. NOTE: [3] attaches library(maps),
+# which masks purrr::map — harmless here, since only dplyr verbs are used.
 source(here("R", "phoneme_analysis", "[3]_PHONEME_network_distance.R"), echo = FALSE)
 
 # ---- 2. Shared subgroup palette (identical to the tree) ----------------------
@@ -57,16 +45,9 @@ stopifnot(
 )
 
 # ---- 3. Coloured network panel ----------------------------------------------
-# plot_network()'s body from [3], simplified for this comparison: the language
-# points are shape-21 discs filled by subgroup (grey outline for contrast on the
-# land polygons), and the connector arrows are drawn a uniform light grey, a
-# little thinner than the main network edges, instead of [3]'s black/firebrick
-# "H2 route" colouring. No legends: the subgroup fill is suppressed (the left
-# panel's labelled colour strip is the shared key) and the connectors no longer
-# carry a colour scale, so the map stays uncluttered. Main network edges have no
-# arrowheads — they're a bidirectional route between nodes, so a directed arrow
-# on one edge conflicts visually with the arrow its reverse would need; only the
-# (directional) language -> node connectors keep arrowheads.
+# [3]'s plot_network() with the points filled by subgroup and the connectors a
+# uniform grey instead of the "H2 route" colouring. Legends are suppressed: the
+# tree panel's colour strip is the shared key for both panels.
 plot_network_coloured <- function(full_tree_sf, arrow_connectors,
                                   points_df, refdf1 = MANILA,
                                   lon_range = c(116, 127), lat_range = c(4, 21),
@@ -111,15 +92,10 @@ ggsave(here("figures", "shared", "tree_vs_network.png"),
        combined, width = 15, height = 9, units = "in", dpi = 300)
 
 # ---- 6. Standalone network figure, with a tree-style legend strip -----------
-# The right-hand panel on its own (no phylogeny alongside), for use outside the
-# tree-vs-network comparison. It needs its own legend since the tree's colour
-# strip isn't present to serve as the shared key here — built to match that
-# strip's look (a stacked colour tile + name per subgroup) rather than
-# ggplot's default small-swatch legend, so the two figures read as one family.
-# Rows are ordered by each subgroup's mean latitude (north first), not by
-# clade size, so the legend reads top-to-bottom the same way the subgroups sit
-# on the map (e.g. the northern Cordillera cluster near the top of the legend,
-# the Mindanao clusters near the bottom).
+# The network panel alone needs its own key, built as a stacked colour tile per
+# subgroup to match the tree's strip rather than ggplot's default swatches.
+# Rows are ordered by mean latitude (north first) so the legend reads
+# top-to-bottom the way the subgroups sit on the map.
 subgroup_lat <- points_coloured %>%
   dplyr::group_by(subgroup) %>%
   dplyr::summarise(mean_lat = mean(latitude), .groups = "drop")
@@ -154,11 +130,7 @@ network_with_legend <- (network_standalone | legend_strip) +
   )
 print(network_with_legend)
 
-# figures/phoneme/mst_waypoints/, not figures/shared/: this network is specific
-# to the phoneme cosine-similarity dataset ([3]_PHONEME_network_distance.R), and
-# a parallel GRAMMAR_network_by_subgroup.png will live in the equivalent
-# figures/grammar/mst_waypoints/ once the grammar analysis gets its own version
-# — matching the existing PHONEME_/GRAMMAR_ split for the other waypoint figures
-# in these two folders.
+# Filed under figures/phoneme/, not shared/: this network is specific to the
+# phoneme dataset, matching the PHONEME_/GRAMMAR_ split of the other waypoint figures.
 ggsave(here("figures", "phoneme", "mst_waypoints", "PHONEME_network_by_subgroup.png"),
        network_with_legend, width = 11, height = 9, units = "in", dpi = 300)

@@ -5,21 +5,14 @@
 # phoneme analysis), reconciles its tip labels with the GRAMBANK Philippine
 # language names, and prunes it to the grammar Philippine study set.
 #
-# The tree is Philippine-archipelago/Formosan-focused: several grammar Sabah/
-# Sama-Bajau languages (Balangingi, Bonggi, Pangutaran Sama, Rungus, Sabah
-# Malay, Southern Sama, Tambunan Dusun, Tatana, Timugon Murut, West Coast
-# Bajau, Yakan) plus Karao and Tagabawa have no tree tip at all and are
-# dropped here; everything else matches exactly or via a documented
-# spelling/dialect-level correspondence in `lookup` below.
+# The tree is Philippine-archipelago/Formosan-focused, so the Sabah/Sama-Bajau
+# languages plus Karao and Tagabawa have no tip and are dropped; the rest match
+# exactly or via the spelling/dialect correspondences in `lookup` below.
 #
-# DEPENDENCY / RUN ORDER:
-#   - REQUIRES `Ph_Languages` and `GRAMBANKdf_PH_maximized` from PART A of
-#     [0]_GRAMBANKdatabase.R (run that first, down to its END OF PART A
-#     banner). Consumed in-environment, not read back from CSV: at this point
-#     GRAMBANKdf_full.csv has not been written yet, since PART B (which
-#     writes it) needs the pruned set this script produces.
-#   - PRODUCES `Ph_Languages_pruned`, consumed by PART B of
-#     [0]_GRAMBANKdatabase.R.
+# Run order: requires `Ph_Languages` and `GRAMBANKdf_PH_maximized` from PART A of
+# [0]_GRAMBANKdatabase.R and produces `Ph_Languages_pruned` for its PART B. Both
+# are passed in-environment, since PART B writes GRAMBANKdf_full.csv only after
+# consuming the pruned set built here.
 #
 # Input:   data/mcc.tree
 # Outputs: data/GRAMMAR_phylo_dist_matrix.csv (patristic distance matrix,
@@ -56,10 +49,8 @@ tree_df <- tibble(
       str_squish()
   )
 
-# Fuzzy/dialect-level correspondences (spelling variants or a representative
-# dialect chosen for a multi-dialect language). Exact-name matches (e.g.
-# "Ibaloi", "Pangasinan") need no entry — they fall through the coalesce()
-# fallback below.
+# Spelling variants and representative dialects for multi-dialect languages;
+# exact-name matches need no entry and fall through the coalesce() below.
 lookup <- tribble(
   ~tree, ~gram,
 
@@ -116,11 +107,9 @@ message(
 )
 
 # ── Coloured phylogram (tips coloured by Glottolog family subgroup) ──────────
-# The MCC/nexus tree carries no clade annotations, so subgroup membership is
-# looked up from Glottolog via each language's ISO 639-3 code (lingtypology).
-# GRAMBANKdf_PH_maximized has no iso6393 column (grammar keys on glottocode),
-# so bridge Language_ID -> ISO via iso.gltc(), same mechanism used in
-# [0]_GRAMBANKdatabase.R to bridge the unrelated control set.
+# The MCC/nexus tree carries no clade annotations, so subgroups come from
+# Glottolog via ISO 639-3. Grammar keys on glottocode, so Language_ID is bridged
+# to ISO with iso.gltc(), as in [0]_GRAMBANKdatabase.R.
 tip_subgroup <- tibble(original = tree_pruned$tip.label) %>%
   left_join(tip_df, by = "original") %>%
   left_join(
@@ -151,9 +140,8 @@ subgroup_pal <- setNames(
   soften(.poly[.lum < 200])[seq_along(subgroup_levels)], subgroup_levels
 )
 
-# Export the per-language subgroup -> colour lookup so other scripts colour the
-# same languages with the identical palette (e.g. [8]'s tree-vs-network figure
-# needs the map points to match these tip colours exactly).
+# Export the subgroup -> colour lookup so [8]'s map points match these tip
+# colours exactly.
 tip_subgroup %>%
   distinct(language = gram, subgroup) %>%
   mutate(colour = unname(subgroup_pal[subgroup])) %>%
