@@ -2,8 +2,10 @@
 # [1] Phoneme Analysis — Weighted cosine similarity
 # Computes the IDF-weighted cosine-similarity matrix over phoneme inventories,
 # extracts each Philippine language's similarity to Spanish / Japanese / English
-# and its mean similarity to the unrelated controls, and writes the matrix +
-# per-language scores for the downstream [2]–[7] analyses and EEMS plotting.
+# and its mean similarity to the unrelated controls, plus a 0-to-max min-max
+# normalized Spanish similarity (cossim_span_norm) for [4]'s regression, and
+# writes the matrix + per-language scores for the downstream [2]–[7] analyses
+# and EEMS plotting.
 #
 # Input:   data/RUHLENdf_PH.csv, data/phoneme_freq_ruhlen_austronesian.csv
 # Outputs: data/PHONEME_cosine_matrix.csv, data/PHONEME_cossim.csv,
@@ -154,6 +156,15 @@ PHONEME_cossim <- RUHLENdf |>
   left_join(df_eng,  by = 'language') |>
   left_join(df_unr,  by = 'language')
 
+# Min-max normalized Spanish similarity, floor fixed at 0 (same 0-to-max
+# convention as the map colour scale below) rather than the empirical min, so
+# 0 reads as "no similarity at all" and 1 as the most Spanish-like PH language
+# observed. Used downstream by [4]'s regression so a slope reads as "% of the
+# observed range per unit distance" instead of a raw cosine-similarity delta.
+cossim_span_max <- max(PHONEME_cossim$cossim_span, na.rm = TRUE)
+PHONEME_cossim <- PHONEME_cossim |>
+  mutate(cossim_span_norm = cossim_span / cossim_span_max)
+
 write.csv(PHONEME_cossim, file = here("data", "PHONEME_cossim.csv"), row.names = TRUE)
 
 # ---- Cosine base map --------------------------------------------------------
@@ -163,7 +174,7 @@ write.csv(PHONEME_cossim, file = here("data", "PHONEME_cossim.csv"), row.names =
 world_map  <- map_data("world")
 map_subset <- world_map %>% filter(region %in% c("Philippines", "Malaysia"))
 
-global_lim <- c(0, max(PHONEME_cossim$cossim_span, na.rm = TRUE))
+global_lim <- c(0, cossim_span_max)
 
 base_plot_cosine <- ggplot() +
   geom_polygon(data = map_subset, aes(x = long, y = lat, group = group),

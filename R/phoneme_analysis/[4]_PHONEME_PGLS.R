@@ -1,12 +1,15 @@
 # =============================================================================
 # [4] Phoneme Analysis — Bayesian phylogenetic regression
 #
-# Fits linear, exponential-decay and cubic-spline models of Spanish-phoneme
-# cosine similarity vs. terrain-penalized migration distance with ulam(), each
-# under a multi_normal likelihood carrying the same Pagel's-lambda-scaled
-# phylogenetic covariance, then compares them by WAIC/PSIS-LOO. Lambda is fixed
-# at the PGLS ML estimate and shared across models, so WAIC differences reflect
-# only the mean structure.
+# Fits linear, exponential-decay and cubic-spline models of normalized
+# Spanish-phoneme cosine similarity (cossim_span_norm, min-max normalized 0 to
+# max(cossim_span) in [1] — see there) vs. terrain-penalized migration distance
+# with ulam(), each under a multi_normal likelihood carrying the same
+# Pagel's-lambda-scaled phylogenetic covariance, then compares them by
+# WAIC/PSIS-LOO. Lambda is fixed at the PGLS ML estimate and shared across
+# models, so WAIC differences reflect only the mean structure. Fitting on the
+# normalized scale means a slope reads as "fraction of the observed Spanish-
+# similarity range per unit distance" rather than a raw cosine-similarity delta.
 #
 # Run order: requires `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
 #
@@ -50,7 +53,7 @@ tip_map <- tree_df_matched |> dplyr::select(original, ph)
 # $data, and that ordering is reused below so y, x and R_lambda stay in sync.
 # The tip_map join duplicates multi-tip languages, giving one point per tip.
 df <- PHONEME_final |>
-  dplyr::select(language, cossim = cossim_span, geodist_H1_span) |>
+  dplyr::select(language, cossim = cossim_span_norm, geodist_H1_span) |>
   left_join(tip_map, by = c("language" = "ph")) |>
   filter(!is.na(original)) |>
   as.data.frame()
@@ -110,16 +113,18 @@ dat <- list(N = N, y = y, x = x, Rlambda = Rlambda)
 
 
 # ── 3. Model 1: linear ──────────────────────────────────────────────────────
-# Priors sit on the cosine-similarity scale (mean ~0.12); log_lik = FALSE
-# because WAIC is built from the whitened likelihood in §6 instead.
+# Priors are generic weakly-informative ones on the normalized [0,1] scale,
+# wide enough to stay agnostic about where on the range the intercept and
+# effect sizes fall. log_lik = FALSE because WAIC is built from the whitened
+# likelihood in §6 instead.
 m_lin <- ulam(
   alist(
     y ~ multi_normal(mu, K),
     vector[N]:mu  <- a + b * x,
     matrix[N,N]:K <- square(sigma) * Rlambda,
-    a ~ dnorm(0.15, 0.10),
-    b ~ dnorm(0, 0.10),
-    sigma ~ dexp(20)
+    a ~ dnorm(0.5, 0.3),
+    b ~ dnorm(0, 0.3),
+    sigma ~ dexp(2)
   ),
   data = dat, chains = 4, cores = 4, cmdstan = TRUE, log_lik = FALSE
 )
@@ -127,16 +132,18 @@ precis(m_lin, pars = c("a", "b", "sigma"))
 
 
 # ── 4. Model 2: exponential decay ───────────────────────────────────────────
-# b ~ dexp(1) is a positive-only prior, so the model can only express decay
-# (mu falling with distance), never growth.
+# a is on the normalized [0,1] scale, so it gets the same generic wide prior as
+# the linear model's intercept. b ~ dexp(1) is a positive-only prior on the
+# distance-decay rate (an x-scale parameter, unaffected by normalizing y), so
+# the model can only express decay (mu falling with distance), never growth.
 m_exp <- ulam(
   alist(
     y ~ multi_normal(mu, K),
     vector[N]:mu  <- a * exp(-b * x),
     matrix[N,N]:K <- square(sigma) * Rlambda,
-    a ~ dnorm(0.20, 0.10),
+    a ~ dnorm(0.5, 0.3),
     b ~ dexp(1),
-    sigma ~ dexp(20)
+    sigma ~ dexp(2)
   ),
   data = dat, chains = 4, cores = 4, cmdstan = TRUE, log_lik = FALSE
 )
@@ -145,7 +152,7 @@ precis(m_exp, pars = c("a", "b", "sigma"))
 
 # ── 5. Model 3: cubic spline ────────────────────────────────────────────────
 # B is the bs() design matrix (5 columns) passed as data; w are the basis
-# weights. Same phylogenetic likelihood as above.
+# weights, given the same generic wide prior as the other models' effect terms.
 Bmat <- bs(x, df = 5)
 dat_sp <- c(dat, list(B = matrix(as.numeric(Bmat), nrow = N)))
 
@@ -154,9 +161,9 @@ m_spline <- ulam(
     y ~ multi_normal(mu, K),
     vector[N]:mu  <- a + B %*% w,
     matrix[N,N]:K <- square(sigma) * Rlambda,
-    a ~ dnorm(0.15, 0.10),
-    vector[5]:w ~ dnorm(0, 0.10),
-    sigma ~ dexp(20)
+    a ~ dnorm(0.5, 0.3),
+    vector[5]:w ~ dnorm(0, 0.3),
+    sigma ~ dexp(2)
   ),
   data = dat_sp, chains = 4, cores = 4, cmdstan = TRUE, log_lik = FALSE
 )
@@ -228,7 +235,7 @@ ribbon_lin <- summarise_mu(mu_lin, xseq_disp)
 ribbon_exp <- summarise_mu(mu_exp, xseq_disp)
 ribbon_sp  <- summarise_mu(mu_sp,  xseq_disp)
 
-scatter_df <- data.frame(geodist_H1_span = x_km / DISPLAY_UNIT_KM, cossim_span = y)
+scatter_df <- data.frame(geodist_H1_span = x_km / DISPLAY_UNIT_KM, cossim_span_norm = y)
 
 # nRMSE at the observed points, computed once here so the plot subtitles and
 # §8's comparison table report the same numbers.
@@ -263,7 +270,7 @@ eq_sp <- paste0(
 plot_fit <- function(ribbon_df, title, eq, nrmse_val) {
   ggplot() +
     geom_point(data = scatter_df,
-               aes(x = geodist_H1_span, y = cossim_span), size = 2) +
+               aes(x = geodist_H1_span, y = cossim_span_norm), size = 2) +
     geom_ribbon(data = ribbon_df, aes(x = dist, ymin = lower, ymax = upper),
                 fill = "steelblue", alpha = 0.25) +
     geom_line(data = ribbon_df, aes(x = dist, y = mean),
@@ -271,7 +278,7 @@ plot_fit <- function(ribbon_df, title, eq, nrmse_val) {
     theme_bw() +
     labs(title = title,
          subtitle = str_wrap(sprintf("%s   |   nRMSE = %.4f", eq, nrmse_val), width = 70),
-         x = "Relative Migration Distance (100 km)", y = "Cosine Similarity")
+         x = "Relative Migration Distance (100 km)", y = "Normalized Spanish Similarity")
 }
 
 p_lin <- plot_fit(ribbon_lin, "Linear (phylogenetic)", eq_lin, nrmse_lin)
