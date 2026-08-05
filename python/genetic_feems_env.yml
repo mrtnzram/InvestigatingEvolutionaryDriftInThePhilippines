@@ -1,0 +1,44 @@
+# Conda environment for python/genetic_feems.py on the external server.
+#
+#   conda env create -f genetic_feems_env.yml
+#   conda activate genetic_feems
+#   python genetic_feems.py --bfile /path/to/Phil_1000g_SGDP_1.66M \
+#       --coords philippine_ethnolinguistic_coords.csv --out ./out
+#
+# Pinned to python=3.10 to match the local feems_env this pipeline was developed
+# against. No cartopy — that's only used for the notebooks' publication-quality
+# figures; this script's --plot output is plain matplotlib.
+#
+# numpy is pinned to >=2 explicitly: feems imports msprime -> tskit at import
+# time (feems/sim.py), and current tskit/msprime builds (both PyPI wheels and
+# the conda-forge builds) are compiled against NumPy 2.x's C-API (numpy._core,
+# only present in numpy>=2.0). An unpinned solve, or patching tskit/msprime
+# into an already-solved env with `conda install` after the fact, can leave
+# numpy on the pre-2.0 series (numpy.core, no `_core`) and this import fails:
+#   RuntimeError: module was compiled against NumPy C-API version 0x12 ...
+#   but the running NumPy has C-API version 0x11
+#   ImportError: numpy._core.multiarray failed to import
+# tskit/msprime are listed here explicitly (not left as transitive deps) so
+# they're solved together with numpy in one pass. If this recurs, don't patch
+# packages into a live env — `conda env remove -n genetic_feems` and recreate
+# from this file so everything is solved together.
+name: genetic_feems
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.10
+  - feems
+  - pandas-plink
+  - numpy>=2
+  - tskit
+  - msprime
+  - scikit-sparse
+  - pandas
+  - scipy
+  - scikit-learn
+  - networkx
+  - shapely
+  - fiona
+  - geopandas
+  - matplotlib
