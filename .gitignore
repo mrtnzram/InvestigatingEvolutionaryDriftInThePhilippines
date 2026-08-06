@@ -17,6 +17,7 @@ credentials/
 # --- Archived legacy scripts and data (superseded by R/ and data/) ---
 archived_code/
 archived_data/
+R/cognate_analysis_archive/
 python/optimal_path.ipynb
 
 # --- Generated figures (regenerate from the R scripts) ---
