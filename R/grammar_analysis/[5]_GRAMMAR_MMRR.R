@@ -2,19 +2,24 @@
 # [5] Grammar Analysis — Multiple Matrix Regression with Randomization (MMRR)
 #
 # Control analysis for internal linguistic diffusion. Regresses pairwise general
-# grammatical dissimilarity (1 - cosine, not Spanish-specific) jointly on
+# grammatical similarity (cosine, not Spanish-specific) jointly on
 # terrain-penalized migration distance and patristic phylogenetic distance,
 # with permutation p-values, so geography and shared ancestry — collinear here —
 # are assessed together rather than by a single-predictor Mantel test.
 #
 # Note: the pairwise distance matrix is built by Dijkstra routing over the full
-# language-to-language network, not the nearest-node distance used in [3].
+# language-to-language network, not the nearest-node distance used in [3]. Each
+# pair takes the cheaper of the via-network route and a direct terrain-penalized
+# line (§6), under a single land penalty shared by every leg (§3) — brought to
+# parity with [5]_PHONEME_MMRR.R, which this script otherwise mirrors.
 #
 # Inputs:  data/GRAMMAR_cosine_matrix.csv, data/GRAMBANKdf_full.csv,
 #          data/nodes.csv, data/edges.csv,
 #          data/GRAMMAR_phylo_dist_matrix.csv  (written by [0]_Phylogenetic_Tree.R)
-# Outputs: data/GRAMMAR_dist_matrix.csv, data/GRAMMAR_diss_matrix.csv,
-#          data/GRAMMAR_mmrr_results.csv,
+# Outputs: data/GRAMMAR_dist_matrix.csv, data/GRAMMAR_sim_matrix.csv,
+#          data/GRAMMAR_mmrr_results.csv        (joint two-predictor model)
+#          data/GRAMMAR_mmrr_single_results.csv (single-predictor models)
+#          figures/grammar/mmrr/grammar_mmrr_single_*.png  (3 single-predictor)
 #          figures/grammar/mmrr/grammar_mmrr_pairplot.png,
 #          figures/grammar/mmrr/grammar_mmrr_partial_regression.png
 # =============================================================================
@@ -63,9 +68,9 @@ edges$to   <- as.character(edges$to)
 reverse_edges <- edges |> rename(from = to, to = from)
 edges <- bind_rows(edges, reverse_edges) |> distinct()
 
-# ---- 1. Dissimilarity matrix (1 - cosine), Philippine languages -------------
+# ---- 1. Similarity matrix (cosine), Philippine languages --------------------
 cosine_matrix_phil <- cosine_matrix[ph_lang, ph_lang]
-GRAMMAR_diss_matrix <- 1 - cosine_matrix_phil
+GRAMMAR_sim_matrix <- cosine_matrix_phil
 
 # ---- 2. Land mask (Philippines + Malaysia) ----------------------------------
 world_map <- map_data("world") |> filter(region %in% c("Philippines", "Malaysia"))
@@ -76,9 +81,15 @@ land_sf <- sf_polygon(obj = world_map, polygon_id = "group", x = "long", y = "la
   st_set_crs(4326)
 
 # ---- 3. Terrain-penalized network edges + weighted graph --------------------
-# NOTE: edges are penalized at 44.18 while the language connectors below use
-# 4.44 — mismatch preserved from the original weighting; flag for review.
-edge_land_penalty <- 44.18
+# ONE terrain penalty for every leg of every route — network edges, language
+# connectors, and the direct language-to-language line in §6. Land travel costs
+# LAND_PENALTY x sea travel per metre, which is a property of the terrain, not
+# of which layer a segment belongs to. This resolves the mismatch inherited from
+# the original monolith (edges at 44.18 vs connectors at 4.44), which made a
+# metre of land 10x dearer on the network than on a connector and left the
+# routing internally inconsistent. 4.44 is the value [3] already uses.
+LAND_PENALTY <- 4.44
+edge_land_penalty <- LAND_PENALTY
 
 edges <- edges |>
   rowwise() |>
@@ -177,7 +188,7 @@ shortest_path_trace <- function(start_id, end_id, graph) {
 }
 
 # ---- 5. Per-language connector penalties (coord -> nearest node) -------------
-land_penalty <- 4.44
+land_penalty <- LAND_PENALTY   # same terrain penalty as the network edges (§3)
 
 phil_df <- GRAMBANKdf_PH |>
   filter(Language_Type == "Philippine Language") |>
@@ -207,22 +218,59 @@ connector_df <- phil_df |>
   ungroup()
 
 # ---- 6. Pairwise terrain-penalized distance matrix (X_geo) ------------------
+# Each pair takes the cheaper of two candidate routes (a true least-cost choice,
+# mirroring the pmin() [3] uses for its H2 measure):
+#
+#   via-network : connector1 + shortest path(node1 -> node2) + connector2
+#   direct      : the terrain-penalized straight line between the two languages
+#
+# Without the direct option every pair was forced out to the network and back,
+# which is indefensible for nearby languages: the [3] land/sea split shows 10%
+# of population pairs share a nearest node, so the network leg often contributes
+# 0 — leaving a pure out-and-back detour. Both legs are penalized with the same
+# LAND_PENALTY (§3), so the comparison is like-for-like.
 phil_pairs <- expand_grid(lang1 = phil_df$language, lang2 = phil_df$language) |>
   filter(lang1 != lang2) |>
   left_join(phil_df |> select(language, node1 = nearest_node), by = c("lang1" = "language")) |>
   left_join(phil_df |> select(language, node2 = nearest_node), by = c("lang2" = "language")) |>
   left_join(connector_df |> select(language, penalty1 = connector_penalty), by = c("lang1" = "language")) |>
-  left_join(connector_df |> select(language, penalty2 = connector_penalty), by = c("lang2" = "language"))
+  left_join(connector_df |> select(language, penalty2 = connector_penalty), by = c("lang2" = "language")) |>
+  left_join(phil_df |> select(language, lon1 = Longitude, lat1 = Latitude), by = c("lang1" = "language")) |>
+  left_join(phil_df |> select(language, lon2 = Longitude, lat2 = Latitude), by = c("lang2" = "language"))
+
+# Direct-line cost, split into land/sea exactly like the connectors in §5.
+# Degenerate zero-length lines (languages recorded at identical coordinates)
+# would make st_linestring/st_intersection misbehave, so they short-circuit to 0.
+direct_penalized_cost <- function(lon1, lat1, lon2, lat2) {
+  if (isTRUE(all.equal(c(lon1, lat1), c(lon2, lat2)))) return(0)
+  geom <- st_sfc(st_linestring(rbind(c(lon1, lat1), c(lon2, lat2))), crs = 4326)
+  land_part <- st_intersection(geom, land_sf)
+  sea_part  <- st_difference(geom, land_sf)
+  land_part <- land_part[!st_is_empty(land_part)]
+  sea_part  <- sea_part[!st_is_empty(sea_part)]
+  land_len <- if (length(land_part) > 0) as.numeric(sum(st_length(land_part))) else 0
+  sea_len  <- if (length(sea_part)  > 0) as.numeric(sum(st_length(sea_part)))  else 0
+  land_len * LAND_PENALTY + sea_len
+}
 
 phil_pairs <- phil_pairs |>
   rowwise() |>
   mutate(
     trace = list(shortest_path_trace(node1, node2, graph)),
     tree_dist = trace$distance,
-    geodist_H1_span = if (is.na(tree_dist)) NA_real_ else
-      (penalty1 + tree_dist + penalty2) / 1000
+    via_network_cost = if (is.na(tree_dist)) NA_real_ else penalty1 + tree_dist + penalty2,
+    direct_cost      = direct_penalized_cost(lon1, lat1, lon2, lat2),
+    # na.rm: an unreachable network route must not veto the direct one.
+    geodist_H1_span  = pmin(via_network_cost, direct_cost, na.rm = TRUE) / 1000,
+    used_direct      = !is.na(direct_cost) &
+      (is.na(via_network_cost) | direct_cost < via_network_cost)
   ) |>
   ungroup()
+
+message(sprintf(
+  "X_geo routing: %d of %d ordered pairs (%.0f%%) took the direct line rather than the network.",
+  sum(phil_pairs$used_direct), nrow(phil_pairs), 100 * mean(phil_pairs$used_direct)
+))
 
 dist_matrix <- phil_pairs |>
   select(lang1, lang2, geodist_H1_span) |>
@@ -251,13 +299,13 @@ GRAMMAR_phylo_dist_matrix <- read.csv(
 # Align all three matrices to a common language set and ordering before
 # vectorizing; the intersection is defensive against upstream tree-set changes.
 common <- Reduce(intersect, list(
-  rownames(GRAMMAR_diss_matrix),
+  rownames(GRAMMAR_sim_matrix),
   rownames(GRAMMAR_dist_matrix),
   rownames(GRAMMAR_phylo_dist_matrix)
 ))
 
 dropped <- setdiff(
-  union(rownames(GRAMMAR_diss_matrix), rownames(GRAMMAR_phylo_dist_matrix)),
+  union(rownames(GRAMMAR_sim_matrix), rownames(GRAMMAR_phylo_dist_matrix)),
   common
 )
 if (length(dropped) > 0) {
@@ -266,17 +314,18 @@ if (length(dropped) > 0) {
           paste(dropped, collapse = ", "))
 }
 
-Y_ling  <- GRAMMAR_diss_matrix[common, common]
+Y_ling  <- GRAMMAR_sim_matrix[common, common]
 X_geo   <- GRAMMAR_dist_matrix[common, common]
 X_phylo <- GRAMMAR_phylo_dist_matrix[common, common]
 
-# 1 - cosine leaves ~1e-10 of noise on Y_ling's diagonal, so all three diagonals
-# are zeroed to make the guards below exact.
-diag(Y_ling) <- 0
+# X diagonals are zeroed for the guards below; Y_ling's diagonal is left at its
+# natural self-similarity of ~1 (unfold() below only reads the strict lower
+# triangle, so the diagonal value never enters the fit either way).
 diag(X_geo) <- 0
 diag(X_phylo) <- 0
 
-# Guards: MMRR assumes symmetric, zero-diagonal matrices sharing one label order.
+# Guards: MMRR assumes symmetric matrices sharing one label order; X's are also
+# zero-diagonal, Y_ling is bounded cosine similarity.
 stopifnot(
   "Y/X_geo labels differ"    = identical(dimnames(Y_ling), dimnames(X_geo)),
   "Y/X_phylo labels differ"  = identical(dimnames(Y_ling), dimnames(X_phylo)),
@@ -284,7 +333,7 @@ stopifnot(
   "Y_ling not symmetric"     = isSymmetric(unname(Y_ling)),
   "X_geo not symmetric"      = isSymmetric(unname(X_geo)),
   "X_phylo not symmetric"    = isSymmetric(unname(X_phylo)),
-  "Y_ling diagonal nonzero"  = all(diag(Y_ling)   == 0),
+  "Y_ling out of [-1, 1]"    = all(Y_ling >= -1 & Y_ling <= 1),
   "X_geo diagonal nonzero"   = all(diag(X_geo)    == 0),
   "X_phylo diagonal nonzero" = all(diag(X_phylo)  == 0)
 )
@@ -308,7 +357,7 @@ heatmap_p <- function(m, title) {
 
 print(
   heatmap_p(X_geo,   "Migration distance") +
-  heatmap_p(Y_ling,  "Grammatical dissimilarity") +
+  heatmap_p(Y_ling,  "Grammatical similarity") +
   heatmap_p(X_phylo, "Phylogenetic distance")
 )
 
@@ -365,6 +414,86 @@ MMRR <- function(Y, X, nperm = 9999, scale = TRUE) {
        Fstatistic = Fstat, Fpvalue = Fp, r.squared = r.squared)
 }
 
+# dir.create() hoisted here, before the first ggsave() in §9a.
+dir.create(here("figures", "grammar", "mmrr"), recursive = TRUE, showWarnings = FALSE)
+
+# ---- 9a. Single-predictor MMRRs (run BEFORE the joint model) ----------------
+# Same MMRR() above, just handed a one-element predictor list — the permutation
+# scheme is identical, so with one predictor this reduces to a permutation-tested
+# simple regression on the vectorized lower triangles, i.e. exactly the Mantel
+# test this script replaced. Because unfold() standardizes, the single-predictor
+# beta IS the Pearson r and R^2 = beta^2.
+#
+# These are reported alongside the joint model on purpose. Geography and
+# phylogeny are collinear, so each can be strongly significant alone while
+# NEITHER clears the threshold once the other is in the model — the joint fit
+# tests only each predictor's UNIQUE contribution. Reporting the joint model by
+# itself would understate the result; reporting only these would overstate how
+# separable the two effects are. The third fit (geo ~ phylo) quantifies exactly
+# that overlap.
+single_mmrr <- function(Ymat, Xmat, y_lab, x_lab, title, file, nperm = 9999) {
+  set.seed(1)
+  fit <- MMRR(Ymat, list(x = Xmat), nperm = nperm)
+  beta <- unname(fit$coefficients["x"])
+  pval <- unname(fit$tpvalue["x"])
+  r2   <- fit$r.squared
+
+  # Permutation p has a floor of 1/(nperm+1); show it as "<" rather than an
+  # exact value it cannot resolve.
+  p_txt <- if (pval <= 1 / (nperm + 1)) {
+    sprintf("p < %.4f", 1 / (nperm + 1))
+  } else {
+    sprintf("p = %.4f", pval)
+  }
+
+  # Axes are plotted in RAW units (km, patristic, cosine) so they read
+  # cleanly; standardizing only rescales the axes, leaving the fit identical.
+  df <- tibble(x = unfold(Xmat, scale = FALSE), y = unfold(Ymat, scale = FALSE))
+
+  p <- ggplot(df, aes(x, y)) +
+    geom_point(alpha = 0.25, size = 0.7, colour = "steelblue") +
+    geom_smooth(method = "lm", se = TRUE, colour = "firebrick", linewidth = 0.9) +
+    labs(
+      title    = title,
+      subtitle = sprintf("beta = %+.3f (standardized)   %s   R² = %.4f",
+                         beta, p_txt, r2),
+      x = x_lab, y = y_lab
+    ) +
+    theme_bw() +
+    theme(plot.title    = element_text(face = "bold", size = 12),
+          plot.subtitle = element_text(size = 10, colour = "grey25"))
+
+  print(p)
+  ggsave(here("figures", "grammar", "mmrr", file), p,
+         width = 6.5, height = 4.5, units = "in", dpi = 300)
+
+  tibble(model = title, beta = beta, p_value = pval, r_squared = r2)
+}
+
+GRAMMAR_mmrr_single <- bind_rows(
+  single_mmrr(Y_ling, X_geo,
+              y_lab = "Grammatical similarity (cosine)",
+              x_lab = "Relative migration distance (km)",
+              title = "Linguistic similarity vs Geographic distance",
+              file  = "grammar_mmrr_single_similarity_vs_geography.png"),
+  single_mmrr(Y_ling, X_phylo,
+              y_lab = "Grammatical similarity (cosine)",
+              x_lab = "Patristic phylogenetic distance",
+              title = "Linguistic similarity vs Phylogenetic distance",
+              file  = "grammar_mmrr_single_similarity_vs_phylogeny.png"),
+  # Collinearity check: the shared structure that flattens both joint betas.
+  single_mmrr(X_geo, X_phylo,
+              y_lab = "Relative migration distance (km)",
+              x_lab = "Patristic phylogenetic distance",
+              title = "Geographic distance vs Phylogenetic distance",
+              file  = "grammar_mmrr_single_geography_vs_phylogeny.png")
+)
+print(GRAMMAR_mmrr_single)
+write.csv(GRAMMAR_mmrr_single,
+          file = here("data", "GRAMMAR_mmrr_single_results.csv"), row.names = FALSE)
+
+
+# ---- 9b. Joint two-predictor MMRR -------------------------------------------
 set.seed(1)  # reproducible permutation p-values
 mmrr_fit <- MMRR(Y_ling, list(geo = X_geo, phylo = X_phylo), nperm = 9999)
 print(mmrr_fit)
@@ -386,7 +515,7 @@ write.csv(GRAMMAR_mmrr_results,
 # ---- 11. Visualization ------------------------------------------------------
 # Both figures are built on the standardized unfolded lower triangles, so they
 # read on the same scale as the fitted (standardized) MMRR coefficients.
-dir.create(here("figures", "grammar", "mmrr"), recursive = TRUE, showWarnings = FALSE)
+# (figures/grammar/mmrr already created in §9a, ahead of the first ggsave())
 
 mmrr_df <- tibble(
   ling  = as.numeric(unfold(Y_ling)),
@@ -397,7 +526,7 @@ mmrr_df <- tibble(
 # (a) Pairplot as a single 3x3 facet_grid so every cell shares its column (x) and
 # row (y) scale. Lower triangle: scatter + linear fit; upper: Pearson r;
 # diagonal: marginal density. Built directly to avoid a GGally dependency.
-pair_labs <- c(ling = "Dissimilarity", geo = "Geo distance", phylo = "Phylo distance")
+pair_labs <- c(ling = "Similarity", geo = "Geo distance", phylo = "Phylo distance")
 pair_vars <- names(pair_labs)
 pair_idx  <- setNames(seq_along(pair_vars), pair_vars)
 as_pair_factor <- function(v) factor(pair_labs[v], levels = pair_labs)
@@ -484,20 +613,20 @@ av_plot <- function(y, x, other, xlab, ylab, beta, pval) {
 p_geo_av <- av_plot(
   mmrr_df$ling, mmrr_df$geo, mmrr_df$phylo,
   xlab = "Geo distance | phylo (residuals)",
-  ylab = "Dissimilarity | phylo (residuals)",
+  ylab = "Similarity | phylo (residuals)",
   beta = GRAMMAR_mmrr_results$beta_geo, pval = GRAMMAR_mmrr_results$p_geo
 )
 
 p_phylo_av <- av_plot(
   mmrr_df$ling, mmrr_df$phylo, mmrr_df$geo,
   xlab = "Phylo distance | geo (residuals)",
-  ylab = "Dissimilarity | geo (residuals)",
+  ylab = "Similarity | geo (residuals)",
   beta = GRAMMAR_mmrr_results$beta_phylo, pval = GRAMMAR_mmrr_results$p_phylo
 )
 
 partial_plot <- (p_geo_av + p_phylo_av) +
   plot_annotation(
-    title = "MMRR partial regression: grammatical dissimilarity vs. geography + phylogeny",
+    title = "MMRR partial regression: grammatical similarity vs. geography + phylogeny",
     subtitle = sprintf("Model R^2 = %.3f,  permutation p = %.4f  (9,999 permutations)",
                        GRAMMAR_mmrr_results$r_squared, GRAMMAR_mmrr_results$p_model)
   )
@@ -507,4 +636,4 @@ ggsave(here("figures", "grammar", "mmrr", "grammar_mmrr_partial_regression.png")
 
 # ---- 12. Persist matrices ---------------------------------------------------
 write.csv(GRAMMAR_dist_matrix, file = here("data", "GRAMMAR_dist_matrix.csv"), row.names = TRUE)
-write.csv(GRAMMAR_diss_matrix, file = here("data", "GRAMMAR_diss_matrix.csv"), row.names = TRUE)
+write.csv(GRAMMAR_sim_matrix, file = here("data", "GRAMMAR_sim_matrix.csv"), row.names = TRUE)

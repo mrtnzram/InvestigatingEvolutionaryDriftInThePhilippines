@@ -1,0 +1,5455 @@
+ID	Concept	Language	form
+1	I	AGTA	ijok
+8	blood	AGTA	dogo
+9	bone	AGTA	tulaŋ
+10	breast	AGTA	susu
+16	dog	AGTA	otu
+17	drink	AGTA	uminum
+19	ear	AGTA	boŋboŋ
+23	eye	AGTA	moto
+25	fire	AGTA	opuj
+26	fish	AGTA	ikan
+30	full	AGTA	moponnu
+35	hand	AGTA	komot
+37	hear	AGTA	modoŋog
+41	knee	AGTA	tud
+43	leaf	AGTA	don
+45	liver	AGTA	ogol
+47	louse	AGTA	kutu
+50	mountain	AGTA	bogetoj
+52	name	AGTA	ŋogan
+54	new	AGTA	bagu
+55	night	AGTA	hiklom
+56	nose	AGTA	iguŋ
+58	one	AGTA	tatakdoj
+59	path	AGTA	dolan
+60	person	AGTA	toloj
+66	see	AGTA	moʔito
+68	skin	AGTA	tobbit
+73	star	AGTA	bitwon
+74	stone	AGTA	botu
+80	tongue	AGTA	hilo
+81	tooth	AGTA	ŋipon
+82	tree	AGTA	koju
+83	two	AGTA	duwo
+85	water	AGTA	donum
+86	we	AGTA	ikitam
+92	you	AGTA	iko
+93	I	AKLANON	aku
+100	blood	AKLANON	duguʔ
+101	bone	AKLANON	tuʔan
+102	breast	AKLANON	susu
+106	come	AKLANON	abut
+107	die	AKLANON	mataj
+108	dog	AKLANON	ajam
+109	drink	AKLANON	inum
+111	ear	AKLANON	duxuŋgan
+115	eye	AKLANON	mata
+117	fire	AKLANON	kaxaju
+118	fish	AKLANON	isdaʔ
+127	hand	AKLANON	alimah
+129	hear	AKLANON	nakabatiʔ
+135	leaf	AKLANON	dahun
+137	liver	AKLANON	ataj
+139	louse	AKLANON	kutuh
+144	name	AKLANON	ŋaxan
+146	new	AKLANON	bagʔuh
+147	night	AKLANON	gabiʔih
+148	nose	AKLANON	iluŋ
+150	one	AKLANON	isaxah
+151	path	AKLANON	daxan
+152	person	AKLANON	tawuh
+158	see	AKLANON	kitaʔ
+160	skin	AKLANON	panit
+165	star	AKLANON	bituʔun
+166	stone	AKLANON	batu
+172	tongue	AKLANON	dilaʔ
+173	tooth	AKLANON	ŋipun
+175	two	AKLANON	dawah
+177	water	AKLANON	tubiʔ
+178	we	AKLANON	kitah
+184	you	AKLANON	ikaw
+185	I	ARTA	tan
+193	bone	ARTA	sagnit
+199	die	ARTA	mapatid
+200	dog	ARTA	lapul
+201	drink	ARTA	matim
+209	fire	ARTA	dut
+214	full	ARTA	minapano
+221	hear	ARTA	atiŋen
+227	leaf	ARTA	don
+229	liver	ARTA	dalem
+231	louse	ARTA	utu
+234	mountain	ARTA	bukid
+236	name	ARTA	ŋadin
+238	new	ARTA	buru
+239	night	ARTA	biŋuet
+240	nose	ARTA	aduŋ
+242	one	ARTA	sipaŋ
+243	path	ARTA	didiman
+244	person	ARTA	agani
+250	see	ARTA	ita
+252	skin	ARTA	gadaŋ
+258	stone	ARTA	karagatan
+259	sun	ARTA	laŋit
+266	tree	ARTA	aju
+267	two	ARTA	talip
+269	water	ARTA	wagat
+270	we	ARTA	meʔaduami
+276	you	ARTA	taw
+277	I	ATTA PAMPLONA	sikan
+284	blood	ATTA PAMPLONA	daga
+285	bone	ATTA PAMPLONA	tulaŋ
+286	breast	ATTA PAMPLONA	gataʔ
+292	dog	ATTA PAMPLONA	itu
+293	drink	ATTA PAMPLONA	amminum
+295	ear	ATTA PAMPLONA	taliŋa
+299	eye	ATTA PAMPLONA	mata
+301	fire	ATTA PAMPLONA	api
+302	fish	ATTA PAMPLONA	sira
+306	full	ATTA PAMPLONA	napannu
+311	hand	ATTA PAMPLONA	lima
+313	hear	ATTA PAMPLONA	maginna
+317	knee	ATTA PAMPLONA	duluŋ
+319	leaf	ATTA PAMPLONA	don
+321	liver	ATTA PAMPLONA	agal
+323	louse	ATTA PAMPLONA	kutu
+326	mountain	ATTA PAMPLONA	puddul
+328	name	ATTA PAMPLONA	ŋagan
+330	new	ATTA PAMPLONA	bagu
+331	night	ATTA PAMPLONA	gabi
+332	nose	ATTA PAMPLONA	iguŋ
+334	one	ATTA PAMPLONA	taddaj
+335	path	ATTA PAMPLONA	dalan
+336	person	ATTA PAMPLONA	tolaj
+342	see	ATTA PAMPLONA	masiŋan
+344	skin	ATTA PAMPLONA	tabbiʔ
+349	star	ATTA PAMPLONA	bituan
+350	stone	ATTA PAMPLONA	batu
+356	tongue	ATTA PAMPLONA	dʒila
+357	tooth	ATTA PAMPLONA	ŋipan
+358	tree	ATTA PAMPLONA	kaju
+359	two	ATTA PAMPLONA	dua
+361	water	ATTA PAMPLONA	danum
+362	we	ATTA PAMPLONA	sittam
+368	you	ATTA PAMPLONA	sikaw
+369	I	BAJAU WEST COAST	aku
+376	blood	BAJAU WEST COAST	laʔ
+377	bone	BAJAU WEST COAST	bokog
+378	breast	BAJAU WEST COAST	susu
+383	die	BAJAU WEST COAST	mataj
+384	dog	BAJAU WEST COAST	uwaʔ
+385	drink	BAJAU WEST COAST	inum
+391	eye	BAJAU WEST COAST	moto
+393	fire	BAJAU WEST COAST	api
+394	fish	BAJAU WEST COAST	diŋ
+403	hand	BAJAU WEST COAST	taŋan
+405	hear	BAJAU WEST COAST	kale
+406	horn	BAJAU WEST COAST	tanduk
+413	liver	BAJAU WEST COAST	ataj
+418	mountain	BAJAU WEST COAST	gunuŋ
+420	name	BAJAU WEST COAST	oron
+423	night	BAJAU WEST COAST	soŋom
+424	nose	BAJAU WEST COAST	uruŋ
+426	one	BAJAU WEST COAST	isaʔ
+427	path	BAJAU WEST COAST	lan
+428	person	BAJAU WEST COAST	dʒomo
+434	see	BAJAU WEST COAST	ŋendaʔ
+449	tooth	BAJAU WEST COAST	impon
+450	tree	BAJAU WEST COAST	pon
+451	two	BAJAU WEST COAST	duo
+453	water	BAJAU WEST COAST	buweʔ
+454	we	BAJAU WEST COAST	kiti
+460	you	BAJAU WEST COAST	kau
+461	I	BALANGAW	haʔon
+468	blood	BALANGAW	dala
+469	bone	BALANGAW	toŋal
+470	breast	BALANGAW	soso
+476	dog	BALANGAW	aho
+477	drink	BALANGAW	inum
+479	ear	BALANGAW	iŋo
+483	eye	BALANGAW	mata
+485	fire	BALANGAW	apoj
+486	fish	BALANGAW	gədiw
+490	full	BALANGAW	napno
+495	hand	BALANGAW	limo
+497	hear	BALANGAW	doŋal
+501	knee	BALANGAW	goŋo
+503	leaf	BALANGAW	tubu
+505	liver	BALANGAW	agtoj
+507	louse	BALANGAW	oto
+510	mountain	BALANGAW	bilig
+512	name	BALANGAW	ŋadon
+514	new	BALANGAW	kaʔʔamma
+515	night	BALANGAW	labi
+516	nose	BALANGAW	aŋal
+518	one	BALANGAW	əho
+519	path	BALANGAW	dalan
+520	person	BALANGAW	tatagu
+526	see	BALANGAW	ilo
+528	skin	BALANGAW	uglet
+533	star	BALANGAW	talaw
+534	stone	BALANGAW	boto
+540	tongue	BALANGAW	dilo
+541	tooth	BALANGAW	bubʔo
+542	tree	BALANGAW	awoj
+543	two	BALANGAW	duwo
+545	water	BALANGAW	dənum
+546	we	BALANGAW	ditaw
+552	you	BALANGAW	heʔa
+553	I	BALANGINGI SAMA	aku
+560	blood	BALANGINGI SAMA	lahaʔ
+561	bone	BALANGINGI SAMA	bokog
+562	breast	BALANGINGI SAMA	duduʔ
+566	come	BALANGINGI SAMA	paitu
+567	die	BALANGINGI SAMA	pataj
+568	dog	BALANGINGI SAMA	edo
+569	drink	BALANGINGI SAMA	inum
+571	ear	BALANGINGI SAMA	taiŋa
+575	eye	BALANGINGI SAMA	mata
+577	fire	BALANGINGI SAMA	api
+578	fish	BALANGINGI SAMA	daiŋ
+582	full	BALANGINGI SAMA	ponnoʔ
+587	hand	BALANGINGI SAMA	taŋan
+589	hear	BALANGINGI SAMA	kale
+590	horn	BALANGINGI SAMA	tanduk
+593	knee	BALANGINGI SAMA	tuʔut
+595	leaf	BALANGINGI SAMA	dahun
+597	liver	BALANGINGI SAMA	ataj
+599	louse	BALANGINGI SAMA	kutu
+602	mountain	BALANGINGI SAMA	bullud
+604	name	BALANGINGI SAMA	on
+606	new	BALANGINGI SAMA	bahaʔu
+607	night	BALANGINGI SAMA	saŋom
+608	nose	BALANGINGI SAMA	uŋ
+610	one	BALANGINGI SAMA	isa
+611	path	BALANGINGI SAMA	lan
+612	person	BALANGINGI SAMA	aʔa
+618	see	BALANGINGI SAMA	andaʔ
+620	skin	BALANGINGI SAMA	kuwit
+625	star	BALANGINGI SAMA	bituʔun
+626	stone	BALANGINGI SAMA	batu
+627	sun	BALANGINGI SAMA	allaw
+632	tongue	BALANGINGI SAMA	dellaʔ
+633	tooth	BALANGINGI SAMA	empon
+634	tree	BALANGINGI SAMA	kaju
+635	two	BALANGINGI SAMA	duwa
+637	water	BALANGINGI SAMA	boheʔ
+638	we	BALANGINGI SAMA	kitabi
+644	you	BALANGINGI SAMA	kaʔa
+645	I	BANTON BANTOANON	ako
+652	blood	BANTON BANTOANON	rogoʔ
+653	bone	BANTON BANTOANON	suka
+654	breast	BANTON BANTOANON	susu
+660	dog	BANTON BANTOANON	iroʔ
+663	ear	BANTON BANTOANON	taliŋa
+667	eye	BANTON BANTOANON	mata
+669	fire	BANTON BANTOANON	kajado
+670	fish	BANTON BANTOANON	israʔ
+679	hand	BANTON BANTOANON	damut
+687	leaf	BANTON BANTOANON	rahon
+689	liver	BANTON BANTOANON	ataj
+691	louse	BANTON BANTOANON	kuto
+696	name	BANTON BANTOANON	ŋajan
+698	new	BANTON BANTOANON	bagʔo
+699	night	BANTON BANTOANON	gabʔe
+700	nose	BANTON BANTOANON	iloŋ
+702	one	BANTON BANTOANON	usa
+704	person	BANTON BANTOANON	tawo
+712	skin	BANTON BANTOANON	anit
+717	star	BANTON BANTOANON	bituʔon
+718	stone	BANTON BANTOANON	bEtu
+724	tongue	BANTON BANTOANON	rilaʔ
+725	tooth	BANTON BANTOANON	ŋisih
+727	two	BANTON BANTOANON	ruha
+729	water	BANTON BANTOANON	tubiʔ
+730	we	BANTON BANTOANON	kita
+736	you	BANTON BANTOANON	ikaw
+737	I	BASQUE	nik
+738	all	BASQUE	guztiz
+739	ash	BASQUE	hauc
+740	big	BASQUE	haundi
+741	bird	BASQUE	Cori
+742	bite	BASQUE	hozka
+743	black	BASQUE	belc
+744	blood	BASQUE	odol
+745	bone	BASQUE	hezur
+746	breast	BASQUE	diti
+747	burn	BASQUE	erre
+748	cloud	BASQUE	hodei
+749	cold	BASQUE	odolgabe
+750	come	BASQUE	etorri
+751	die	BASQUE	hil
+752	dog	BASQUE	zakur
+753	drink	BASQUE	edan
+754	dry	BASQUE	lehor
+755	ear	BASQUE	belarri
+756	earth	BASQUE	lurbira
+757	eat	BASQUE	janari
+758	egg	BASQUE	arraulca
+759	eye	BASQUE	begi
+760	feather	BASQUE	luma
+761	fire	BASQUE	su
+762	fish	BASQUE	arrain
+763	flesh	BASQUE	haragi
+764	fly	BASQUE	hegan
+765	foot	BASQUE	oin
+766	full	BASQUE	beterik
+767	good	BASQUE	on
+768	grease	BASQUE	gancu
+769	green	BASQUE	orlegi
+770	hair	BASQUE	ile
+771	hand	BASQUE	esku
+772	head	BASQUE	buru
+773	hear	BASQUE	encun
+774	horn	BASQUE	adar
+775	hot	BASQUE	bero
+776	kill	BASQUE	hilarazi
+777	knee	BASQUE	belaun
+778	know	BASQUE	jakin
+779	leaf	BASQUE	hosto
+780	lie	BASQUE	ecan
+781	liver	BASQUE	gibel
+782	long	BASQUE	luze
+783	louse	BASQUE	zorri
+784	man	BASQUE	gizon
+785	moon	BASQUE	ilargi
+786	mountain	BASQUE	mendi
+787	mouth	BASQUE	aho
+788	name	BASQUE	izen
+789	neck	BASQUE	lepo
+790	new	BASQUE	berri
+791	night	BASQUE	gau
+792	nose	BASQUE	sudur
+793	not	BASQUE	ez
+794	one	BASQUE	bat
+795	path	BASQUE	basabide
+796	person	BASQUE	gizaki
+797	rain	BASQUE	euri
+798	red	BASQUE	gorri
+799	root	BASQUE	erreboil
+800	sand	BASQUE	hondar
+801	say	BASQUE	esan
+802	see	BASQUE	ikusi
+803	sit	BASQUE	jarri
+804	skin	BASQUE	azal
+805	sleep	BASQUE	lo
+806	small	BASQUE	Ciki
+807	smoke	BASQUE	pipaldi
+808	stand	BASQUE	zutik
+809	star	BASQUE	izar
+810	stone	BASQUE	harri
+811	sun	BASQUE	eguzki
+812	swim	BASQUE	igerika
+813	tail	BASQUE	buztan
+814	that	BASQUE	hori
+815	this	BASQUE	hauSe
+816	tongue	BASQUE	mihi
+817	tooth	BASQUE	horc
+818	tree	BASQUE	zuhaic
+819	two	BASQUE	bi
+820	walk	BASQUE	ibili
+821	water	BASQUE	ur
+822	we	BASQUE	gu
+823	what	BASQUE	zer
+824	white	BASQUE	zuri
+825	who	BASQUE	nork
+826	woman	BASQUE	andre
+827	yellow	BASQUE	hori
+828	you	BASQUE	zuek
+829	I	BATAK PALAWAN	aku
+836	blood	BATAK PALAWAN	tagək
+837	bone	BATAK PALAWAN	tuʔlaŋ
+838	breast	BATAK PALAWAN	dudu
+844	dog	BATAK PALAWAN	kəʔdəŋ
+845	drink	BATAK PALAWAN	inum
+847	ear	BATAK PALAWAN	taliŋa
+851	eye	BATAK PALAWAN	mata
+853	fire	BATAK PALAWAN	apuj
+854	fish	BATAK PALAWAN	sədaʔ
+858	full	BATAK PALAWAN	pəgpəg
+863	hand	BATAK PALAWAN	alima
+865	hear	BATAK PALAWAN	batiʔ
+869	knee	BATAK PALAWAN	tuud
+871	leaf	BATAK PALAWAN	daun
+873	liver	BATAK PALAWAN	ataj
+875	louse	BATAK PALAWAN	kutu
+878	mountain	BATAK PALAWAN	bulud
+880	name	BATAK PALAWAN	ŋaran
+882	new	BATAK PALAWAN	baʔgu
+883	night	BATAK PALAWAN	dələm
+884	nose	BATAK PALAWAN	uruŋ
+886	one	BATAK PALAWAN	əsa
+887	path	BATAK PALAWAN	dalan
+888	person	BATAK PALAWAN	taw
+894	see	BATAK PALAWAN	ləʔgan
+896	skin	BATAK PALAWAN	kulit
+901	star	BATAK PALAWAN	panakunun
+902	stone	BATAK PALAWAN	batu
+908	tongue	BATAK PALAWAN	dilaʔ
+909	tooth	BATAK PALAWAN	nipən
+910	tree	BATAK PALAWAN	kaju
+911	two	BATAK PALAWAN	dua
+913	water	BATAK PALAWAN	danum
+914	we	BATAK PALAWAN	kitami
+920	you	BATAK PALAWAN	ikaw
+921	I	BILAAN KORONADAL	agu
+928	blood	BILAAN KORONADAL	litəʔ
+929	bone	BILAAN KORONADAL	tulon
+930	breast	BILAAN KORONADAL	tutuʔ
+936	dog	BILAAN KORONADAL	ajəm
+937	drink	BILAAN KORONADAL	inum
+939	ear	BILAAN KORONADAL	kliŋə
+943	eye	BILAAN KORONADAL	mato
+945	fire	BILAAN KORONADAL	lifoh
+946	fish	BILAAN KORONADAL	nalaf
+950	full	BILAAN KORONADAL	fnoʔ
+955	hand	BILAAN KORONADAL	sigal
+957	hear	BILAAN KORONADAL	liŋə
+961	knee	BILAAN KORONADAL	bukal
+963	leaf	BILAAN KORONADAL	doʔon
+965	liver	BILAAN KORONADAL	atoj
+967	louse	BILAAN KORONADAL	kutuʔ
+970	mountain	BILAAN KORONADAL	bulul
+972	name	BILAAN KORONADAL	dagit
+974	new	BILAAN KORONADAL	falami
+975	night	BILAAN KORONADAL	butaŋ
+976	nose	BILAAN KORONADAL	iluŋ
+978	one	BILAAN KORONADAL	satu
+979	path	BILAAN KORONADAL	dalon
+980	person	BILAAN KORONADAL	to
+986	see	BILAAN KORONADAL	təʔən
+988	skin	BILAAN KORONADAL	kulit
+993	star	BILAAN KORONADAL	blotik
+994	stone	BILAAN KORONADAL	batu
+1000	tongue	BILAAN KORONADAL	diloʔ
+1001	tooth	BILAAN KORONADAL	kifan
+1002	tree	BILAAN KORONADAL	kaju
+1003	two	BILAAN KORONADAL	lwə
+1005	water	BILAAN KORONADAL	eʔel
+1006	we	BILAAN KORONADAL	ato
+1012	you	BILAAN KORONADAL	gə
+1013	I	BILAAN SARANGANI	agu
+1020	blood	BILAAN SARANGANI	litəʔ
+1021	bone	BILAAN SARANGANI	tulan
+1022	breast	BILAAN SARANGANI	tutuʔ
+1028	dog	BILAAN SARANGANI	ajəm
+1029	drink	BILAAN SARANGANI	minum
+1031	ear	BILAAN SARANGANI	kliŋə
+1035	eye	BILAAN SARANGANI	mata
+1037	fire	BILAAN SARANGANI	lifo
+1038	fish	BILAAN SARANGANI	nalaf
+1042	full	BILAAN SARANGANI	fnoʔ
+1047	hand	BILAAN SARANGANI	sigal
+1049	hear	BILAAN SARANGANI	liŋə
+1053	knee	BILAAN SARANGANI	bukal
+1055	leaf	BILAAN SARANGANI	doʔon
+1057	liver	BILAAN SARANGANI	ataj
+1059	louse	BILAAN SARANGANI	kutu
+1062	mountain	BILAAN SARANGANI	bulul
+1064	name	BILAAN SARANGANI	dagit
+1066	new	BILAAN SARANGANI	falami
+1067	night	BILAAN SARANGANI	butaŋ
+1068	nose	BILAAN SARANGANI	iluŋ
+1070	one	BILAAN SARANGANI	satu
+1071	path	BILAAN SARANGANI	dalan
+1072	person	BILAAN SARANGANI	to
+1078	see	BILAAN SARANGANI	təʔən
+1080	skin	BILAAN SARANGANI	kindal
+1085	star	BILAAN SARANGANI	blatik
+1086	stone	BILAAN SARANGANI	batu
+1092	tongue	BILAAN SARANGANI	dilaʔ
+1093	tooth	BILAAN SARANGANI	kifan
+1094	tree	BILAAN SARANGANI	kajo
+1095	two	BILAAN SARANGANI	lwə
+1097	water	BILAAN SARANGANI	jeʔel
+1098	we	BILAAN SARANGANI	ito
+1104	you	BILAAN SARANGANI	gə
+1105	I	BONGGI	ou
+1112	blood	BONGGI	rah
+1113	bone	BONGGI	tulagn
+1114	breast	BONGGI	dudu
+1118	come	BONGGI	miataŋ
+1119	die	BONGGI	mati
+1120	dog	BONGGI	asu
+1121	drink	BONGGI	eŋinum
+1127	eye	BONGGI	mata
+1129	fire	BONGGI	afi
+1130	fish	BONGGI	sadak
+1139	hand	BONGGI	fi
+1141	hear	BONGGI	kidoŋor
+1147	leaf	BONGGI	doudn
+1149	liver	BONGGI	ati
+1156	name	BONGGI	eŋardn
+1158	new	BONGGI	baru
+1159	night	BONGGI	raobi
+1160	nose	BONGGI	iduŋ
+1162	one	BONGGI	isa
+1164	person	BONGGI	lama
+1172	skin	BONGGI	kubal
+1177	star	BONGGI	bitudn
+1178	stone	BONGGI	batu
+1184	tongue	BONGGI	dila
+1185	tooth	BONGGI	kuhud
+1187	two	BONGGI	dua
+1189	water	BONGGI	beig
+1190	we	BONGGI	sesia
+1197	I	BONTOC GUINAANG	sakʔən
+1204	blood	BONTOC GUINAANG	dala
+1205	bone	BONTOC GUINAANG	toŋʔal
+1206	breast	BONTOC GUINAANG	soso
+1212	dog	BONTOC GUINAANG	aso
+1213	drink	BONTOC GUINAANG	inom
+1215	ear	BONTOC GUINAANG	koləŋ
+1219	eye	BONTOC GUINAANG	mata
+1221	fire	BONTOC GUINAANG	apoj
+1222	fish	BONTOC GUINAANG	gadəw
+1226	full	BONTOC GUINAANG	napno
+1231	hand	BONTOC GUINAANG	lima
+1233	hear	BONTOC GUINAANG	dəŋəl
+1237	knee	BONTOC GUINAANG	powəg
+1239	leaf	BONTOC GUINAANG	tobo
+1241	liver	BONTOC GUINAANG	agtəj
+1243	louse	BONTOC GUINAANG	koto
+1246	mountain	BONTOC GUINAANG	bilig
+1248	name	BONTOC GUINAANG	ŋadan
+1250	new	BONTOC GUINAANG	balo
+1251	night	BONTOC GUINAANG	labi
+1252	nose	BONTOC GUINAANG	əŋəl
+1254	one	BONTOC GUINAANG	əsa
+1255	path	BONTOC GUINAANG	dalan
+1256	person	BONTOC GUINAANG	ipogaw
+1262	see	BONTOC GUINAANG	ila
+1264	skin	BONTOC GUINAANG	kopkop
+1269	star	BONTOC GUINAANG	talaw
+1270	stone	BONTOC GUINAANG	bato
+1276	tongue	BONTOC GUINAANG	dila
+1277	tooth	BONTOC GUINAANG	babʔa
+1278	tree	BONTOC GUINAANG	kaʔəw
+1279	two	BONTOC GUINAANG	dowa
+1281	water	BONTOC GUINAANG	danom
+1282	we	BONTOC GUINAANG	datako
+1288	you	BONTOC GUINAANG	sikʔa
+1289	I	BUHI	ʔaku
+1296	blood	BUHI	ruguʔ
+1297	bone	BUHI	tuʔwaŋ
+1298	breast	BUHI	susu
+1302	come	BUHI	ʔabut
+1303	die	BUHI	giraʔan
+1304	dog	BUHI	ʔajam
+1305	drink	BUHI	ʔinum
+1307	ear	BUHI	taliŋa
+1311	eye	BUHI	mata
+1313	fire	BUHI	kalaju
+1314	fish	BUHI	ʔisraʔ
+1318	full	BUHI	punuʔ
+1323	hand	BUHI	kamit
+1325	hear	BUHI	riŋig
+1326	horn	BUHI	suŋij
+1329	knee	BUHI	tuwud
+1331	leaf	BUHI	dawun
+1333	liver	BUHI	ʔataj
+1335	louse	BUHI	kutu
+1338	mountain	BUHI	bukid
+1340	name	BUHI	ŋaran
+1342	new	BUHI	bagʔu
+1343	night	BUHI	gaʔbi
+1344	nose	BUHI	ʔuruŋ
+1346	one	BUHI	ʔisad
+1347	path	BUHI	dagan
+1348	person	BUHI	taʔu
+1354	see	BUHI	kita
+1356	skin	BUHI	kublit
+1361	star	BUHI	bitiʔwin
+1362	stone	BUHI	batu
+1363	sun	BUHI	ʔaldaw
+1368	tongue	BUHI	dilaʔ
+1369	tooth	BUHI	ŋipin
+1370	tree	BUHI	kawuj
+1371	two	BUHI	duwa
+1373	water	BUHI	tubig
+1374	we	BUHI	kita
+1380	you	BUHI	kamu
+1381	I	BUKIDNON BINUKID	janʔa
+1382	all	BUKIDNON BINUKID	alan
+1383	ash	BUKIDNON BINUKID	abu
+1384	big	BUKIDNON BINUKID	aragi
+1385	bird	BUKIDNON BINUKID	tagbis
+1386	bite	BUKIDNON BINUKID	kagat
+1387	black	BUKIDNON BINUKID	maitum
+1388	blood	BUKIDNON BINUKID	laŋəsa
+1389	bone	BUKIDNON BINUKID	tulʔan
+1391	burn	BUKIDNON BINUKID	sunog
+1392	cloud	BUKIDNON BINUKID	gabon
+1393	cold	BUKIDNON BINUKID	matinuʔ
+1394	come	BUKIDNON BINUKID	dini
+1395	die	BUKIDNON BINUKID	minataj
+1396	dog	BUKIDNON BINUKID	asu
+1397	drink	BUKIDNON BINUKID	inum
+1398	dry	BUKIDNON BINUKID	mamara
+1399	ear	BUKIDNON BINUKID	taliŋa
+1400	earth	BUKIDNON BINUKID	bugtaʔ
+1401	eat	BUKIDNON BINUKID	kaʔon
+1402	egg	BUKIDNON BINUKID	impis
+1403	eye	BUKIDNON BINUKID	mata
+1404	feather	BUKIDNON BINUKID	bulbul
+1405	fire	BUKIDNON BINUKID	hapuj
+1406	fish	BUKIDNON BINUKID	isdaʔ
+1407	flesh	BUKIDNON BINUKID	sapuʔ
+1408	fly	BUKIDNON BINUKID	lajaŋ
+1409	foot	BUKIDNON BINUKID	paʔa
+1410	full	BUKIDNON BINUKID	napunuʔ
+1411	good	BUKIDNON BINUKID	maajad
+1412	grease	BUKIDNON BINUKID	grasa
+1413	green	BUKIDNON BINUKID	mahilaw
+1414	hair	BUKIDNON BINUKID	buhok
+1415	hand	BUKIDNON BINUKID	alima
+1416	head	BUKIDNON BINUKID	ulo
+1417	hear	BUKIDNON BINUKID	paliman
+1418	horn	BUKIDNON BINUKID	suŋaj
+1419	hot	BUKIDNON BINUKID	mainit
+1420	kill	BUKIDNON BINUKID	himataji
+1421	knee	BUKIDNON BINUKID	buʔol
+1422	know	BUKIDNON BINUKID	katuon
+1423	leaf	BUKIDNON BINUKID	dahon
+1424	lie	BUKIDNON BINUKID	biduʔ
+1425	liver	BUKIDNON BINUKID	ataj
+1426	long	BUKIDNON BINUKID	mataŋkaw
+1427	louse	BUKIDNON BINUKID	lisaʔ
+1428	man	BUKIDNON BINUKID	maʔama
+1429	moon	BUKIDNON BINUKID	bulan
+1430	mountain	BUKIDNON BINUKID	buntod
+1431	mouth	BUKIDNON BINUKID	baʔbaʔ
+1432	name	BUKIDNON BINUKID	ŋaran
+1433	neck	BUKIDNON BINUKID	liʔug
+1434	new	BUKIDNON BINUKID	bagʔu
+1435	night	BUKIDNON BINUKID	daluman
+1436	nose	BUKIDNON BINUKID	iduŋ
+1437	not	BUKIDNON BINUKID	hariʔ
+1438	one	BUKIDNON BINUKID	sabuwa
+1439	path	BUKIDNON BINUKID	dalan
+1440	person	BUKIDNON BINUKID	ətaw
+1441	rain	BUKIDNON BINUKID	uran
+1442	red	BUKIDNON BINUKID	maligaʔ
+1443	root	BUKIDNON BINUKID	gamut
+1444	sand	BUKIDNON BINUKID	grabas
+1445	say	BUKIDNON BINUKID	ikagi
+1446	see	BUKIDNON BINUKID	ahaʔ
+1447	sit	BUKIDNON BINUKID	pinuʔu
+1448	skin	BUKIDNON BINUKID	laŋgit
+1449	sleep	BUKIDNON BINUKID	tiruga
+1450	small	BUKIDNON BINUKID	aCuʔaj
+1451	smoke	BUKIDNON BINUKID	ubul
+1452	stand	BUKIDNON BINUKID	hitindəg
+1453	star	BUKIDNON BINUKID	bituon
+1454	stone	BUKIDNON BINUKID	batu
+1455	sun	BUKIDNON BINUKID	aldaw
+1456	swim	BUKIDNON BINUKID	sulip
+1457	tail	BUKIDNON BINUKID	ikug
+1458	that	BUKIDNON BINUKID	hajan
+1459	this	BUKIDNON BINUKID	ijan
+1460	tongue	BUKIDNON BINUKID	dilaʔ
+1461	tooth	BUKIDNON BINUKID	ŋipun
+1462	tree	BUKIDNON BINUKID	kaju
+1463	two	BUKIDNON BINUKID	daruwa
+1464	walk	BUKIDNON BINUKID	hipanaw
+1465	water	BUKIDNON BINUKID	wahig
+1466	we	BUKIDNON BINUKID	jaŋkuj
+1467	what	BUKIDNON BINUKID	inu
+1468	white	BUKIDNON BINUKID	maputi
+1469	who	BUKIDNON BINUKID	sinʔu
+1470	woman	BUKIDNON BINUKID	bahi
+1471	yellow	BUKIDNON BINUKID	makalawag
+1472	you	BUKIDNON BINUKID	jaŋka
+1473	I	BUTUANON	ako
+1480	blood	BUTUANON	dugo
+1481	bone	BUTUANON	bukog
+1482	breast	BUTUANON	dughan
+1486	come	BUTUANON	kansani
+1487	die	BUTUANON	pataj
+1488	dog	BUTUANON	gadja
+1489	drink	BUTUANON	moinum
+1491	ear	BUTUANON	taliŋa
+1495	eye	BUTUANON	mata
+1497	fire	BUTUANON	kajo
+1498	fish	BUTUANON	isda
+1507	hand	BUTUANON	alima
+1509	hear	BUTUANON	moduŋog
+1515	leaf	BUTUANON	dahon
+1517	liver	BUTUANON	ataj
+1519	louse	BUTUANON	kujamad
+1524	name	BUTUANON	ŋan
+1526	new	BUTUANON	bago
+1527	night	BUTUANON	dum
+1528	nose	BUTUANON	iloŋ
+1530	one	BUTUANON	isa
+1531	path	BUTUANON	dan
+1532	person	BUTUANON	tao
+1538	see	BUTUANON	makita
+1540	skin	BUTUANON	panit
+1545	star	BUTUANON	bituon
+1546	stone	BUTUANON	bato
+1552	tongue	BUTUANON	dila
+1553	tooth	BUTUANON	ŋipon
+1555	two	BUTUANON	duwa
+1557	water	BUTUANON	tubig
+1558	we	BUTUANON	kita
+1564	you	BUTUANON	ikaw
+1565	I	CAIJIA	ŋuo
+1572	blood	CAIJIA	tʃr
+1573	bone	CAIJIA	kuituo
+1574	breast	CAIJIA	mi
+1578	come	CAIJIA	xu
+1579	die	CAIJIA	sr
+1580	dog	CAIJIA	khui
+1581	drink	CAIJIA	an
+1583	ear	CAIJIA	nikha
+1587	eye	CAIJIA	nicr
+1589	fire	CAIJIA	fai
+1590	fish	CAIJIA	xuŋ
+1594	full	CAIJIA	pəu
+1599	hand	CAIJIA	suo
+1601	hear	CAIJIA	thi
+1602	horn	CAIJIA	ko
+1609	liver	CAIJIA	sanka
+1611	louse	CAIJIA	sei
+1614	mountain	CAIJIA	tipəu
+1616	name	CAIJIA	mi
+1618	new	CAIJIA	Sin
+1619	night	CAIJIA	sa
+1620	nose	CAIJIA	bikei
+1622	one	CAIJIA	ji
+1623	path	CAIJIA	ho
+1624	person	CAIJIA	xuotʃuo
+1630	see	CAIJIA	kien
+1632	skin	CAIJIA	pəu
+1637	star	CAIJIA	Sisu
+1638	stone	CAIJIA	ca
+1639	sun	CAIJIA	ien
+1644	tongue	CAIJIA	crta
+1645	tooth	CAIJIA	tʃeipei
+1646	tree	CAIJIA	so
+1647	two	CAIJIA	ta
+1649	water	CAIJIA	sr
+1650	we	CAIJIA	ŋuo
+1656	you	CAIJIA	nu
+1657	I	CEBUANO	ako
+1664	blood	CEBUANO	duguʔ
+1665	bone	CEBUANO	bukug
+1666	breast	CEBUANO	dughan
+1670	come	CEBUANO	anhi
+1671	die	CEBUANO	mataj
+1672	dog	CEBUANO	iroʔ
+1673	drink	CEBUANO	inum
+1675	ear	CEBUANO	daluŋgan
+1679	eye	CEBUANO	mata
+1681	fire	CEBUANO	kalaju
+1682	fish	CEBUANO	isda
+1691	hand	CEBUANO	kamut
+1693	hear	CEBUANO	duŋug
+1699	leaf	CEBUANO	dahun
+1701	liver	CEBUANO	ataj
+1703	louse	CEBUANO	kutu
+1708	name	CEBUANO	ŋalan
+1710	new	CEBUANO	bagu
+1711	night	CEBUANO	gabiʔi
+1712	nose	CEBUANO	iluŋ
+1714	one	CEBUANO	usa
+1715	path	CEBUANO	dalan
+1716	person	CEBUANO	tawu
+1722	see	CEBUANO	tanaw
+1724	skin	CEBUANO	panit
+1729	star	CEBUANO	bitun
+1730	stone	CEBUANO	batu
+1736	tongue	CEBUANO	dila
+1737	tooth	CEBUANO	ŋipun
+1739	two	CEBUANO	duha
+1741	water	CEBUANO	tubig
+1742	we	CEBUANO	kita
+1748	you	CEBUANO	ikaw
+1749	I	CENTRAL TAGBANWA	ako
+1756	blood	CENTRAL TAGBANWA	tahik
+1757	bone	CENTRAL TAGBANWA	duhi
+1758	breast	CENTRAL TAGBANWA	tuto
+1763	die	CENTRAL TAGBANWA	pataj
+1764	dog	CENTRAL TAGBANWA	kiriŋ
+1765	drink	CENTRAL TAGBANWA	inim
+1767	ear	CENTRAL TAGBANWA	taliŋa
+1771	eye	CENTRAL TAGBANWA	mata
+1773	fire	CENTRAL TAGBANWA	apoj
+1774	fish	CENTRAL TAGBANWA	daiŋ
+1778	full	CENTRAL TAGBANWA	pigpig
+1783	hand	CENTRAL TAGBANWA	alima
+1785	hear	CENTRAL TAGBANWA	bati
+1786	horn	CENTRAL TAGBANWA	sirbato
+1789	knee	CENTRAL TAGBANWA	tod
+1791	leaf	CENTRAL TAGBANWA	daon
+1793	liver	CENTRAL TAGBANWA	kandat
+1795	louse	CENTRAL TAGBANWA	kajamad
+1798	mountain	CENTRAL TAGBANWA	bukid
+1800	name	CENTRAL TAGBANWA	ŋalan
+1802	new	CENTRAL TAGBANWA	bago
+1803	night	CENTRAL TAGBANWA	dilim
+1804	nose	CENTRAL TAGBANWA	uroŋ
+1806	one	CENTRAL TAGBANWA	tam
+1808	person	CENTRAL TAGBANWA	katawan
+1814	see	CENTRAL TAGBANWA	intul
+1816	skin	CENTRAL TAGBANWA	kulit
+1821	star	CENTRAL TAGBANWA	bitukon
+1822	stone	CENTRAL TAGBANWA	bato
+1823	sun	CENTRAL TAGBANWA	aldaw
+1828	tongue	CENTRAL TAGBANWA	dila
+1829	tooth	CENTRAL TAGBANWA	ŋiti
+1830	tree	CENTRAL TAGBANWA	kajo
+1831	two	CENTRAL TAGBANWA	dua
+1833	water	CENTRAL TAGBANWA	wai
+1834	we	CENTRAL TAGBANWA	kita
+1840	you	CENTRAL TAGBANWA	ka
+1841	I	CUYONON	ako
+1848	blood	CUYONON	dugoʔ
+1849	bone	CUYONON	tulan
+1850	breast	CUYONON	itən
+1856	dog	CUYONON	tjuʔ
+1857	drink	CUYONON	inom
+1859	ear	CUYONON	taliŋa
+1863	eye	CUYONON	mataʔ
+1865	fire	CUYONON	kalajoʔ
+1866	fish	CUYONON	isdaʔ
+1875	hand	CUYONON	lima
+1877	hear	CUYONON	batiʔ
+1883	leaf	CUYONON	dawn
+1885	liver	CUYONON	ataj
+1887	louse	CUYONON	kutoʔ
+1892	name	CUYONON	aran
+1894	new	CUYONON	bagoʔ
+1895	night	CUYONON	gabiʔ
+1896	nose	CUYONON	iloŋ
+1898	one	CUYONON	sakabilog
+1899	path	CUYONON	dalan
+1900	person	CUYONON	tauʔ
+1906	see	CUYONON	kitaʔ
+1908	skin	CUYONON	kulit
+1913	star	CUYONON	biton
+1914	stone	CUYONON	batoʔ
+1920	tongue	CUYONON	dilaʔ
+1921	tooth	CUYONON	ipən
+1923	two	CUYONON	darwa
+1925	water	CUYONON	tubig
+1926	we	CUYONON	kita
+1932	you	CUYONON	ikaw
+1933	I	DARAGA	ʔaku
+1940	blood	DARAGA	duguʔ
+1941	bone	DARAGA	tuʔlaŋ
+1942	breast	DARAGA	susu
+1946	come	DARAGA	ʔabut
+1947	die	DARAGA	giran
+1948	dog	DARAGA	ʔajam
+1949	drink	DARAGA	ʔinum
+1951	ear	DARAGA	taliŋa
+1955	eye	DARAGA	mata
+1957	fire	DARAGA	kalaju
+1958	fish	DARAGA	siraʔ
+1962	full	DARAGA	punuʔ
+1967	hand	DARAGA	kamit
+1969	hear	DARAGA	diŋig
+1970	horn	DARAGA	suŋaj
+1973	knee	DARAGA	tuʔud
+1975	leaf	DARAGA	dawun
+1977	liver	DARAGA	ʔataj
+1979	louse	DARAGA	kutu
+1982	mountain	DARAGA	bulud
+1984	name	DARAGA	ŋaran
+1986	new	DARAGA	baʔgu
+1987	night	DARAGA	gaʔbi
+1988	nose	DARAGA	ʔuruŋ
+1990	one	DARAGA	ʔisad
+1991	path	DARAGA	dalan
+1992	person	DARAGA	tawu
+1998	see	DARAGA	kita
+2000	skin	DARAGA	kulit
+2005	star	DARAGA	bituʔun
+2006	stone	DARAGA	batu
+2007	sun	DARAGA	ʔaldaw
+2012	tongue	DARAGA	dilaʔ
+2013	tooth	DARAGA	ŋipin
+2014	tree	DARAGA	kawuj
+2015	two	DARAGA	duwa
+2017	water	DARAGA	tubig
+2018	we	DARAGA	kita
+2024	you	DARAGA	kamu
+2025	I	DUMAGAT CASIGURAN	sakən
+2032	blood	DUMAGAT CASIGURAN	digeʔ
+2033	bone	DUMAGAT CASIGURAN	tulaŋ
+2034	breast	DUMAGAT CASIGURAN	gisat
+2040	dog	DUMAGAT CASIGURAN	asoʔ
+2041	drink	DUMAGAT CASIGURAN	uminom
+2043	ear	DUMAGAT CASIGURAN	taliŋaʔ
+2047	eye	DUMAGAT CASIGURAN	mataʔ
+2049	fire	DUMAGAT CASIGURAN	apoj
+2050	fish	DUMAGAT CASIGURAN	ikan
+2054	full	DUMAGAT CASIGURAN	putat
+2059	hand	DUMAGAT CASIGURAN	kamət
+2061	hear	DUMAGAT CASIGURAN	batiʔ
+2065	knee	DUMAGAT CASIGURAN	tod
+2067	leaf	DUMAGAT CASIGURAN	don
+2069	liver	DUMAGAT CASIGURAN	agteʔ
+2071	louse	DUMAGAT CASIGURAN	kutoʔ
+2074	mountain	DUMAGAT CASIGURAN	buked
+2076	name	DUMAGAT CASIGURAN	ŋahen
+2078	new	DUMAGAT CASIGURAN	biguʔ
+2079	night	DUMAGAT CASIGURAN	kələp
+2080	nose	DUMAGAT CASIGURAN	duŋos
+2082	one	DUMAGAT CASIGURAN	Esaʔ
+2083	path	DUMAGAT CASIGURAN	dilan
+2084	person	DUMAGAT CASIGURAN	tolaj
+2090	see	DUMAGAT CASIGURAN	metaʔ
+2092	skin	DUMAGAT CASIGURAN	kulet
+2097	star	DUMAGAT CASIGURAN	biton
+2098	stone	DUMAGAT CASIGURAN	bitoʔ
+2104	tongue	DUMAGAT CASIGURAN	dilaʔ
+2105	tooth	DUMAGAT CASIGURAN	ŋipən
+2106	tree	DUMAGAT CASIGURAN	kajoʔ
+2107	two	DUMAGAT CASIGURAN	əduwaʔ
+2109	water	DUMAGAT CASIGURAN	dinom
+2110	we	DUMAGAT CASIGURAN	sikitam
+2116	you	DUMAGAT CASIGURAN	siko
+2117	I	DUPANINGAN AGTA	hikan
+2124	blood	DUPANINGAN AGTA	digiʔ
+2125	bone	DUPANINGAN AGTA	tulaŋ
+2126	breast	DUPANINGAN AGTA	gisat
+2130	come	DUPANINGAN AGTA	umaŋaj
+2131	die	DUPANINGAN AGTA	malugulug
+2132	dog	DUPANINGAN AGTA	asuʔ
+2133	drink	DUPANINGAN AGTA	magroŋroŋ
+2135	ear	DUPANINGAN AGTA	taliŋa
+2139	eye	DUPANINGAN AGTA	mataʔ
+2141	fire	DUPANINGAN AGTA	gaŋatan
+2142	fish	DUPANINGAN AGTA	padut
+2146	full	DUPANINGAN AGTA	mabijag
+2151	hand	DUPANINGAN AGTA	kamat
+2153	hear	DUPANINGAN AGTA	matiman
+2154	horn	DUPANINGAN AGTA	saduk
+2157	knee	DUPANINGAN AGTA	guwalab
+2159	leaf	DUPANINGAN AGTA	don
+2161	liver	DUPANINGAN AGTA	agtaj
+2163	louse	DUPANINGAN AGTA	kutuʔ
+2166	mountain	DUPANINGAN AGTA	tagilEtel
+2168	name	DUPANINGAN AGTA	nagEn
+2170	new	DUPANINGAN AGTA	biguʔ
+2171	night	DUPANINGAN AGTA	kalap
+2172	nose	DUPANINGAN AGTA	duŋas
+2174	one	DUPANINGAN AGTA	Esa
+2175	path	DUPANINGAN AGTA	dilan
+2176	person	DUPANINGAN AGTA	agtaʔ
+2182	see	DUPANINGAN AGTA	maʔEnta
+2184	skin	DUPANINGAN AGTA	gadaŋ
+2189	star	DUPANINGAN AGTA	pusijan
+2190	stone	DUPANINGAN AGTA	rusuʔ
+2191	sun	DUPANINGAN AGTA	sEŋgit
+2196	tongue	DUPANINGAN AGTA	dilaʔ
+2197	tooth	DUPANINGAN AGTA	ŋipan
+2198	tree	DUPANINGAN AGTA	kajuʔ
+2199	two	DUPANINGAN AGTA	duwa
+2201	water	DUPANINGAN AGTA	dinom
+2202	we	DUPANINGAN AGTA	hikitam
+2208	you	DUPANINGAN AGTA	hikaw
+2209	I	ENGLISH	Ei
+2210	all	ENGLISH	ol
+2211	ash	ENGLISH	ES
+2212	big	ENGLISH	big
+2213	bird	ENGLISH	bərd
+2214	bite	ENGLISH	bEit
+2215	black	ENGLISH	blEk
+2216	blood	ENGLISH	bləd
+2217	bone	ENGLISH	bon
+2218	breast	ENGLISH	brEst
+2219	burn	ENGLISH	bərn
+2220	cloud	ENGLISH	klaud
+2221	cold	ENGLISH	kold
+2222	come	ENGLISH	kəm
+2223	die	ENGLISH	dEi
+2224	dog	ENGLISH	dag
+2225	drink	ENGLISH	driŋk
+2226	dry	ENGLISH	drEi
+2227	ear	ENGLISH	ir
+2228	earth	ENGLISH	ər8
+2229	eat	ENGLISH	it
+2230	egg	ENGLISH	eg
+2231	eye	ENGLISH	Ei
+2232	feather	ENGLISH	fE8r
+2233	fire	ENGLISH	fEir
+2234	fish	ENGLISH	fiS
+2235	flesh	ENGLISH	flES
+2236	fly	ENGLISH	flEi
+2237	foot	ENGLISH	fut
+2238	full	ENGLISH	ful
+2239	good	ENGLISH	gud
+2240	grease	ENGLISH	gris
+2241	green	ENGLISH	grin
+2242	hair	ENGLISH	hEr
+2243	hand	ENGLISH	hEnd
+2244	head	ENGLISH	hEd
+2245	hear	ENGLISH	hir
+2246	horn	ENGLISH	horn
+2247	hot	ENGLISH	hat
+2248	kill	ENGLISH	kil
+2249	knee	ENGLISH	ni
+2250	know	ENGLISH	no
+2251	leaf	ENGLISH	lif
+2252	lie	ENGLISH	lEi
+2253	liver	ENGLISH	livər
+2254	long	ENGLISH	loŋ
+2255	louse	ENGLISH	laus
+2256	man	ENGLISH	mEn
+2257	moon	ENGLISH	mun
+2258	mountain	ENGLISH	mauntən
+2259	mouth	ENGLISH	mau8
+2260	name	ENGLISH	nem
+2261	neck	ENGLISH	nEk
+2262	new	ENGLISH	nu
+2263	night	ENGLISH	nEit
+2264	nose	ENGLISH	noz
+2265	not	ENGLISH	nat
+2266	one	ENGLISH	wən
+2267	path	ENGLISH	pE8
+2268	person	ENGLISH	prsən
+2269	rain	ENGLISH	rein
+2270	red	ENGLISH	rEd
+2271	root	ENGLISH	rut
+2272	sand	ENGLISH	sEnd
+2273	say	ENGLISH	sei
+2274	see	ENGLISH	si
+2275	sit	ENGLISH	sit
+2276	skin	ENGLISH	skin
+2277	sleep	ENGLISH	slip
+2278	small	ENGLISH	smal
+2279	smoke	ENGLISH	smok
+2280	stand	ENGLISH	stEnd
+2281	star	ENGLISH	star
+2282	stone	ENGLISH	ston
+2283	sun	ENGLISH	sən
+2284	swim	ENGLISH	swim
+2285	tail	ENGLISH	tel
+2286	that	ENGLISH	8Et
+2287	this	ENGLISH	8is
+2288	tongue	ENGLISH	təŋ
+2289	tooth	ENGLISH	tu8
+2290	tree	ENGLISH	tri
+2291	two	ENGLISH	tu
+2292	walk	ENGLISH	wok
+2293	water	ENGLISH	watər
+2294	we	ENGLISH	wi
+2295	what	ENGLISH	what
+2296	white	ENGLISH	whEit
+2297	who	ENGLISH	hu
+2298	woman	ENGLISH	wumən
+2299	yellow	ENGLISH	jElo
+2300	you	ENGLISH	ju
+2301	I	ESKAYAN	narin
+2308	blood	ESKAYAN	alwatis
+2309	bone	ESKAYAN	giro
+2310	breast	ESKAYAN	palda
+2314	come	ESKAYAN	lari
+2315	die	ESKAYAN	modowati
+2316	dog	ESKAYAN	plodo
+2317	drink	ESKAYAN	odʒirim
+2319	ear	ESKAYAN	klabara
+2323	eye	ESKAYAN	sim
+2325	fire	ESKAYAN	poloʔiso
+2326	fish	ESKAYAN	pir
+2335	hand	ESKAYAN	dapami
+2337	hear	ESKAYAN	jantisi
+2341	knee	ESKAYAN	ilkdo
+2343	leaf	ESKAYAN	saliti
+2345	liver	ESKAYAN	was
+2347	louse	ESKAYAN	hoko
+2352	name	ESKAYAN	laŋgis
+2354	new	ESKAYAN	tibil
+2355	night	ESKAYAN	kloper
+2356	nose	ESKAYAN	dʒiomintir
+2358	one	ESKAYAN	oj
+2359	path	ESKAYAN	rakilan
+2360	person	ESKAYAN	bolto
+2366	see	ESKAYAN	mosimsati
+2368	skin	ESKAYAN	pil
+2373	star	ESKAYAN	pisakol
+2374	stone	ESKAYAN	sabana
+2375	sun	ESKAYAN	astro
+2380	tongue	ESKAYAN	golitas
+2381	tooth	ESKAYAN	prindido
+2383	two	ESKAYAN	tri
+2385	water	ESKAYAN	koljar
+2386	we	ESKAYAN	arhitika
+2392	you	ESKAYAN	samo
+2393	I	ESTONIAN	mina
+2394	all	ESTONIAN	koik
+2395	ash	ESTONIAN	tuk
+2396	big	ESTONIAN	sur
+2397	bird	ESTONIAN	lind
+2398	bite	ESTONIAN	hammusta
+2399	black	ESTONIAN	must
+2400	blood	ESTONIAN	veri
+2401	bone	ESTONIAN	kont
+2402	breast	ESTONIAN	rind
+2403	burn	ESTONIAN	pole
+2404	cloud	ESTONIAN	pilv
+2405	cold	ESTONIAN	kulm
+2406	come	ESTONIAN	tule
+2407	die	ESTONIAN	sure
+2408	dog	ESTONIAN	koer
+2409	drink	ESTONIAN	dʒo
+2410	dry	ESTONIAN	kuiv
+2411	ear	ESTONIAN	korv
+2412	earth	ESTONIAN	ma
+2413	eat	ESTONIAN	so
+2414	egg	ESTONIAN	muna
+2415	eye	ESTONIAN	silm
+2416	feather	ESTONIAN	sulg
+2417	fire	ESTONIAN	tuli
+2418	fish	ESTONIAN	kala
+2419	flesh	ESTONIAN	liha
+2420	fly	ESTONIAN	lenda
+2421	foot	ESTONIAN	dʒalg
+2422	full	ESTONIAN	tais
+2423	good	ESTONIAN	hea
+2424	grease	ESTONIAN	rasv
+2425	green	ESTONIAN	roheline
+2426	hair	ESTONIAN	dʒuksed
+2427	hand	ESTONIAN	kasi
+2428	head	ESTONIAN	pea
+2429	hear	ESTONIAN	kul
+2430	horn	ESTONIAN	sarv
+2431	hot	ESTONIAN	soe
+2432	kill	ESTONIAN	tap
+2433	knee	ESTONIAN	polv
+2434	know	ESTONIAN	tead
+2435	leaf	ESTONIAN	let
+2436	lie	ESTONIAN	lama
+2437	liver	ESTONIAN	maks
+2438	long	ESTONIAN	pikk
+2439	louse	ESTONIAN	tai
+2440	man	ESTONIAN	mes
+2441	moon	ESTONIAN	ku
+2442	mountain	ESTONIAN	magi
+2443	mouth	ESTONIAN	su
+2444	name	ESTONIAN	nimi
+2445	neck	ESTONIAN	kael
+2446	new	ESTONIAN	us
+2447	night	ESTONIAN	o
+2448	nose	ESTONIAN	nina
+2449	not	ESTONIAN	mitte
+2450	one	ESTONIAN	uks
+2451	path	ESTONIAN	te
+2452	person	ESTONIAN	inimene
+2453	rain	ESTONIAN	vim
+2454	red	ESTONIAN	punane
+2455	root	ESTONIAN	dʒur
+2456	sand	ESTONIAN	liv
+2457	say	ESTONIAN	utle
+2458	see	ESTONIAN	nage
+2459	sit	ESTONIAN	istu
+2460	skin	ESTONIAN	nak
+2461	sleep	ESTONIAN	maga
+2462	small	ESTONIAN	vaike
+2463	smoke	ESTONIAN	suic
+2464	stand	ESTONIAN	seis
+2465	star	ESTONIAN	tat
+2466	stone	ESTONIAN	kivi
+2467	sun	ESTONIAN	paike
+2468	swim	ESTONIAN	udʒu
+2469	tail	ESTONIAN	saba
+2470	that	ESTONIAN	to
+2471	this	ESTONIAN	se
+2472	tongue	ESTONIAN	kel
+2473	tooth	ESTONIAN	hammas
+2474	tree	ESTONIAN	pu
+2475	two	ESTONIAN	kaks
+2476	walk	ESTONIAN	kondi
+2477	water	ESTONIAN	vesi
+2478	we	ESTONIAN	meie
+2479	what	ESTONIAN	mis
+2480	white	ESTONIAN	valge
+2481	who	ESTONIAN	kes
+2482	woman	ESTONIAN	naine
+2483	yellow	ESTONIAN	kollane
+2484	you	ESTONIAN	sina
+2485	I	FINNISH	minE
+2486	all	FINNISH	kaikki
+2487	ash	FINNISH	tuhka
+2488	big	FINNISH	iso
+2489	bird	FINNISH	lintu
+2490	bite	FINNISH	pure
+2491	black	FINNISH	musta
+2492	blood	FINNISH	veri
+2493	bone	FINNISH	luu
+2494	breast	FINNISH	rinta
+2495	burn	FINNISH	pala
+2496	cloud	FINNISH	pilvi
+2497	cold	FINNISH	kjlmE
+2498	come	FINNISH	tule
+2499	die	FINNISH	kuole
+2500	dog	FINNISH	koira
+2501	drink	FINNISH	dʒuo
+2502	dry	FINNISH	kuiva
+2503	ear	FINNISH	korva
+2504	earth	FINNISH	maa
+2505	eat	FINNISH	sjə
+2506	egg	FINNISH	muna
+2507	eye	FINNISH	silmE
+2508	feather	FINNISH	sulka
+2509	fire	FINNISH	tuli
+2510	fish	FINNISH	kala
+2511	flesh	FINNISH	liha
+2512	fly	FINNISH	lentE
+2513	foot	FINNISH	dʒalka
+2514	full	FINNISH	tEjsi
+2515	good	FINNISH	hjvE
+2516	grease	FINNISH	rasva
+2517	green	FINNISH	vihreE
+2518	hair	FINNISH	tukka
+2519	hand	FINNISH	kEsi
+2520	head	FINNISH	pEE
+2521	hear	FINNISH	kuule
+2522	horn	FINNISH	sarvi
+2523	hot	FINNISH	kuuma
+2524	kill	FINNISH	tappa
+2525	knee	FINNISH	polvi
+2526	know	FINNISH	tietE
+2527	leaf	FINNISH	lehti
+2528	lie	FINNISH	makaa
+2529	liver	FINNISH	maksa
+2530	long	FINNISH	pitkE
+2531	louse	FINNISH	tEi
+2532	man	FINNISH	mies
+2533	moon	FINNISH	kuu
+2534	mountain	FINNISH	vuori
+2535	mouth	FINNISH	suu
+2536	name	FINNISH	nimi
+2537	neck	FINNISH	kaula
+2538	new	FINNISH	uusi
+2539	night	FINNISH	jə
+2540	nose	FINNISH	nenE
+2541	not	FINNISH	ei
+2542	one	FINNISH	iksi
+2543	path	FINNISH	tie
+2544	person	FINNISH	ihminen
+2545	rain	FINNISH	sata
+2546	red	FINNISH	punainen
+2547	root	FINNISH	dʒuuri
+2548	sand	FINNISH	hiekka
+2549	say	FINNISH	sano
+2550	see	FINNISH	nEke
+2551	sit	FINNISH	istu
+2552	skin	FINNISH	iho
+2553	sleep	FINNISH	nukku
+2554	small	FINNISH	pieni
+2555	smoke	FINNISH	savu
+2556	stand	FINNISH	seiso
+2557	star	FINNISH	tEhti
+2558	stone	FINNISH	kivi
+2559	sun	FINNISH	aurinko
+2560	swim	FINNISH	ui
+2561	tail	FINNISH	hEntE
+2562	that	FINNISH	tuo
+2563	this	FINNISH	tEmE
+2564	tongue	FINNISH	kieli
+2565	tooth	FINNISH	hammas
+2566	tree	FINNISH	puu
+2567	two	FINNISH	kaksi
+2568	walk	FINNISH	kEvele
+2569	water	FINNISH	vesi
+2570	we	FINNISH	me
+2571	what	FINNISH	mikE
+2572	white	FINNISH	valkoinen
+2573	who	FINNISH	kuka
+2574	woman	FINNISH	nainen
+2575	yellow	FINNISH	keltainen
+2576	you	FINNISH	sinE
+2577	I	FUZHOU CHINESE	ŋuai
+2584	blood	FUZHOU CHINESE	haik
+2585	bone	FUZHOU CHINESE	kouk
+2586	breast	FUZHOU CHINESE	neiŋ
+2590	come	FUZHOU CHINESE	li
+2591	die	FUZHOU CHINESE	8i
+2592	dog	FUZHOU CHINESE	kheiŋ
+2593	drink	FUZHOU CHINESE	tʃiok
+2595	ear	FUZHOU CHINESE	ŋai
+2599	eye	FUZHOU CHINESE	meikciu
+2601	fire	FUZHOU CHINESE	hui
+2602	fish	FUZHOU CHINESE	ŋi
+2606	full	FUZHOU CHINESE	muaŋ
+2611	hand	FUZHOU CHINESE	tʃiu
+2613	hear	FUZHOU CHINESE	thiaŋ
+2614	horn	FUZHOU CHINESE	koik
+2617	knee	FUZHOU CHINESE	khakphuthau
+2619	leaf	FUZHOU CHINESE	nuok
+2621	liver	FUZHOU CHINESE	kaŋ
+2623	louse	FUZHOU CHINESE	8aikmo
+2626	mountain	FUZHOU CHINESE	8aŋ
+2628	name	FUZHOU CHINESE	miaŋcei
+2630	new	FUZHOU CHINESE	8iŋ
+2631	night	FUZHOU CHINESE	maŋmuo
+2632	nose	FUZHOU CHINESE	phei
+2634	one	FUZHOU CHINESE	8uok
+2635	path	FUZHOU CHINESE	lou
+2636	person	FUZHOU CHINESE	neiŋ
+2642	see	FUZHOU CHINESE	khaŋ
+2644	skin	FUZHOU CHINESE	phui
+2649	star	FUZHOU CHINESE	8iŋ
+2650	stone	FUZHOU CHINESE	8uokthau
+2651	sun	FUZHOU CHINESE	likthau
+2656	tongue	FUZHOU CHINESE	tʃuiliek
+2657	tooth	FUZHOU CHINESE	ŋai
+2658	tree	FUZHOU CHINESE	tʃiu
+2659	two	FUZHOU CHINESE	naŋ
+2661	water	FUZHOU CHINESE	cui
+2662	we	FUZHOU CHINESE	ŋuaikoneiŋ
+2668	you	FUZHOU CHINESE	ne
+2669	I	GADDANG	ikkanak
+2676	blood	GADDANG	ada
+2677	bone	GADDANG	tulaŋ
+2678	breast	GADDANG	gatat
+2684	dog	GADDANG	atu
+2685	drink	GADDANG	minum
+2687	ear	GADDANG	lajag
+2691	eye	GADDANG	mata
+2693	fire	GADDANG	apuj
+2694	fish	GADDANG	koriraw
+2698	full	GADDANG	napənnwen
+2703	hand	GADDANG	laŋalaj
+2705	hear	GADDANG	madiŋəg
+2709	knee	GADDANG	atud
+2711	leaf	GADDANG	adon
+2713	liver	GADDANG	al
+2715	louse	GADDANG	kutu
+2718	mountain	GADDANG	kulud
+2720	name	GADDANG	ŋan
+2722	new	GADDANG	bawu
+2723	night	GADDANG	gapi
+2724	nose	GADDANG	ijoŋ
+2726	one	GADDANG	antet
+2727	path	GADDANG	dallan
+2728	person	GADDANG	tolaj
+2734	see	GADDANG	itan
+2736	skin	GADDANG	gaddaŋ
+2741	star	GADDANG	bitun
+2742	stone	GADDANG	batu
+2748	tongue	GADDANG	dila
+2749	tooth	GADDANG	ŋipan
+2750	tree	GADDANG	kajo
+2751	two	GADDANG	addwa
+2753	water	GADDANG	danum
+2754	we	GADDANG	ikkanetam
+2760	you	GADDANG	ikka
+2761	I	HANUNOO	aku
+2762	all	HANUNOO	tanan
+2763	ash	HANUNOO	ajum
+2764	big	HANUNOO	dada
+2765	bird	HANUNOO	manuk
+2766	bite	HANUNOO	kagat
+2767	black	HANUNOO	agiwan
+2768	blood	HANUNOO	duguʔ
+2769	bone	HANUNOO	butʔul
+2770	breast	HANUNOO	susu
+2771	burn	HANUNOO	tutud
+2772	cloud	HANUNOO	paŋanud
+2773	cold	HANUNOO	maramig
+2774	come	HANUNOO	balik
+2775	die	HANUNOO	mataj
+2776	dog	HANUNOO	iduʔ
+2777	drink	HANUNOO	uminum
+2778	dry	HANUNOO	uga
+2779	ear	HANUNOO	tuli
+2780	earth	HANUNOO	dagaʔ
+2781	eat	HANUNOO	kumaʔun
+2782	egg	HANUNOO	itlug
+2783	eye	HANUNOO	mata
+2784	feather	HANUNOO	bulbul manuk
+2785	fire	HANUNOO	apuj
+2786	fish	HANUNOO	isdaʔ
+2787	flesh	HANUNOO	tuban
+2788	fly	HANUNOO	lumajaŋ
+2789	foot	HANUNOO	raparapa
+2791	good	HANUNOO	majad
+2792	grease	HANUNOO	tabaʔ
+2793	green	HANUNOO	latuj
+2794	hair	HANUNOO	bukuk
+2795	hand	HANUNOO	kamaŋ
+2796	head	HANUNOO	ulu
+2797	hear	HANUNOO	dunug
+2799	hot	HANUNOO	maʔinit
+2800	kill	HANUNOO	matjun
+2802	know	HANUNOO	magka
+2803	leaf	HANUNOO	labuŋ
+2804	lie	HANUNOO	igjaʔ
+2805	liver	HANUNOO	ataj
+2806	long	HANUNOO	aba
+2807	louse	HANUNOO	kutu
+2808	man	HANUNOO	lalaki
+2809	moon	HANUNOO	bulan
+2811	mouth	HANUNOO	bibig
+2812	name	HANUNOO	ŋaran
+2813	neck	HANUNOO	liʔug
+2814	new	HANUNOO	badʔu
+2815	night	HANUNOO	jabi
+2816	nose	HANUNOO	iruŋ
+2817	not	HANUNOO	balaw
+2818	one	HANUNOO	usa
+2819	path	HANUNOO	dalan
+2820	person	HANUNOO	tawu
+2821	rain	HANUNOO	uran
+2822	red	HANUNOO	marara
+2823	root	HANUNOO	gamut
+2824	sand	HANUNOO	baras
+2825	say	HANUNOO	magkun
+2826	see	HANUNOO	makakit
+2827	sit	HANUNOO	kumukaw
+2828	skin	HANUNOO	tarik
+2829	sleep	HANUNOO	maturug
+2830	small	HANUNOO	diʔit
+2831	smoke	HANUNOO	anus
+2832	stand	HANUNOO	tumindug
+2833	star	HANUNOO	pamgasan
+2834	stone	HANUNOO	batuʔ
+2836	swim	HANUNOO	lumaŋuj
+2837	tail	HANUNOO	ikug
+2838	that	HANUNOO	tunda
+2839	this	HANUNOO	inda
+2840	tongue	HANUNOO	dilaʔ
+2841	tooth	HANUNOO	ŋipun
+2843	two	HANUNOO	duwa
+2844	walk	HANUNOO	lumakaw
+2845	water	HANUNOO	danum
+2846	we	HANUNOO	kita
+2847	what	HANUNOO	hintaj
+2848	white	HANUNOO	abukaj
+2849	who	HANUNOO	sintaj
+2850	woman	HANUNOO	babaji
+2851	yellow	HANUNOO	dilaw
+2852	you	HANUNOO	kawu
+2853	I	HIGAONON BINUKID	janʔa
+2854	all	HIGAONON BINUKID	alan
+2855	ash	HIGAONON BINUKID	abu
+2856	big	HIGAONON BINUKID	aragi
+2857	bird	HIGAONON BINUKID	tagbis
+2858	bite	HIGAONON BINUKID	kagat
+2859	black	HIGAONON BINUKID	maitum
+2860	blood	HIGAONON BINUKID	laŋəsa
+2861	bone	HIGAONON BINUKID	tulʔan
+2863	burn	HIGAONON BINUKID	sunog
+2864	cloud	HIGAONON BINUKID	gabon
+2865	cold	HIGAONON BINUKID	matinuʔ
+2866	come	HIGAONON BINUKID	dini
+2867	die	HIGAONON BINUKID	minataj
+2868	dog	HIGAONON BINUKID	asu
+2869	drink	HIGAONON BINUKID	inum
+2870	dry	HIGAONON BINUKID	mamara
+2871	ear	HIGAONON BINUKID	taliŋa
+2872	earth	HIGAONON BINUKID	bugtaʔ
+2873	eat	HIGAONON BINUKID	kaʔon
+2874	egg	HIGAONON BINUKID	impis
+2875	eye	HIGAONON BINUKID	mata
+2876	feather	HIGAONON BINUKID	bulbul
+2877	fire	HIGAONON BINUKID	hapuj
+2878	fish	HIGAONON BINUKID	isdaʔ
+2879	flesh	HIGAONON BINUKID	sapuʔ
+2880	fly	HIGAONON BINUKID	lajaŋ
+2881	foot	HIGAONON BINUKID	paʔa
+2882	full	HIGAONON BINUKID	napunuʔ
+2883	good	HIGAONON BINUKID	maajad
+2884	grease	HIGAONON BINUKID	grasa
+2885	green	HIGAONON BINUKID	mahilaw
+2886	hair	HIGAONON BINUKID	buhok
+2887	hand	HIGAONON BINUKID	alima
+2888	head	HIGAONON BINUKID	ulo
+2889	hear	HIGAONON BINUKID	paliman
+2890	horn	HIGAONON BINUKID	suŋaj
+2891	hot	HIGAONON BINUKID	mainit
+2892	kill	HIGAONON BINUKID	himataji
+2893	knee	HIGAONON BINUKID	buʔol
+2894	know	HIGAONON BINUKID	katuon
+2895	leaf	HIGAONON BINUKID	dahon
+2896	lie	HIGAONON BINUKID	biduʔ
+2897	liver	HIGAONON BINUKID	ataj
+2898	long	HIGAONON BINUKID	mataŋkaw
+2899	louse	HIGAONON BINUKID	lisaʔ
+2900	man	HIGAONON BINUKID	maʔama
+2901	moon	HIGAONON BINUKID	bulan
+2902	mountain	HIGAONON BINUKID	buntod
+2903	mouth	HIGAONON BINUKID	baʔbaʔ
+2904	name	HIGAONON BINUKID	ŋaran
+2905	neck	HIGAONON BINUKID	liʔug
+2906	new	HIGAONON BINUKID	bagʔu
+2907	night	HIGAONON BINUKID	daluman
+2908	nose	HIGAONON BINUKID	iduŋ
+2909	not	HIGAONON BINUKID	hariʔ
+2910	one	HIGAONON BINUKID	sabuwa
+2911	path	HIGAONON BINUKID	dalan
+2912	person	HIGAONON BINUKID	ətaw
+2913	rain	HIGAONON BINUKID	uran
+2914	red	HIGAONON BINUKID	maligaʔ
+2915	root	HIGAONON BINUKID	gamut
+2916	sand	HIGAONON BINUKID	grabas
+2917	say	HIGAONON BINUKID	ikagi
+2918	see	HIGAONON BINUKID	ahaʔ
+2919	sit	HIGAONON BINUKID	pinuʔu
+2920	skin	HIGAONON BINUKID	laŋgit
+2921	sleep	HIGAONON BINUKID	tiruga
+2922	small	HIGAONON BINUKID	aCuʔaj
+2923	smoke	HIGAONON BINUKID	ubul
+2924	stand	HIGAONON BINUKID	hitindəg
+2925	star	HIGAONON BINUKID	bituon
+2926	stone	HIGAONON BINUKID	batu
+2927	sun	HIGAONON BINUKID	aldaw
+2928	swim	HIGAONON BINUKID	sulip
+2929	tail	HIGAONON BINUKID	ikug
+2930	that	HIGAONON BINUKID	hajan
+2931	this	HIGAONON BINUKID	ijan
+2932	tongue	HIGAONON BINUKID	dilaʔ
+2933	tooth	HIGAONON BINUKID	ŋipun
+2934	tree	HIGAONON BINUKID	kaju
+2935	two	HIGAONON BINUKID	daruwa
+2936	walk	HIGAONON BINUKID	hipanaw
+2937	water	HIGAONON BINUKID	wahig
+2938	we	HIGAONON BINUKID	jaŋkuj
+2939	what	HIGAONON BINUKID	inu
+2940	white	HIGAONON BINUKID	maputi
+2941	who	HIGAONON BINUKID	sinʔu
+2942	woman	HIGAONON BINUKID	bahi
+2943	yellow	HIGAONON BINUKID	makalawag
+2944	you	HIGAONON BINUKID	jaŋka
+2945	I	HUNGARIAN	en
+2946	all	HUNGARIAN	mind
+2947	ash	HUNGARIAN	hamu
+2948	big	HUNGARIAN	nagj
+2949	bird	HUNGARIAN	madar
+2950	bite	HUNGARIAN	harap
+2951	black	HUNGARIAN	fekete
+2952	blood	HUNGARIAN	ver
+2953	bone	HUNGARIAN	Cont
+2954	breast	HUNGARIAN	mel
+2955	burn	HUNGARIAN	eg
+2956	cloud	HUNGARIAN	felhi
+2957	cold	HUNGARIAN	hideg
+2958	come	HUNGARIAN	dʒin
+2959	die	HUNGARIAN	hal
+2960	dog	HUNGARIAN	kuTa
+2961	drink	HUNGARIAN	in
+2962	dry	HUNGARIAN	saraz
+2963	ear	HUNGARIAN	fil
+2964	earth	HUNGARIAN	fild
+2965	eat	HUNGARIAN	en
+2966	egg	HUNGARIAN	todʒas
+2967	eye	HUNGARIAN	sem
+2968	feather	HUNGARIAN	tol
+2969	fire	HUNGARIAN	tiz
+2970	fish	HUNGARIAN	hal
+2971	flesh	HUNGARIAN	hus
+2972	fly	HUNGARIAN	repil
+2973	foot	HUNGARIAN	labfedʒ
+2974	full	HUNGARIAN	tele
+2975	good	HUNGARIAN	dʒo
+2976	grease	HUNGARIAN	Zir
+2977	green	HUNGARIAN	zild
+2978	hair	HUNGARIAN	hadʒ
+2979	hand	HUNGARIAN	kez
+2980	head	HUNGARIAN	fedʒ
+2981	hear	HUNGARIAN	hallan
+2982	horn	HUNGARIAN	sarv
+2983	hot	HUNGARIAN	meleg
+2984	kill	HUNGARIAN	il
+2985	knee	HUNGARIAN	terd
+2986	know	HUNGARIAN	tud
+2987	leaf	HUNGARIAN	level
+2988	lie	HUNGARIAN	fekid
+2989	liver	HUNGARIAN	madʒ
+2990	long	HUNGARIAN	hossu
+2991	louse	HUNGARIAN	teti
+2992	man	HUNGARIAN	mies
+2993	moon	HUNGARIAN	hold
+2994	mountain	HUNGARIAN	hegj
+2995	mouth	HUNGARIAN	sadʒ
+2996	name	HUNGARIAN	nev
+2997	neck	HUNGARIAN	5ak
+2998	new	HUNGARIAN	idʒ
+2999	night	HUNGARIAN	edʒ
+3000	nose	HUNGARIAN	or
+3001	not	HUNGARIAN	nem
+3002	one	HUNGARIAN	egj
+3003	path	HUNGARIAN	it
+3004	person	HUNGARIAN	ember
+3005	rain	HUNGARIAN	esi
+3006	red	HUNGARIAN	verez
+3007	root	HUNGARIAN	gjiker
+3008	sand	HUNGARIAN	homok
+3009	say	HUNGARIAN	monda
+3010	see	HUNGARIAN	lat
+3011	sit	HUNGARIAN	il
+3012	skin	HUNGARIAN	bir
+3013	sleep	HUNGARIAN	alud
+3014	small	HUNGARIAN	kis
+3015	smoke	HUNGARIAN	fist
+3016	stand	HUNGARIAN	all
+3017	star	HUNGARIAN	Cillag
+3018	stone	HUNGARIAN	ki
+3019	sun	HUNGARIAN	nap
+3020	swim	HUNGARIAN	is
+3021	tail	HUNGARIAN	farok
+3022	that	HUNGARIAN	az
+3023	this	HUNGARIAN	ez
+3024	tongue	HUNGARIAN	5elv
+3025	tooth	HUNGARIAN	fog
+3026	tree	HUNGARIAN	fa
+3027	two	HUNGARIAN	ketti
+3028	walk	HUNGARIAN	men
+3029	water	HUNGARIAN	viz
+3030	we	HUNGARIAN	mi
+3031	what	HUNGARIAN	ami
+3032	white	HUNGARIAN	feher
+3033	who	HUNGARIAN	aki
+3034	woman	HUNGARIAN	ni
+3035	yellow	HUNGARIAN	sarga
+3036	you	HUNGARIAN	te
+3037	I	IBANAG	soʔ
+3044	blood	IBANAG	daga
+3045	bone	IBANAG	tulaŋ
+3046	breast	IBANAG	susu
+3050	come	IBANAG	umarani
+3051	die	IBANAG	mataj
+3052	dog	IBANAG	kitu
+3053	drink	IBANAG	uminum
+3055	ear	IBANAG	taliŋa
+3059	eye	IBANAG	mata
+3061	fire	IBANAG	afi
+3062	fish	IBANAG	sira
+3071	hand	IBANAG	lima
+3073	hear	IBANAG	magina
+3079	leaf	IBANAG	don
+3081	liver	IBANAG	agal
+3083	louse	IBANAG	lita
+3088	name	IBANAG	ŋagan
+3090	new	IBANAG	bagu
+3091	night	IBANAG	gabi
+3092	nose	IBANAG	iguŋ
+3094	one	IBANAG	tadaj
+3095	path	IBANAG	dalan
+3096	person	IBANAG	tolaj
+3102	see	IBANAG	masiŋan
+3104	skin	IBANAG	tabiʔ
+3109	star	IBANAG	bitun
+3110	stone	IBANAG	batu
+3116	tongue	IBANAG	zila
+3117	tooth	IBANAG	ŋipan
+3119	two	IBANAG	duwa
+3121	water	IBANAG	danum
+3122	we	IBANAG	sitam
+3128	you	IBANAG	sikaw
+3129	I	IDAAN	aku
+3136	blood	IDAAN	ndaʔ
+3137	bone	IDAAN	tulaŋ
+3138	breast	IDAAN	tusu
+3142	come	IDAAN	mosob
+3143	die	IDAAN	mataj
+3144	dog	IDAAN	asu
+3145	drink	IDAAN	minum
+3147	ear	IDAAN	toliŋo
+3151	eye	IDAAN	mato
+3153	fire	IDAAN	apuj
+3154	fish	IDAAN	pait
+3163	hand	IDAAN	opiʔ
+3165	hear	IDAAN	kiŋog
+3171	leaf	IDAAN	daun
+3173	liver	IDAAN	ataj
+3175	louse	IDAAN	kutu
+3180	name	IDAAN	naran
+3182	new	IDAAN	bagku
+3183	night	IDAAN	gabpi
+3184	nose	IDAAN	iruŋ
+3186	one	IDAAN	saʔ
+3187	path	IDAAN	dalan
+3188	person	IDAAN	ulun
+3194	see	IDAAN	mata
+3196	skin	IDAAN	kulit
+3201	star	IDAAN	botun
+3202	stone	IDAAN	batu
+3208	tongue	IDAAN	dilaʔ
+3209	tooth	IDAAN	nipon
+3211	two	IDAAN	duo
+3213	water	IDAAN	sapaʔ
+3214	we	IDAAN	kito
+3220	you	IDAAN	ikaw
+3221	I	IFUGAO AMGANAD	haʔʔon
+3228	blood	IFUGAO AMGANAD	dala
+3229	bone	IFUGAO AMGANAD	tuŋal
+3230	breast	IFUGAO AMGANAD	palagpag
+3236	dog	IFUGAO AMGANAD	kahu
+3237	drink	IFUGAO AMGANAD	uminum
+3239	ear	IFUGAO AMGANAD	iŋa
+3243	eye	IFUGAO AMGANAD	mata
+3245	fire	IFUGAO AMGANAD	apuj
+3246	fish	IFUGAO AMGANAD	dolog
+3250	full	IFUGAO AMGANAD	napnu
+3255	hand	IFUGAO AMGANAD	taʔle
+3257	hear	IFUGAO AMGANAD	doŋol
+3261	knee	IFUGAO AMGANAD	lulug
+3263	leaf	IFUGAO AMGANAD	tubu
+3265	liver	IFUGAO AMGANAD	alte
+3267	louse	IFUGAO AMGANAD	utu
+3270	mountain	IFUGAO AMGANAD	billid
+3272	name	IFUGAO AMGANAD	ŋadan
+3274	new	IFUGAO AMGANAD	paʔʔala
+3275	night	IFUGAO AMGANAD	nahadom
+3276	nose	IFUGAO AMGANAD	oloŋ
+3278	one	IFUGAO AMGANAD	oha
+3279	path	IFUGAO AMGANAD	awon
+3280	person	IFUGAO AMGANAD	tagu
+3286	see	IFUGAO AMGANAD	tigo
+3288	skin	IFUGAO AMGANAD	ʔupʔup
+3293	star	IFUGAO AMGANAD	bittuwon
+3294	stone	IFUGAO AMGANAD	batu
+3300	tongue	IFUGAO AMGANAD	dila
+3301	tooth	IFUGAO AMGANAD	boba
+3302	tree	IFUGAO AMGANAD	kajiw
+3303	two	IFUGAO AMGANAD	duwa
+3305	water	IFUGAO AMGANAD	litiŋ
+3306	we	IFUGAO AMGANAD	ditaʔʔu
+3312	you	IFUGAO AMGANAD	heʔʔa
+3313	I	IFUGAO BATAD	haʔʔin
+3320	blood	IFUGAO BATAD	dala
+3321	bone	IFUGAO BATAD	toŋal
+3322	breast	IFUGAO BATAD	huhu
+3328	dog	IFUGAO BATAD	kahu
+3329	drink	IFUGAO BATAD	inum
+3331	ear	IFUGAO BATAD	iŋa
+3335	eye	IFUGAO BATAD	mata
+3337	fire	IFUGAO BATAD	apuj
+3342	full	IFUGAO BATAD	napnu
+3347	hand	IFUGAO BATAD	ŋamaj
+3349	hear	IFUGAO BATAD	doŋol
+3353	knee	IFUGAO BATAD	lulug
+3355	leaf	IFUGAO BATAD	pajaʔ
+3357	liver	IFUGAO BATAD	oltaj
+3359	louse	IFUGAO BATAD	utu
+3362	mountain	IFUGAO BATAD	duntug
+3364	name	IFUGAO BATAD	ŋadan
+3366	new	IFUGAO BATAD	paʔʔamma
+3367	night	IFUGAO BATAD	mahdom
+3368	nose	IFUGAO BATAD	oloŋ
+3370	one	IFUGAO BATAD	goha
+3371	path	IFUGAO BATAD	wanti
+3372	person	IFUGAO BATAD	tagu
+3378	see	IFUGAO BATAD	tigon
+3380	skin	IFUGAO BATAD	upʔup
+3385	star	IFUGAO BATAD	bittuan
+3386	stone	IFUGAO BATAD	batu
+3392	tongue	IFUGAO BATAD	dila
+3393	tooth	IFUGAO BATAD	baba
+3394	tree	IFUGAO BATAD	ajiw
+3395	two	IFUGAO BATAD	duwa
+3397	water	IFUGAO BATAD	danum
+3398	we	IFUGAO BATAD	dituʔu
+3404	you	IFUGAO BATAD	heʔʔa
+3405	I	IFUGAO BAYNINAN	haʔʔen
+3412	blood	IFUGAO BAYNINAN	dala
+3413	bone	IFUGAO BAYNINAN	tuŋal
+3414	breast	IFUGAO BAYNINAN	palagpag
+3420	dog	IFUGAO BAYNINAN	kahu
+3421	drink	IFUGAO BAYNINAN	uminum
+3423	ear	IFUGAO BAYNINAN	iŋa
+3427	eye	IFUGAO BAYNINAN	mata
+3429	fire	IFUGAO BAYNINAN	apuj
+3430	fish	IFUGAO BAYNINAN	dolog
+3434	full	IFUGAO BAYNINAN	napnu
+3439	hand	IFUGAO BAYNINAN	taʔle
+3441	hear	IFUGAO BAYNINAN	doŋlon
+3445	knee	IFUGAO BAYNINAN	lulug
+3447	leaf	IFUGAO BAYNINAN	tubu
+3449	liver	IFUGAO BAYNINAN	olte
+3451	louse	IFUGAO BAYNINAN	utu
+3454	mountain	IFUGAO BAYNINAN	bilid
+3456	name	IFUGAO BAYNINAN	ŋadan
+3458	new	IFUGAO BAYNINAN	balu
+3459	night	IFUGAO BAYNINAN	labi
+3460	nose	IFUGAO BAYNINAN	oloŋ
+3462	one	IFUGAO BAYNINAN	goha
+3463	path	IFUGAO BAYNINAN	awon
+3464	person	IFUGAO BAYNINAN	tagu
+3470	see	IFUGAO BAYNINAN	tigon
+3472	skin	IFUGAO BAYNINAN	upʔup
+3477	star	IFUGAO BAYNINAN	bittuwon
+3478	stone	IFUGAO BAYNINAN	batu
+3484	tongue	IFUGAO BAYNINAN	dila
+3485	tooth	IFUGAO BAYNINAN	buba
+3486	tree	IFUGAO BAYNINAN	kajiw
+3487	two	IFUGAO BAYNINAN	duwa
+3489	water	IFUGAO BAYNINAN	leteŋ
+3490	we	IFUGAO BAYNINAN	dituʔu
+3496	you	IFUGAO BAYNINAN	heʔʔa
+3497	I	ILOKANO	siak
+3504	blood	ILOKANO	dara
+3505	bone	ILOKANO	tulaŋ
+3506	breast	ILOKANO	suso
+3510	come	ILOKANO	umaj
+3511	die	ILOKANO	mataj
+3512	dog	ILOKANO	aso
+3513	drink	ILOKANO	inom
+3515	ear	ILOKANO	lapajag
+3519	eye	ILOKANO	mata
+3521	fire	ILOKANO	apoj
+3522	fish	ILOKANO	ikan
+3531	hand	ILOKANO	ima
+3533	hear	ILOKANO	deŋeg
+3539	leaf	ILOKANO	buloŋ
+3541	liver	ILOKANO	dalem
+3543	louse	ILOKANO	kuto
+3548	name	ILOKANO	nagan
+3550	new	ILOKANO	baro
+3551	night	ILOKANO	rabi
+3552	nose	ILOKANO	agoŋ
+3554	one	ILOKANO	masa
+3555	path	ILOKANO	dalan
+3556	person	ILOKANO	tao
+3562	see	ILOKANO	kita
+3564	skin	ILOKANO	kudil
+3569	star	ILOKANO	bituen
+3570	stone	ILOKANO	bato
+3576	tongue	ILOKANO	dila
+3577	tooth	ILOKANO	ŋipen
+3579	two	ILOKANO	dua
+3581	water	ILOKANO	danum
+3582	we	ILOKANO	datajo
+3588	you	ILOKANO	sika
+3589	I	ILONGOT KAKIDUGEN	siʔak
+3596	blood	ILONGOT KAKIDUGEN	matgə m
+3597	bone	ILONGOT KAKIDUGEN	tuʔlaŋ
+3598	breast	ILONGOT KAKIDUGEN	tutu
+3604	dog	ILONGOT KAKIDUGEN	atu
+3605	drink	ILONGOT KAKIDUGEN	inum
+3607	ear	ILONGOT KAKIDUGEN	taliŋa
+3611	eye	ILONGOT KAKIDUGEN	mata
+3613	fire	ILONGOT KAKIDUGEN	gapuj
+3614	fish	ILONGOT KAKIDUGEN	guduŋ
+3618	full	ILONGOT KAKIDUGEN	pənu
+3623	hand	ILONGOT KAKIDUGEN	gima
+3625	hear	ILONGOT KAKIDUGEN	dəŋəg
+3631	leaf	ILONGOT KAKIDUGEN	buŋ
+3633	liver	ILONGOT KAKIDUGEN	agsi
+3635	louse	ILONGOT KAKIDUGEN	kutu
+3638	mountain	ILONGOT KAKIDUGEN	bəsilid
+3640	name	ILONGOT KAKIDUGEN	ŋadən
+3642	new	ILONGOT KAKIDUGEN	bəgu
+3643	night	ILONGOT KAKIDUGEN	masi
+3644	nose	ILONGOT KAKIDUGEN	əgəŋ
+3646	one	ILONGOT KAKIDUGEN	sit
+3647	path	ILONGOT KAKIDUGEN	bənuwa
+3648	person	ILONGOT KAKIDUGEN	tuʔu
+3654	see	ILONGOT KAKIDUGEN	buja
+3656	skin	ILONGOT KAKIDUGEN	kalib
+3661	star	ILONGOT KAKIDUGEN	pandək
+3662	stone	ILONGOT KAKIDUGEN	dəpgat
+3668	tongue	ILONGOT KAKIDUGEN	limut
+3669	tooth	ILONGOT KAKIDUGEN	bəʔbə
+3670	tree	ILONGOT KAKIDUGEN	kiju
+3671	two	ILONGOT KAKIDUGEN	duwa
+3673	water	ILONGOT KAKIDUGEN	dənum
+3674	we	ILONGOT KAKIDUGEN	sikisi
+3680	you	ILONGOT KAKIDUGEN	sika
+3681	I	INIBALOI	siʔkak
+3688	blood	INIBALOI	Cala
+3689	bone	INIBALOI	pokəl
+3690	breast	INIBALOI	soso
+3696	dog	INIBALOI	aso
+3697	drink	INIBALOI	inom
+3699	ear	INIBALOI	taŋida
+3703	eye	INIBALOI	mata
+3705	fire	INIBALOI	apoj
+3706	fish	INIBALOI	paʔidəŋ
+3710	full	INIBALOI	napno
+3715	hand	INIBALOI	takdaj
+3717	hear	INIBALOI	kidəŋ
+3721	knee	INIBALOI	powəg
+3723	leaf	INIBALOI	boloŋ
+3725	liver	INIBALOI	altəj
+3727	louse	INIBALOI	koto
+3730	mountain	INIBALOI	contog
+3732	name	INIBALOI	ŋaran
+3734	new	INIBALOI	bado
+3735	night	INIBALOI	kaləbian
+3736	nose	INIBALOI	ədəŋ
+3738	one	INIBALOI	sakəj
+3739	path	INIBALOI	calan
+3740	person	INIBALOI	toʔo
+3746	see	INIBALOI	onʔan
+3748	skin	INIBALOI	bidat
+3753	star	INIBALOI	talaw
+3754	stone	INIBALOI	bato
+3760	tongue	INIBALOI	Cila
+3761	tooth	INIBALOI	saŋi
+3762	tree	INIBALOI	kijəw
+3763	two	INIBALOI	Cowa
+3765	water	INIBALOI	Canom
+3766	we	INIBALOI	siʔkito
+3772	you	INIBALOI	siʔkam
+3773	I	IRANUN	aku
+3780	blood	IRANUN	ruguʔ
+3781	bone	IRANUN	tulan
+3782	breast	IRANUN	susu
+3786	come	IRANUN	miakauma
+3787	die	IRANUN	miatai
+3788	dog	IRANUN	asu
+3789	drink	IRANUN	inem
+3791	ear	IRANUN	taŋila
+3795	eye	IRANUN	mata
+3797	fire	IRANUN	apui
+3798	fish	IRANUN	sedaʔ
+3807	hand	IRANUN	lima
+3809	hear	IRANUN	neg
+3815	leaf	IRANUN	raun
+3817	liver	IRANUN	atai
+3819	louse	IRANUN	kutu
+3824	name	IRANUN	ŋaran
+3826	new	IRANUN	bagu
+3827	night	IRANUN	magabi
+3828	nose	IRANUN	ŋiruŋ
+3830	one	IRANUN	isa
+3831	path	IRANUN	lalan
+3832	person	IRANUN	tau
+3838	see	IRANUN	ilai
+3840	skin	IRANUN	upis
+3845	star	IRANUN	bituʔun
+3846	stone	IRANUN	watu
+3852	tongue	IRANUN	dilaʔ
+3853	tooth	IRANUN	ŋipen
+3855	two	IRANUN	dua
+3857	water	IRANUN	aig
+3858	we	IRANUN	sekita
+3864	you	IRANUN	ta
+3865	I	IRIGA	ʔaku
+3872	blood	IRIGA	ruguʔ
+3873	bone	IRIGA	tulaŋ
+3874	breast	IRIGA	susu
+3878	come	IRIGA	ʔabut
+3879	die	IRIGA	giraʔan
+3880	dog	IRIGA	ʔajam
+3881	drink	IRIGA	ʔinum
+3883	ear	IRIGA	taliŋa
+3887	eye	IRIGA	mata
+3889	fire	IRIGA	kalaju
+3890	fish	IRIGA	ʔisiraʔ
+3894	full	IRIGA	punuʔ
+3899	hand	IRIGA	kamit
+3901	hear	IRIGA	riŋig
+3902	horn	IRIGA	suŋuj
+3905	knee	IRIGA	tuwud
+3907	leaf	IRIGA	dawun
+3909	liver	IRIGA	ʔataj
+3911	louse	IRIGA	kutu
+3914	mountain	IRIGA	kulud
+3916	name	IRIGA	ŋaran
+3918	new	IRIGA	bagu
+3919	night	IRIGA	gabʔi
+3920	nose	IRIGA	ʔuruŋ
+3922	one	IRIGA	ʔisad
+3923	path	IRIGA	dalan
+3924	person	IRIGA	tawu
+3930	see	IRIGA	bajad
+3932	skin	IRIGA	kulit
+3937	star	IRIGA	bituʔun
+3938	stone	IRIGA	batu
+3939	sun	IRIGA	ʔaldiw
+3944	tongue	IRIGA	riraʔ
+3945	tooth	IRIGA	ŋipin
+3946	tree	IRIGA	kawuj
+3947	two	IRIGA	darawa
+3949	water	IRIGA	tubig
+3950	we	IRIGA	kita
+3956	you	IRIGA	kamu
+3957	I	ISNAG	ijaʔ
+3964	blood	ISNAG	daga
+3965	bone	ISNAG	tulaŋ
+3966	breast	ISNAG	gatat
+3970	come	ISNAG	umbet
+3971	die	ISNAG	nataj
+3972	dog	ISNAG	atu
+3973	drink	ISNAG	inum
+3975	ear	ISNAG	taliŋa
+3979	eye	ISNAG	mata
+3981	fire	ISNAG	apuj
+3982	fish	ISNAG	sisida
+3986	full	ISNAG	napnu
+3991	hand	ISNAG	ima
+3993	hear	ISNAG	magina
+3994	horn	ISNAG	sagud
+3997	knee	ISNAG	utud
+3999	leaf	ISNAG	adon
+4001	liver	ISNAG	agtaj
+4003	louse	ISNAG	kutu
+4006	mountain	ISNAG	bantaj
+4008	name	ISNAG	ŋagan
+4010	new	ISNAG	baru
+4011	night	ISNAG	gabi
+4012	nose	ISNAG	iguŋ
+4014	one	ISNAG	isa
+4015	path	ISNAG	dalen
+4016	person	ISNAG	tolaj
+4022	see	ISNAG	nasiŋan
+4024	skin	ISNAG	lublub
+4029	star	ISNAG	bituwan
+4030	stone	ISNAG	batu
+4031	sun	ISNAG	mata
+4036	tongue	ISNAG	dila
+4037	tooth	ISNAG	ŋipan
+4038	tree	ISNAG	kaju
+4039	two	ISNAG	duwa
+4041	water	ISNAG	danum
+4042	we	ISNAG	dakami
+4048	you	ISNAG	ikaw
+4049	I	ITAWIT	jEkEn
+4056	blood	ITAWIT	dEhE
+4057	bone	ITAWIT	tulEŋ
+4058	breast	ITAWIT	susu
+4062	come	ITAWIT	umEŋ
+4063	die	ITAWIT	metEj
+4064	dog	ITAWIT	Etu
+4065	drink	ITAWIT	inum
+4067	ear	ITAWIT	dErEŋgEŋ
+4071	eye	ITAWIT	mEtE
+4073	fire	ITAWIT	Efi
+4074	fish	ITAWIT	dilis
+4083	hand	ITAWIT	imE
+4085	hear	ITAWIT	magina
+4091	leaf	ITAWIT	don
+4093	liver	ITAWIT	EgEl
+4095	louse	ITAWIT	kutu
+4100	name	ITAWIT	nEhEn
+4102	new	ITAWIT	bEhu
+4103	night	ITAWIT	gEbi
+4104	nose	ITAWIT	ijuŋ
+4106	one	ITAWIT	isE
+4107	path	ITAWIT	dElEn
+4108	person	ITAWIT	tolEj
+4114	see	ITAWIT	mEsiŋEn
+4116	skin	ITAWIT	gEdEŋ
+4121	star	ITAWIT	bitwEn
+4122	stone	ITAWIT	bEtu
+4128	tongue	ITAWIT	hilE
+4129	tooth	ITAWIT	ŋipEn
+4131	two	ITAWIT	duE
+4133	water	ITAWIT	dEnum
+4134	we	ITAWIT	ikEmi
+4140	you	ITAWIT	ikEw
+4141	I	ITNEG BINONGAN	dijakən
+4148	blood	ITNEG BINONGAN	dala
+4149	bone	ITNEG BINONGAN	tolʔaŋ
+4150	breast	ITNEG BINONGAN	soso
+4156	dog	ITNEG BINONGAN	aso
+4157	drink	ITNEG BINONGAN	ominom
+4159	ear	ITNEG BINONGAN	iŋa
+4163	eye	ITNEG BINONGAN	ata
+4165	fire	ITNEG BINONGAN	apoj
+4166	fish	ITNEG BINONGAN	laməs
+4170	full	ITNEG BINONGAN	napno
+4175	hand	ITNEG BINONGAN	ima
+4177	hear	ITNEG BINONGAN	manaʔag
+4181	knee	ITNEG BINONGAN	powəg
+4183	leaf	ITNEG BINONGAN	tobo
+4185	liver	ITNEG BINONGAN	agtəj
+4187	louse	ITNEG BINONGAN	koto
+4190	mountain	ITNEG BINONGAN	bilig
+4192	name	ITNEG BINONGAN	ŋalan
+4195	night	ITNEG BINONGAN	labi
+4196	nose	ITNEG BINONGAN	əŋəl
+4198	one	ITNEG BINONGAN	issa
+4199	path	ITNEG BINONGAN	dadan
+4200	person	ITNEG BINONGAN	taʔo
+4206	see	ITNEG BINONGAN	masəŋan
+4208	skin	ITNEG BINONGAN	kopsit
+4213	star	ITNEG BINONGAN	bitowən
+4214	stone	ITNEG BINONGAN	bato
+4220	tongue	ITNEG BINONGAN	dila
+4221	tooth	ITNEG BINONGAN	ŋipən
+4222	tree	ITNEG BINONGAN	kajo
+4223	two	ITNEG BINONGAN	dowa
+4225	water	ITNEG BINONGAN	danom
+4226	we	ITNEG BINONGAN	ditajo
+4232	you	ITNEG BINONGAN	dika
+4233	I	JAPANESE	wataSi
+4234	all	JAPANESE	subete
+4235	ash	JAPANESE	hai
+4236	big	JAPANESE	okina
+4237	bird	JAPANESE	tori
+4238	bite	JAPANESE	kamu
+4239	black	JAPANESE	kuroi
+4240	blood	JAPANESE	Ci
+4241	bone	JAPANESE	hone
+4242	breast	JAPANESE	mune
+4243	burn	JAPANESE	moe
+4244	cloud	JAPANESE	kumo
+4245	cold	JAPANESE	samui
+4246	come	JAPANESE	ku
+4247	die	JAPANESE	Sinu
+4248	dog	JAPANESE	inu
+4249	drink	JAPANESE	nomu
+4250	dry	JAPANESE	kawaita
+4251	ear	JAPANESE	mimi
+4252	earth	JAPANESE	Cikju
+4253	eat	JAPANESE	tabe
+4254	egg	JAPANESE	tamago
+4255	eye	JAPANESE	me
+4256	feather	JAPANESE	jumo
+4257	fire	JAPANESE	hi
+4258	fish	JAPANESE	uo
+4259	flesh	JAPANESE	niku
+4260	fly	JAPANESE	tobu
+4261	foot	JAPANESE	aSi
+4262	full	JAPANESE	miCita
+4263	good	JAPANESE	joi
+4264	grease	JAPANESE	dʒuSi
+4265	green	JAPANESE	midori
+4266	hair	JAPANESE	ke
+4267	hand	JAPANESE	te
+4268	head	JAPANESE	atama
+4269	hear	JAPANESE	kiku
+4270	horn	JAPANESE	cuno
+4271	hot	JAPANESE	acui
+4272	kill	JAPANESE	korosu
+4273	knee	JAPANESE	hiza
+4274	know	JAPANESE	Si
+4275	leaf	JAPANESE	kono ha
+4276	lie	JAPANESE	wokotawa
+4278	long	JAPANESE	nagai
+4280	man	JAPANESE	hito
+4281	moon	JAPANESE	cuki
+4282	mountain	JAPANESE	jama
+4283	mouth	JAPANESE	kuCi
+4284	name	JAPANESE	na
+4285	neck	JAPANESE	kubi
+4286	new	JAPANESE	ataraSi
+4287	night	JAPANESE	jo
+4288	nose	JAPANESE	hana
+4289	not	JAPANESE	de nai
+4290	one	JAPANESE	hitocu
+4291	path	JAPANESE	komiCi
+4292	person	JAPANESE	hito
+4293	rain	JAPANESE	ame
+4294	red	JAPANESE	akairo no
+4295	root	JAPANESE	ne
+4296	sand	JAPANESE	suna
+4297	say	JAPANESE	ju
+4298	see	JAPANESE	mi
+4299	sit	JAPANESE	suwa
+4300	skin	JAPANESE	kawa
+4301	sleep	JAPANESE	nemu
+4302	small	JAPANESE	Cisai
+4303	smoke	JAPANESE	kemuri
+4304	stand	JAPANESE	tacu
+4305	star	JAPANESE	hoSi
+4306	stone	JAPANESE	iSi
+4307	sun	JAPANESE	taijo
+4308	swim	JAPANESE	ojogu
+4309	tail	JAPANESE	o
+4310	that	JAPANESE	sono
+4311	this	JAPANESE	kono
+4312	tongue	JAPANESE	Sita
+4313	tooth	JAPANESE	ha
+4314	tree	JAPANESE	ki
+4315	two	JAPANESE	futacu
+4316	walk	JAPANESE	aruku
+4317	water	JAPANESE	mizu
+4318	we	JAPANESE	wareware
+4319	what	JAPANESE	nan no
+4320	white	JAPANESE	Siroi
+4321	who	JAPANESE	tare
+4322	woman	JAPANESE	onna
+4323	yellow	JAPANESE	kiro
+4324	you	JAPANESE	anata
+4325	I	KADAZAN	zou
+4332	blood	KADAZAN	za
+4333	bone	KADAZAN	tuhaŋ
+4334	breast	KADAZAN	susu
+4338	come	KADAZAN	mikot
+4339	die	KADAZAN	matai
+4340	dog	KADAZAN	tasu
+4341	drink	KADAZAN	inumon
+4343	ear	KADAZAN	tohiŋo
+4347	eye	KADAZAN	mato
+4349	fire	KADAZAN	tapui
+4350	fish	KADAZAN	sada
+4354	full	KADAZAN	noponu
+4359	hand	KADAZAN	pahad
+4361	hear	KADAZAN	koŋo
+4362	horn	KADAZAN	saŋau
+4365	knee	KADAZAN	totud
+4367	leaf	KADAZAN	lon
+4369	liver	KADAZAN	toŋkovizau
+4371	louse	KADAZAN	kutu
+4374	mountain	KADAZAN	nuhu takavas
+4376	name	KADAZAN	ŋan
+4378	new	KADAZAN	vagu
+4379	night	KADAZAN	sodop
+4380	nose	KADAZAN	toduŋ
+4382	one	KADAZAN	iso
+4383	path	KADAZAN	lahan
+4384	person	KADAZAN	tuhun
+4390	see	KADAZAN	kokito
+4392	skin	KADAZAN	kuhit
+4397	star	KADAZAN	tombituon
+4398	stone	KADAZAN	vatu
+4399	sun	KADAZAN	tadau
+4404	tongue	KADAZAN	diha
+4405	tooth	KADAZAN	nipon
+4406	tree	KADAZAN	kazu
+4407	two	KADAZAN	duvo
+4409	water	KADAZAN	vaig
+4410	we	KADAZAN	toko
+4416	you	KADAZAN	ko
+4417	I	KAGAYANEN	a
+4424	blood	KAGAYANEN	ləŋəsa
+4425	bone	KAGAYANEN	bəkəg
+4426	breast	KAGAYANEN	susu
+4430	come	KAGAYANEN	iliŋ
+4431	die	KAGAYANEN	pataj
+4432	dog	KAGAYANEN	ajam
+4433	drink	KAGAYANEN	inəm
+4435	ear	KAGAYANEN	taliŋa
+4439	eye	KAGAYANEN	mata
+4441	fire	KAGAYANEN	apuj
+4442	fish	KAGAYANEN	sidaʔ
+4446	full	KAGAYANEN	panu
+4451	hand	KAGAYANEN	blukan
+4453	hear	KAGAYANEN	mati
+4454	horn	KAGAYANEN	suŋaj
+4457	knee	KAGAYANEN	buʔul
+4459	leaf	KAGAYANEN	daun
+4461	liver	KAGAYANEN	ataj
+4463	louse	KAGAYANEN	kutu
+4466	mountain	KAGAYANEN	bukid
+4468	name	KAGAYANEN	ŋaran
+4470	new	KAGAYANEN	bagʔu
+4471	night	KAGAYANEN	kiləm
+4472	nose	KAGAYANEN	iruŋ
+4474	one	KAGAYANEN	isja
+4475	path	KAGAYANEN	dalan
+4476	person	KAGAYANEN	itaw
+4482	see	KAGAYANEN	kita
+4484	skin	KAGAYANEN	laŋgit
+4489	star	KAGAYANEN	bituʔun
+4490	stone	KAGAYANEN	batu
+4491	sun	KAGAYANEN	adlaw
+4496	tongue	KAGAYANEN	dilaʔ
+4497	tooth	KAGAYANEN	ŋipən
+4498	tree	KAGAYANEN	kauj
+4499	two	KAGAYANEN	darawa
+4501	water	KAGAYANEN	waig
+4502	we	KAGAYANEN	kaj
+4508	you	KAGAYANEN	ka
+4509	I	KALAGAN	aku
+4516	blood	KALAGAN	duguʔ
+4517	bone	KALAGAN	pisaʔ
+4518	breast	KALAGAN	susu
+4524	dog	KALAGAN	iduʔ
+4525	drink	KALAGAN	inəm
+4527	ear	KALAGAN	taliŋa
+4531	eye	KALAGAN	mata
+4533	fire	KALAGAN	atulun
+4534	fish	KALAGAN	isdaʔ
+4538	full	KALAGAN	njatmoʔ
+4543	hand	KALAGAN	biktin
+4545	hear	KALAGAN	dəŋəg
+4549	knee	KALAGAN	bukubuku
+4551	leaf	KALAGAN	dawun
+4553	liver	KALAGAN	ataj
+4555	louse	KALAGAN	babəŋ
+4558	mountain	KALAGAN	buntud
+4560	name	KALAGAN	ŋalan
+4562	new	KALAGAN	bagu
+4563	night	KALAGAN	gabi
+4564	nose	KALAGAN	iluŋ
+4566	one	KALAGAN	sambuk
+4567	path	KALAGAN	dalan
+4568	person	KALAGAN	utaw
+4574	see	KALAGAN	kitaʔ
+4576	skin	KALAGAN	kindal
+4581	star	KALAGAN	bitun
+4582	stone	KALAGAN	batu
+4588	tongue	KALAGAN	dilaʔ
+4589	tooth	KALAGAN	untu
+4590	tree	KALAGAN	kawuj
+4591	two	KALAGAN	duwa
+4593	water	KALAGAN	tubig
+4594	we	KALAGAN	kitadun
+4600	you	KALAGAN	ikaw
+4601	I	KALINGA GUINAANG	saʔon
+4608	blood	KALINGA GUINAANG	dala
+4609	bone	KALINGA GUINAANG	tuŋʔal
+4610	breast	KALINGA GUINAANG	susu
+4616	dog	KALINGA GUINAANG	asu
+4617	drink	KALINGA GUINAANG	uminum
+4619	ear	KALINGA GUINAANG	iŋa
+4623	eye	KALINGA GUINAANG	ata
+4625	fire	KALINGA GUINAANG	apuj
+4626	fish	KALINGA GUINAANG	lamos
+4630	full	KALINGA GUINAANG	napnu
+4635	hand	KALINGA GUINAANG	ima
+4637	hear	KALINGA GUINAANG	doŋlon
+4641	knee	KALINGA GUINAANG	puwog
+4643	leaf	KALINGA GUINAANG	tubu
+4645	liver	KALINGA GUINAANG	agtoj
+4647	louse	KALINGA GUINAANG	utu
+4650	mountain	KALINGA GUINAANG	bilig
+4652	name	KALINGA GUINAANG	ŋadan
+4654	new	KALINGA GUINAANG	aʔʔopja
+4655	night	KALINGA GUINAANG	labi
+4656	nose	KALINGA GUINAANG	oŋol
+4658	one	KALINGA GUINAANG	ossaʔan
+4659	path	KALINGA GUINAANG	dalan
+4660	person	KALINGA GUINAANG	tagu
+4666	see	KALINGA GUINAANG	ilan
+4668	skin	KALINGA GUINAANG	oblit
+4673	star	KALINGA GUINAANG	bituwon
+4674	stone	KALINGA GUINAANG	batu
+4680	tongue	KALINGA GUINAANG	dila
+4681	tooth	KALINGA GUINAANG	5ipon
+4682	tree	KALINGA GUINAANG	kaju
+4683	two	KALINGA GUINAANG	duwa
+4685	water	KALINGA GUINAANG	danum
+4686	we	KALINGA GUINAANG	ditaʔo
+4692	you	KALINGA GUINAANG	siʔa
+4693	I	KALINGA LIMOS	sakon
+4700	blood	KALINGA LIMOS	dala
+4701	bone	KALINGA LIMOS	tulʔaŋ
+4702	breast	KALINGA LIMOS	susu
+4706	come	KALINGA LIMOS	datoŋ
+4707	die	KALINGA LIMOS	natoj
+4708	dog	KALINGA LIMOS	asu
+4709	drink	KALINGA LIMOS	inum
+4711	ear	KALINGA LIMOS	iŋa
+4715	eye	KALINGA LIMOS	ata
+4717	fire	KALINGA LIMOS	apuj
+4718	fish	KALINGA LIMOS	ikan
+4722	full	KALINGA LIMOS	napnu
+4727	hand	KALINGA LIMOS	taklaj
+4729	hear	KALINGA LIMOS	doŋol
+4730	horn	KALINGA LIMOS	sakgud
+4733	knee	KALINGA LIMOS	puwog
+4735	leaf	KALINGA LIMOS	tubu
+4737	liver	KALINGA LIMOS	agtoj
+4739	louse	KALINGA LIMOS	kutu
+4742	mountain	KALINGA LIMOS	bateled
+4744	name	KALINGA LIMOS	ŋadan
+4746	new	KALINGA LIMOS	bagu
+4747	night	KALINGA LIMOS	labi
+4748	nose	KALINGA LIMOS	oŋol
+4750	one	KALINGA LIMOS	osa
+4751	path	KALINGA LIMOS	dalan
+4752	person	KALINGA LIMOS	tagu
+4758	see	KALINGA LIMOS	ila
+4760	skin	KALINGA LIMOS	kupsit
+4765	star	KALINGA LIMOS	bituwon
+4766	stone	KALINGA LIMOS	batu
+4767	sun	KALINGA LIMOS	init
+4772	tongue	KALINGA LIMOS	dila
+4773	tooth	KALINGA LIMOS	ŋipon
+4774	tree	KALINGA LIMOS	kaju
+4775	two	KALINGA LIMOS	duwa
+4777	water	KALINGA LIMOS	danum
+4778	we	KALINGA LIMOS	dikami
+4784	you	KALINGA LIMOS	sika
+4785	I	KALLAHAN KAYAPA PROPER	hiʔgak
+4792	blood	KALLAHAN KAYAPA PROPER	dala
+4793	bone	KALLAHAN KAYAPA PROPER	pukil
+4794	breast	KALLAHAN KAYAPA PROPER	huhu
+4800	dog	KALLAHAN KAYAPA PROPER	ahhu
+4801	drink	KALLAHAN KAYAPA PROPER	manʔinnum
+4803	ear	KALLAHAN KAYAPA PROPER	ŋila
+4807	eye	KALLAHAN KAYAPA PROPER	mata
+4809	fire	KALLAHAN KAYAPA PROPER	apuj
+4810	fish	KALLAHAN KAYAPA PROPER	paʔilləŋ
+4814	full	KALLAHAN KAYAPA PROPER	napnu
+4819	hand	KALLAHAN KAYAPA PROPER	taklaj
+4821	hear	KALLAHAN KAYAPA PROPER	dədŋələn
+4825	knee	KALLAHAN KAYAPA PROPER	puwəg
+4827	leaf	KALLAHAN KAYAPA PROPER	buluŋ
+4829	liver	KALLAHAN KAYAPA PROPER	altəj
+4831	louse	KALLAHAN KAYAPA PROPER	kutu
+4834	mountain	KALLAHAN KAYAPA PROPER	duntug
+4836	name	KALLAHAN KAYAPA PROPER	ŋadan
+4838	new	KALLAHAN KAYAPA PROPER	ballu
+4839	night	KALLAHAN KAYAPA PROPER	malabi
+4840	nose	KALLAHAN KAYAPA PROPER	ələŋ
+4842	one	KALLAHAN KAYAPA PROPER	hakəj
+4843	path	KALLAHAN KAYAPA PROPER	dalan
+4844	person	KALLAHAN KAYAPA PROPER	tuʔu
+4850	see	KALLAHAN KAYAPA PROPER	unʔan
+4852	skin	KALLAHAN KAYAPA PROPER	bəlat
+4857	star	KALLAHAN KAYAPA PROPER	talaw
+4858	stone	KALLAHAN KAYAPA PROPER	batu
+4864	tongue	KALLAHAN KAYAPA PROPER	dila
+4865	tooth	KALLAHAN KAYAPA PROPER	haŋi
+4866	tree	KALLAHAN KAYAPA PROPER	kallahan
+4867	two	KALLAHAN KAYAPA PROPER	duwa
+4869	water	KALLAHAN KAYAPA PROPER	danum
+4870	we	KALLAHAN KAYAPA PROPER	hiʔgataju
+4876	you	KALLAHAN KAYAPA PROPER	hiʔgam
+4877	I	KANKANAY NORTHERN	sakʔin
+4884	blood	KANKANAY NORTHERN	basa
+4885	bone	KANKANAY NORTHERN	iŋit
+4886	breast	KANKANAY NORTHERN	soso
+4892	dog	KANKANAY NORTHERN	aso
+4893	drink	KANKANAY NORTHERN	ominom
+4895	ear	KANKANAY NORTHERN	iŋa
+4899	eye	KANKANAY NORTHERN	mata
+4901	fire	KANKANAY NORTHERN	apoj
+4902	fish	KANKANAY NORTHERN	ikan
+4906	full	KANKANAY NORTHERN	napno
+4911	hand	KANKANAY NORTHERN	lədəŋ
+4913	hear	KANKANAY NORTHERN	dəŋŋə
+4917	knee	KANKANAY NORTHERN	powəg
+4919	leaf	KANKANAY NORTHERN	tobo
+4921	liver	KANKANAY NORTHERN	atəj
+4923	louse	KANKANAY NORTHERN	koto
+4926	mountain	KANKANAY NORTHERN	bilig
+4928	name	KANKANAY NORTHERN	ŋadan
+4930	new	KANKANAY NORTHERN	balo
+4931	night	KANKANAY NORTHERN	labi
+4932	nose	KANKANAY NORTHERN	əʔəŋ
+4934	one	KANKANAY NORTHERN	əsa
+4935	path	KANKANAY NORTHERN	daʔan
+4936	person	KANKANAY NORTHERN	ipogaw
+4942	see	KANKANAY NORTHERN	ila
+4944	skin	KANKANAY NORTHERN	kollop
+4949	star	KANKANAY NORTHERN	talaw
+4950	stone	KANKANAY NORTHERN	bato
+4956	tongue	KANKANAY NORTHERN	dila
+4957	tooth	KANKANAY NORTHERN	babʔa
+4958	tree	KANKANAY NORTHERN	kaʔiw
+4959	two	KANKANAY NORTHERN	dowa
+4961	water	KANKANAY NORTHERN	danom
+4962	we	KANKANAY NORTHERN	datako
+4968	you	KANKANAY NORTHERN	sikʔa
+4969	I	KAPAMPANGAN	aku
+4970	all	KAPAMPANGAN	laganus
+4971	ash	KAPAMPANGAN	abu
+4972	big	KAPAMPANGAN	maragul
+4973	bird	KAPAMPANGAN	ajup
+4974	bite	KAPAMPANGAN	ket
+4975	black	KAPAMPANGAN	matuliŋ
+4976	blood	KAPAMPANGAN	dajaʔ
+4977	bone	KAPAMPANGAN	binjas
+4978	breast	KAPAMPANGAN	susu
+4979	burn	KAPAMPANGAN	silab
+4980	cloud	KAPAMPANGAN	lulaʔ
+4981	cold	KAPAMPANGAN	marimla
+4982	come	KAPAMPANGAN	dataŋ
+4983	die	KAPAMPANGAN	mate
+4984	dog	KAPAMPANGAN	asu
+4985	drink	KAPAMPANGAN	inum
+4986	dry	KAPAMPANGAN	maliŋiʔ
+4987	ear	KAPAMPANGAN	balugbug
+4988	earth	KAPAMPANGAN	gabun
+4989	eat	KAPAMPANGAN	maŋam
+4990	egg	KAPAMPANGAN	ebun
+4991	eye	KAPAMPANGAN	mata
+4992	feather	KAPAMPANGAN	bagjus
+4993	fire	KAPAMPANGAN	apiʔ
+4994	fish	KAPAMPANGAN	asan
+4995	flesh	KAPAMPANGAN	katawan
+4996	fly	KAPAMPANGAN	sulapo
+4997	foot	KAPAMPANGAN	bitis
+4999	good	KAPAMPANGAN	makajap
+5000	grease	KAPAMPANGAN	tabaʔ
+5001	green	KAPAMPANGAN	berde
+5002	hair	KAPAMPANGAN	bwak
+5003	hand	KAPAMPANGAN	gamat
+5004	head	KAPAMPANGAN	buntuk
+5005	hear	KAPAMPANGAN	damdaman
+5007	hot	KAPAMPANGAN	mapaliʔ
+5008	kill	KAPAMPANGAN	pate
+5010	know	KAPAMPANGAN	balwan
+5011	leaf	KAPAMPANGAN	buluŋ
+5012	lie	KAPAMPANGAN	kera
+5013	liver	KAPAMPANGAN	ate
+5014	long	KAPAMPANGAN	makaba
+5015	louse	KAPAMPANGAN	kutu
+5016	man	KAPAMPANGAN	lalaki
+5017	moon	KAPAMPANGAN	bulan
+5019	mouth	KAPAMPANGAN	asbuk
+5020	name	KAPAMPANGAN	lagjuʔ
+5021	neck	KAPAMPANGAN	batal
+5022	new	KAPAMPANGAN	baju
+5023	night	KAPAMPANGAN	beji
+5024	nose	KAPAMPANGAN	aruŋ
+5025	not	KAPAMPANGAN	aliʔ
+5026	one	KAPAMPANGAN	metuŋ
+5027	path	KAPAMPANGAN	dalan
+5028	person	KAPAMPANGAN	tau
+5029	rain	KAPAMPANGAN	uran
+5030	red	KAPAMPANGAN	lutuʔ
+5031	root	KAPAMPANGAN	emut
+5032	sand	KAPAMPANGAN	balas
+5033	say	KAPAMPANGAN	sabi
+5034	see	KAPAMPANGAN	ikit
+5035	sit	KAPAMPANGAN	lukluk
+5036	skin	KAPAMPANGAN	balat
+5037	sleep	KAPAMPANGAN	tudtud
+5038	small	KAPAMPANGAN	malati
+5039	smoke	KAPAMPANGAN	asu
+5040	stand	KAPAMPANGAN	tikdoʔ
+5041	star	KAPAMPANGAN	batwin
+5042	stone	KAPAMPANGAN	batu
+5044	swim	KAPAMPANGAN	kawe
+5045	tail	KAPAMPANGAN	ikiʔ
+5046	that	KAPAMPANGAN	ian
+5047	this	KAPAMPANGAN	ini
+5048	tongue	KAPAMPANGAN	dilaʔ
+5049	tooth	KAPAMPANGAN	ipan
+5051	two	KAPAMPANGAN	adwaʔ
+5052	walk	KAPAMPANGAN	lakad
+5053	water	KAPAMPANGAN	danum
+5054	we	KAPAMPANGAN	itamu
+5055	what	KAPAMPANGAN	naŋ
+5056	white	KAPAMPANGAN	maputiʔ
+5057	who	KAPAMPANGAN	ninu
+5058	woman	KAPAMPANGAN	babai
+5059	yellow	KAPAMPANGAN	dilo
+5060	you	KAPAMPANGAN	ika
+5061	I	KINARAY A	ako
+5068	blood	KINARAY A	dugo
+5069	bone	KINARAY A	tulʔan
+5075	die	KINARAY A	napataj
+5076	dog	KINARAY A	ajam
+5077	drink	KINARAY A	inom
+5079	ear	KINARAY A	taliŋa
+5083	eye	KINARAY A	mata
+5085	fire	KINARAY A	kalajo
+5086	fish	KINARAY A	isda
+5095	hand	KINARAY A	alima
+5098	horn	KINARAY A	busina
+5101	knee	KINARAY A	tuhod
+5105	liver	KINARAY A	ataj
+5110	mountain	KINARAY A	bukid
+5114	new	KINARAY A	bagʔo
+5115	night	KINARAY A	gabi
+5116	nose	KINARAY A	iroŋ
+5118	one	KINARAY A	sara
+5120	person	KINARAY A	tawo
+5128	skin	KINARAY A	panit
+5133	star	KINARAY A	biton
+5135	sun	KINARAY A	adlaw
+5140	tongue	KINARAY A	dila
+5141	tooth	KINARAY A	ŋipon
+5142	tree	KINARAY A	kahoj
+5145	water	KINARAY A	tubig
+5146	we	KINARAY A	kita
+5152	you	KINARAY A	ikaw
+5153	I	KOREAN	na
+5154	all	KOREAN	modun
+5155	ash	KOREAN	CE
+5156	big	KOREAN	kun
+5157	bird	KOREAN	sE
+5158	bite	KOREAN	mul
+5159	black	KOREAN	komun
+5160	blood	KOREAN	pi
+5161	bone	KOREAN	bjo
+5162	breast	KOREAN	kasum
+5163	burn	KOREAN	tEu
+5164	cloud	KOREAN	kurun
+5165	cold	KOREAN	Can
+5166	come	KOREAN	oda
+5167	die	KOREAN	Cuk
+5168	dog	KOREAN	kE
+5169	drink	KOREAN	masi
+5170	dry	KOREAN	marun
+5171	ear	KOREAN	kwi
+5172	earth	KOREAN	Cigu
+5173	eat	KOREAN	mok
+5174	egg	KOREAN	al
+5175	eye	KOREAN	nun
+5176	feather	KOREAN	kit
+5177	fire	KOREAN	pul
+5178	fish	KOREAN	mul kogi
+5179	flesh	KOREAN	kogi
+5180	fly	KOREAN	nal
+5181	foot	KOREAN	pal
+5182	full	KOREAN	Can
+5183	good	KOREAN	Cohun
+5184	grease	KOREAN	kirum
+5185	green	KOREAN	Corok sEk
+5186	hair	KOREAN	moritol
+5187	hand	KOREAN	son
+5188	head	KOREAN	mori
+5189	hear	KOREAN	tut
+5190	horn	KOREAN	bul
+5191	hot	KOREAN	dugoun
+5192	kill	KOREAN	Cuki
+5193	knee	KOREAN	murup
+5194	know	KOREAN	al
+5195	leaf	KOREAN	iph
+5196	lie	KOREAN	kodʒitmalul ha
+5197	liver	KOREAN	kan
+5198	long	KOREAN	kin
+5199	louse	KOREAN	i
+5200	man	KOREAN	namdʒa
+5201	moon	KOREAN	tal
+5202	mountain	KOREAN	san
+5203	mouth	KOREAN	ip
+5204	name	KOREAN	irum
+5205	neck	KOREAN	mok
+5206	new	KOREAN	sEroun
+5207	night	KOREAN	pam
+5208	nose	KOREAN	ko
+5209	not	KOREAN	ani
+5210	one	KOREAN	han
+5211	path	KOREAN	kil
+5212	person	KOREAN	saram
+5213	rain	KOREAN	pi
+5214	red	KOREAN	pulkun
+5215	root	KOREAN	buri
+5216	sand	KOREAN	morai
+5217	say	KOREAN	mal ha
+5218	see	KOREAN	po
+5219	sit	KOREAN	ant
+5220	skin	KOREAN	gopdʒil
+5221	sleep	KOREAN	Ca
+5222	small	KOREAN	Cakun
+5223	smoke	KOREAN	joŋi
+5224	stand	KOREAN	so
+5225	star	KOREAN	pjol
+5226	stone	KOREAN	tol
+5227	sun	KOREAN	hE
+5228	swim	KOREAN	heom
+5229	tail	KOREAN	gori
+5230	that	KOREAN	kugot
+5231	this	KOREAN	igot
+5232	tongue	KOREAN	hjo
+5233	tooth	KOREAN	i
+5234	tree	KOREAN	namu
+5235	two	KOREAN	tul
+5236	walk	KOREAN	koro
+5237	water	KOREAN	mul
+5238	we	KOREAN	uri
+5239	what	KOREAN	oton
+5240	white	KOREAN	huin
+5241	who	KOREAN	nuga
+5242	woman	KOREAN	jodʒa
+5243	yellow	KOREAN	nurun
+5244	you	KOREAN	taŋsin
+5245	I	LEGAZPI	ʔaku
+5252	blood	LEGAZPI	duguʔ
+5253	bone	LEGAZPI	tuʔlaŋ
+5254	breast	LEGAZPI	susu
+5258	come	LEGAZPI	ʔabut
+5259	die	LEGAZPI	gadan
+5260	dog	LEGAZPI	ʔajam
+5261	drink	LEGAZPI	ʔinum
+5263	ear	LEGAZPI	taliŋa
+5267	eye	LEGAZPI	mata
+5269	fire	LEGAZPI	kalaju
+5270	fish	LEGAZPI	siraʔ
+5274	full	LEGAZPI	panuʔ
+5279	hand	LEGAZPI	kamut
+5281	hear	LEGAZPI	daŋug
+5282	horn	LEGAZPI	suŋaj
+5285	knee	LEGAZPI	tuhud
+5287	leaf	LEGAZPI	dahun
+5289	liver	LEGAZPI	katuj
+5291	louse	LEGAZPI	kutu
+5294	mountain	LEGAZPI	bulud
+5296	name	LEGAZPI	ŋaran
+5298	new	LEGAZPI	baʔgu
+5299	night	LEGAZPI	baŋgi
+5300	nose	LEGAZPI	duŋuʔ
+5302	one	LEGAZPI	saruʔ
+5303	path	LEGAZPI	dalan
+5304	person	LEGAZPI	tawu
+5310	see	LEGAZPI	ʔiliŋ
+5312	skin	LEGAZPI	ʔunit
+5317	star	LEGAZPI	bituʔun
+5318	stone	LEGAZPI	gapuʔ
+5319	sun	LEGAZPI	ʔaldaw
+5324	tongue	LEGAZPI	dilaʔ
+5325	tooth	LEGAZPI	ŋipun
+5326	tree	LEGAZPI	kahuj
+5327	two	LEGAZPI	duwa
+5329	water	LEGAZPI	tubig
+5330	we	LEGAZPI	kita
+5336	you	LEGAZPI	kamu
+5337	I	LIBON	ʔaku
+5344	blood	LIBON	ruguʔ
+5345	bone	LIBON	tulaŋ
+5346	breast	LIBON	susu
+5350	come	LIBON	ʔabut
+5351	die	LIBON	goran
+5352	dog	LIBON	ʔajam
+5353	drink	LIBON	ʔinum
+5355	ear	LIBON	taliŋa
+5359	eye	LIBON	mata
+5361	fire	LIBON	kalaju
+5362	fish	LIBON	ʔisoraʔ
+5366	full	LIBON	punuʔ
+5371	hand	LIBON	kamot
+5373	hear	LIBON	roŋog
+5374	horn	LIBON	suŋoj
+5377	knee	LIBON	tuwud
+5379	leaf	LIBON	dawun
+5381	liver	LIBON	ʔataj
+5383	louse	LIBON	kutu
+5386	mountain	LIBON	ʔampas
+5388	name	LIBON	ŋaran
+5390	new	LIBON	bagu
+5391	night	LIBON	gabi
+5392	nose	LIBON	ʔuruŋ
+5394	one	LIBON	ʔosad
+5395	path	LIBON	dalan
+5396	person	LIBON	tawu
+5402	see	LIBON	kita
+5404	skin	LIBON	kulit
+5409	star	LIBON	bituʔun
+5410	stone	LIBON	batu
+5411	sun	LIBON	ʔaldaw
+5416	tongue	LIBON	riraʔ
+5417	tooth	LIBON	ŋipon
+5418	tree	LIBON	kawuj
+5419	two	LIBON	duwa
+5421	water	LIBON	tubig
+5422	we	LIBON	kita
+5428	you	LIBON	kamu
+5429	I	LIVE	minama
+5436	blood	LIVE	ver
+5437	bone	LIVE	lju
+5438	breast	LIVE	rinda
+5442	come	LIVE	tulda
+5443	die	LIVE	kuoljo
+5444	dog	LIVE	pin
+5445	drink	LIVE	dʒuodjo
+5447	ear	LIVE	kuora
+5453	fire	LIVE	tul
+5454	fish	LIVE	kala
+5458	full	LIVE	tEuc
+5463	hand	LIVE	keic
+5469	knee	LIVE	puola
+5471	leaf	LIVE	ljed
+5473	liver	LIVE	maksa
+5478	mountain	LIVE	mEg
+5480	name	LIVE	nim
+5482	new	LIVE	uc
+5483	night	LIVE	ie
+5484	nose	LIVE	nana
+5486	one	LIVE	ikS
+5487	path	LIVE	rekriek
+5488	person	LIVE	riStiŋ
+5494	see	LIVE	nEdjo
+5496	skin	LIVE	nogjo
+5502	stone	LIVE	kiuvkiu
+5503	sun	LIVE	pEvaliki
+5508	tongue	LIVE	kjel
+5509	tooth	LIVE	ambaz
+5510	tree	LIVE	pu
+5511	two	LIVE	kakS
+5513	water	LIVE	veic
+5514	we	LIVE	meg
+5520	you	LIVE	sinasa
+5521	I	MAMANWA	haʔo
+5528	blood	MAMANWA	dogoʔ
+5529	bone	MAMANWA	bəkəg
+5530	breast	MAMANWA	soso
+5536	dog	MAMANWA	idoʔ
+5537	drink	MAMANWA	inəm
+5539	ear	MAMANWA	taliŋa
+5543	eye	MAMANWA	mata
+5545	fire	MAMANWA	gabok
+5546	fish	MAMANWA	idaʔ
+5550	full	MAMANWA	katmoʔ
+5555	hand	MAMANWA	alima
+5557	hear	MAMANWA	batiʔ
+5561	knee	MAMANWA	tohod
+5563	leaf	MAMANWA	dahon
+5565	liver	MAMANWA	pato
+5567	louse	MAMANWA	toma
+5570	mountain	MAMANWA	boboŋ
+5572	name	MAMANWA	ŋaran
+5574	new	MAMANWA	bagʔo
+5575	night	MAMANWA	kahabzan
+5576	nose	MAMANWA	iroŋ
+5578	one	MAMANWA	isa
+5579	path	MAMANWA	dalan
+5580	person	MAMANWA	taʔo
+5586	see	MAMANWA	kita
+5588	skin	MAMANWA	kindal
+5593	star	MAMANWA	bitoʔon
+5594	stone	MAMANWA	bato
+5600	tongue	MAMANWA	dilaʔ
+5601	tooth	MAMANWA	ŋipən
+5602	tree	MAMANWA	liwaʔan
+5603	two	MAMANWA	dowa
+5605	water	MAMANWA	sapaʔ
+5606	we	MAMANWA	kita
+5612	you	MAMANWA	iko
+5613	I	MANIDE	haku
+5620	blood	MANIDE	digiʔ
+5621	bone	MANIDE	bejon
+5627	die	MANIDE	palaʔ
+5628	dog	MANIDE	idiʔ
+5631	ear	MANIDE	seweŋ
+5637	fire	MANIDE	hapuj
+5638	fish	MANIDE	kabilihwog
+5642	full	MANIDE	bagtok
+5649	hear	MANIDE	kalkal
+5653	knee	MANIDE	buʔluŋ
+5655	leaf	MANIDE	dahun
+5662	mountain	MANIDE	beŋag
+5664	name	MANIDE	ŋadon
+5666	new	MANIDE	beʔgi
+5667	night	MANIDE	takep
+5668	nose	MANIDE	haʔduŋ
+5670	one	MANIDE	supeg
+5671	path	MANIDE	kanog
+5678	see	MANIDE	talu
+5680	skin	MANIDE	balaʔkis
+5686	stone	MANIDE	betuʔ
+5687	sun	MANIDE	degow
+5692	tongue	MANIDE	katlub
+5693	tooth	MANIDE	ŋipen
+5694	tree	MANIDE	kahew
+5698	we	MANIDE	kita
+5704	you	MANIDE	hika
+5705	I	MANOBO ATA	sikanak
+5712	blood	MANOBO ATA	laŋosa
+5713	bone	MANOBO ATA	bokog
+5714	breast	MANOBO ATA	susu
+5720	dog	MANOBO ATA	asu
+5721	drink	MANOBO ATA	inum
+5723	ear	MANOBO ATA	taliŋa
+5727	eye	MANOBO ATA	mata
+5729	fire	MANOBO ATA	hapuj
+5730	fish	MANOBO ATA	ŋalap
+5734	full	MANOBO ATA	kaponuʔ
+5739	hand	MANOBO ATA	bolad
+5741	hear	MANOBO ATA	dinog
+5745	knee	MANOBO ATA	buʔol
+5747	leaf	MANOBO ATA	doun
+5749	liver	MANOBO ATA	atoj
+5751	louse	MANOBO ATA	kutu
+5754	mountain	MANOBO ATA	bubuŋan
+5756	name	MANOBO ATA	ŋadan
+5758	new	MANOBO ATA	iam
+5759	night	MANOBO ATA	maʔusilom
+5760	nose	MANOBO ATA	iduŋ
+5762	one	MANOBO ATA	isa
+5763	path	MANOBO ATA	dalan
+5764	person	MANOBO ATA	otow
+5770	see	MANOBO ATA	pitow
+5772	skin	MANOBO ATA	laplap
+5777	star	MANOBO ATA	bituʔon
+5778	stone	MANOBO ATA	batu
+5784	tongue	MANOBO ATA	diloʔ
+5785	tooth	MANOBO ATA	ŋipon
+5786	tree	MANOBO ATA	kaju
+5787	two	MANOBO ATA	dadawa
+5789	water	MANOBO ATA	woig
+5790	we	MANOBO ATA	sikanta
+5796	you	MANOBO ATA	sikojkow
+5797	I	MANOBO DIBABAWON	siʔak
+5804	blood	MANOBO DIBABAWON	laŋəsa
+5805	bone	MANOBO DIBABAWON	bəkəg
+5806	breast	MANOBO DIBABAWON	duduʔ
+5812	dog	MANOBO DIBABAWON	iduʔ
+5813	drink	MANOBO DIBABAWON	inəm
+5815	ear	MANOBO DIBABAWON	taliŋa
+5819	eye	MANOBO DIBABAWON	mata
+5821	fire	MANOBO DIBABAWON	kaju
+5822	fish	MANOBO DIBABAWON	isdaʔ
+5826	full	MANOBO DIBABAWON	napənuʔ
+5831	hand	MANOBO DIBABAWON	bəad
+5833	hear	MANOBO DIBABAWON	dinəg
+5837	knee	MANOBO DIBABAWON	aib
+5839	leaf	MANOBO DIBABAWON	dəhun
+5841	liver	MANOBO DIBABAWON	atəj
+5843	louse	MANOBO DIBABAWON	kutu
+5846	mountain	MANOBO DIBABAWON	untud
+5848	name	MANOBO DIBABAWON	ŋadan
+5850	new	MANOBO DIBABAWON	bajaʔ
+5851	night	MANOBO DIBABAWON	kadukiləm
+5852	nose	MANOBO DIBABAWON	simud
+5854	one	MANOBO DIBABAWON	sə
+5855	path	MANOBO DIBABAWON	daan
+5856	person	MANOBO DIBABAWON	ətəw
+5862	see	MANOBO DIBABAWON	kita
+5864	skin	MANOBO DIBABAWON	kindaa
+5869	star	MANOBO DIBABAWON	bituʔən
+5870	stone	MANOBO DIBABAWON	batu
+5876	tongue	MANOBO DIBABAWON	dilaʔ
+5877	tooth	MANOBO DIBABAWON	ŋipən
+5878	tree	MANOBO DIBABAWON	kaju
+5879	two	MANOBO DIBABAWON	dadua
+5881	water	MANOBO DIBABAWON	wəhig
+5882	we	MANOBO DIBABAWON	kinəw
+5888	you	MANOBO DIBABAWON	sikuna
+5889	I	MANOBO ILIANEN	siʔakən
+5896	blood	MANOBO ILIANEN	ləŋəsa
+5897	bone	MANOBO ILIANEN	tulan
+5898	breast	MANOBO ILIANEN	susu
+5904	dog	MANOBO ILIANEN	asu
+5905	drink	MANOBO ILIANEN	inum
+5907	ear	MANOBO ILIANEN	təliŋa
+5911	eye	MANOBO ILIANEN	mata
+5913	fire	MANOBO ILIANEN	apuj
+5914	fish	MANOBO ILIANEN	səraʔ
+5918	full	MANOBO ILIANEN	nəpənuʔ
+5923	hand	MANOBO ILIANEN	bəlad
+5925	hear	MANOBO ILIANEN	rinəg
+5929	knee	MANOBO ILIANEN	buʔəl
+5931	leaf	MANOBO ILIANEN	dawun
+5933	liver	MANOBO ILIANEN	atəj
+5935	louse	MANOBO ILIANEN	kutu
+5938	mountain	MANOBO ILIANEN	bubuŋan
+5940	name	MANOBO ILIANEN	ŋaran
+5942	new	MANOBO ILIANEN	bəhu
+5943	night	MANOBO ILIANEN	mərukiləm
+5944	nose	MANOBO ILIANEN	iruŋ
+5946	one	MANOBO ILIANEN	səbəka
+5947	path	MANOBO ILIANEN	dalan
+5948	person	MANOBO ILIANEN	ətəw
+5954	see	MANOBO ILIANEN	kita
+5956	skin	MANOBO ILIANEN	lundis
+5961	star	MANOBO ILIANEN	bituʔən
+5962	stone	MANOBO ILIANEN	batu
+5968	tongue	MANOBO ILIANEN	dilaʔ
+5969	tooth	MANOBO ILIANEN	ŋipən
+5970	tree	MANOBO ILIANEN	kaju
+5971	two	MANOBO ILIANEN	dəruwa
+5973	water	MANOBO ILIANEN	wajig
+5974	we	MANOBO ILIANEN	sikita
+5980	you	MANOBO ILIANEN	sikuna
+5981	I	MANOBO KALAMANSIG COTABATO	akən
+5988	blood	MANOBO KALAMANSIG COTABATO	dəpanug
+5989	bone	MANOBO KALAMANSIG COTABATO	tuʔəlan
+5990	breast	MANOBO KALAMANSIG COTABATO	susu
+5996	dog	MANOBO KALAMANSIG COTABATO	tujaŋ
+5997	drink	MANOBO KALAMANSIG COTABATO	inəm
+5999	ear	MANOBO KALAMANSIG COTABATO	təliŋa
+6003	eye	MANOBO KALAMANSIG COTABATO	mata
+6005	fire	MANOBO KALAMANSIG COTABATO	apuj
+6006	fish	MANOBO KALAMANSIG COTABATO	uton
+6010	full	MANOBO KALAMANSIG COTABATO	nəpənuʔ
+6015	hand	MANOBO KALAMANSIG COTABATO	bəlad
+6017	hear	MANOBO KALAMANSIG COTABATO	dinəg
+6021	knee	MANOBO KALAMANSIG COTABATO	lulud
+6023	leaf	MANOBO KALAMANSIG COTABATO	daʔun
+6025	liver	MANOBO KALAMANSIG COTABATO	ataj
+6027	louse	MANOBO KALAMANSIG COTABATO	kutu
+6030	mountain	MANOBO KALAMANSIG COTABATO	gətan
+6032	name	MANOBO KALAMANSIG COTABATO	ŋadan
+6034	new	MANOBO KALAMANSIG COTABATO	magtu
+6035	night	MANOBO KALAMANSIG COTABATO	sigəp
+6036	nose	MANOBO KALAMANSIG COTABATO	iduŋ
+6038	one	MANOBO KALAMANSIG COTABATO	səbaʔən
+6039	path	MANOBO KALAMANSIG COTABATO	dalan
+6040	person	MANOBO KALAMANSIG COTABATO	ətaw
+6046	see	MANOBO KALAMANSIG COTABATO	ilag
+6048	skin	MANOBO KALAMANSIG COTABATO	kunul
+6053	star	MANOBO KALAMANSIG COTABATO	bituʔən
+6054	stone	MANOBO KALAMANSIG COTABATO	batu
+6060	tongue	MANOBO KALAMANSIG COTABATO	dilaʔ
+6061	tooth	MANOBO KALAMANSIG COTABATO	ŋipən
+6062	tree	MANOBO KALAMANSIG COTABATO	kaju
+6063	two	MANOBO KALAMANSIG COTABATO	duwa
+6065	water	MANOBO KALAMANSIG COTABATO	wajəg
+6066	we	MANOBO KALAMANSIG COTABATO	kita
+6072	you	MANOBO KALAMANSIG COTABATO	kuna
+6073	I	MANOBO SARANGANI	siʔak
+6080	blood	MANOBO SARANGANI	dipanog
+6081	bone	MANOBO SARANGANI	toʔlan
+6082	breast	MANOBO SARANGANI	soso
+6088	dog	MANOBO SARANGANI	tojaŋ
+6089	drink	MANOBO SARANGANI	inom
+6091	ear	MANOBO SARANGANI	toliŋa
+6095	eye	MANOBO SARANGANI	mata
+6097	fire	MANOBO SARANGANI	apoj
+6098	fish	MANOBO SARANGANI	ikan
+6102	full	MANOBO SARANGANI	ponoʔ
+6107	hand	MANOBO SARANGANI	bolad
+6109	hear	MANOBO SARANGANI	dinog
+6113	knee	MANOBO SARANGANI	boʔol
+6115	leaf	MANOBO SARANGANI	dawon
+6117	liver	MANOBO SARANGANI	ataj
+6119	louse	MANOBO SARANGANI	koto
+6122	mountain	MANOBO SARANGANI	bontod
+6124	name	MANOBO SARANGANI	ŋadan
+6126	new	MANOBO SARANGANI	kaliŋ
+6127	night	MANOBO SARANGANI	dolom
+6128	nose	MANOBO SARANGANI	idoŋ
+6130	one	MANOBO SARANGANI	sobad
+6131	path	MANOBO SARANGANI	dalan
+6132	person	MANOBO SARANGANI	otaw
+6138	see	MANOBO SARANGANI	kitaʔ
+6140	skin	MANOBO SARANGANI	kindal
+6145	star	MANOBO SARANGANI	bitoʔon
+6146	stone	MANOBO SARANGANI	bato
+6152	tongue	MANOBO SARANGANI	dilaʔ
+6153	tooth	MANOBO SARANGANI	ŋipon
+6154	tree	MANOBO SARANGANI	kajo
+6155	two	MANOBO SARANGANI	dowa
+6157	water	MANOBO SARANGANI	wajog
+6158	we	MANOBO SARANGANI	sikitadon
+6164	you	MANOBO SARANGANI	sikona
+6165	I	MANOBO TIGWA	siʔak
+6172	blood	MANOBO TIGWA	laŋəsa
+6173	bone	MANOBO TIGWA	tulʔan
+6174	breast	MANOBO TIGWA	susu
+6180	dog	MANOBO TIGWA	asu
+6181	drink	MANOBO TIGWA	inum
+6183	ear	MANOBO TIGWA	taliŋa
+6187	eye	MANOBO TIGWA	mata
+6189	fire	MANOBO TIGWA	hapuj
+6190	fish	MANOBO TIGWA	ŋalap
+6194	full	MANOBO TIGWA	napənuʔ
+6199	hand	MANOBO TIGWA	bəlad
+6201	hear	MANOBO TIGWA	dinəg
+6205	knee	MANOBO TIGWA	buʔəl
+6207	leaf	MANOBO TIGWA	dəun
+6209	liver	MANOBO TIGWA	atəj
+6211	louse	MANOBO TIGWA	kutu
+6214	mountain	MANOBO TIGWA	bubuŋan
+6216	name	MANOBO TIGWA	ŋadan
+6218	new	MANOBO TIGWA	bagʔu
+6219	night	MANOBO TIGWA	madusiləm
+6220	nose	MANOBO TIGWA	iduŋ
+6222	one	MANOBO TIGWA	sabəka
+6223	path	MANOBO TIGWA	dalan
+6224	person	MANOBO TIGWA	ətəw
+6230	see	MANOBO TIGWA	kita
+6232	skin	MANOBO TIGWA	laŋgit
+6237	star	MANOBO TIGWA	bituʔən
+6238	stone	MANOBO TIGWA	batu
+6244	tongue	MANOBO TIGWA	diləʔ
+6245	tooth	MANOBO TIGWA	ŋipən
+6246	tree	MANOBO TIGWA	kaju
+6247	two	MANOBO TIGWA	dadua
+6249	water	MANOBO TIGWA	wəig
+6250	we	MANOBO TIGWA	sikanta
+6256	you	MANOBO TIGWA	sikəikəw
+6257	I	MANOBO WESTERN BUKIDNON	siʔak
+6264	blood	MANOBO WESTERN BUKIDNON	ləŋəsa
+6265	bone	MANOBO WESTERN BUKIDNON	tulan
+6266	breast	MANOBO WESTERN BUKIDNON	susu
+6272	dog	MANOBO WESTERN BUKIDNON	asu
+6273	drink	MANOBO WESTERN BUKIDNON	inum
+6275	ear	MANOBO WESTERN BUKIDNON	təliŋa
+6279	eye	MANOBO WESTERN BUKIDNON	mata
+6281	fire	MANOBO WESTERN BUKIDNON	hapuj
+6282	fish	MANOBO WESTERN BUKIDNON	paʔit
+6286	full	MANOBO WESTERN BUKIDNON	pənuʔ
+6291	hand	MANOBO WESTERN BUKIDNON	bəlad
+6293	hear	MANOBO WESTERN BUKIDNON	dinəg
+6297	knee	MANOBO WESTERN BUKIDNON	buʔəl
+6299	leaf	MANOBO WESTERN BUKIDNON	dahun
+6301	liver	MANOBO WESTERN BUKIDNON	atəj
+6303	louse	MANOBO WESTERN BUKIDNON	kutuʔ
+6306	mountain	MANOBO WESTERN BUKIDNON	buntud
+6308	name	MANOBO WESTERN BUKIDNON	ŋazan
+6310	new	MANOBO WESTERN BUKIDNON	bəgu
+6311	night	MANOBO WESTERN BUKIDNON	dukiləm
+6312	nose	MANOBO WESTERN BUKIDNON	izuŋ
+6314	one	MANOBO WESTERN BUKIDNON	səvəha
+6315	path	MANOBO WESTERN BUKIDNON	dalan
+6316	person	MANOBO WESTERN BUKIDNON	ətəw
+6322	see	MANOBO WESTERN BUKIDNON	ahaʔ
+6324	skin	MANOBO WESTERN BUKIDNON	lundis
+6329	star	MANOBO WESTERN BUKIDNON	bituʔən
+6330	stone	MANOBO WESTERN BUKIDNON	batu
+6336	tongue	MANOBO WESTERN BUKIDNON	dilaʔ
+6337	tooth	MANOBO WESTERN BUKIDNON	ŋipən
+6338	tree	MANOBO WESTERN BUKIDNON	kuju
+6339	two	MANOBO WESTERN BUKIDNON	dəzuwa
+6341	water	MANOBO WESTERN BUKIDNON	wahig
+6342	we	MANOBO WESTERN BUKIDNON	sikitəw
+6348	you	MANOBO WESTERN BUKIDNON	sikəw
+6349	I	MANSAKA	aku
+6356	blood	MANSAKA	duguʔ
+6357	bone	MANSAKA	pəsaʔ
+6358	breast	MANSAKA	aba
+6364	dog	MANSAKA	iduʔ
+6365	drink	MANSAKA	inəm
+6367	ear	MANSAKA	tariŋa
+6371	eye	MANSAKA	mata
+6373	fire	MANSAKA	aturun
+6374	fish	MANSAKA	kaja
+6378	full	MANSAKA	itmuʔ
+6383	hand	MANSAKA	bəktən
+6385	hear	MANSAKA	dəŋəg
+6389	knee	MANSAKA	tuʔud
+6391	leaf	MANSAKA	daʔun
+6393	liver	MANSAKA	ataj
+6395	louse	MANSAKA	kutu
+6398	mountain	MANSAKA	bətaj
+6400	name	MANSAKA	aran
+6402	new	MANSAKA	bagu
+6403	night	MANSAKA	gabi
+6404	nose	MANSAKA	iluŋ
+6406	one	MANSAKA	isa
+6407	path	MANSAKA	daran
+6408	person	MANSAKA	utaw
+6414	see	MANSAKA	kitaʔ
+6416	skin	MANSAKA	paris naŋ ʔutaw
+6421	star	MANSAKA	bituʔun
+6422	stone	MANSAKA	batu
+6428	tongue	MANSAKA	dilaʔ
+6429	tooth	MANSAKA	untu
+6430	tree	MANSAKA	kaʔuj
+6431	two	MANSAKA	duwa
+6433	water	MANSAKA	tubig
+6434	we	MANSAKA	kita
+6440	you	MANSAKA	ikaw
+6441	I	MAPUN	aku
+6448	blood	MAPUN	lahaʔ
+6449	bone	MAPUN	towaŋ
+6450	breast	MAPUN	dakan
+6454	come	MAPUN	pitu
+6455	die	MAPUN	imuwa
+6456	dog	MAPUN	idoʔ
+6457	drink	MAPUN	inum
+6459	ear	MAPUN	tiŋa
+6463	eye	MAPUN	mata
+6465	fire	MAPUN	api
+6466	fish	MAPUN	dajiŋ
+6475	hand	MAPUN	taŋan
+6477	hear	MAPUN	ke
+6483	leaf	MAPUN	dawun
+6485	liver	MAPUN	ataj
+6487	louse	MAPUN	kutu
+6492	name	MAPUN	awon
+6494	new	MAPUN	bahau
+6495	night	MAPUN	bahaŋi
+6496	nose	MAPUN	samo
+6498	one	MAPUN	dambuwaʔ
+6499	path	MAPUN	lan
+6500	person	MAPUN	dʒama
+6506	see	MAPUN	kita
+6508	skin	MAPUN	kuwit
+6513	star	MAPUN	potean
+6514	stone	MAPUN	batu
+6520	tongue	MAPUN	dalaʔ
+6521	tooth	MAPUN	impon
+6523	two	MAPUN	duwa
+6525	water	MAPUN	boheʔ
+6526	we	MAPUN	kitabi
+6532	you	MAPUN	ko
+6533	I	MARANAO	ako
+6540	blood	MARANAO	rogoʔ
+6541	bone	MARANAO	tolan
+6542	breast	MARANAO	soso
+6546	come	MARANAO	danon
+6547	die	MARANAO	mataj
+6548	dog	MARANAO	aso
+6549	drink	MARANAO	inom
+6551	ear	MARANAO	taŋila
+6555	eye	MARANAO	mata
+6557	fire	MARANAO	apoi
+6558	fish	MARANAO	sedaʔ
+6567	hand	MARANAO	lima
+6569	hear	MARANAO	makineg
+6575	leaf	MARANAO	raʔon
+6577	liver	MARANAO	ataj
+6579	louse	MARANAO	koto
+6584	name	MARANAO	ŋaran
+6586	new	MARANAO	bego
+6587	night	MARANAO	gagaoiʔi
+6588	nose	MARANAO	iroŋ
+6590	one	MARANAO	isa
+6591	path	MARANAO	lalan
+6592	person	MARANAO	taw
+6598	see	MARANAO	ilaj
+6600	skin	MARANAO	anit
+6605	star	MARANAO	bitoʔon
+6606	stone	MARANAO	wato
+6612	tongue	MARANAO	dilaʔ
+6613	tooth	MARANAO	ŋipen
+6615	two	MARANAO	doa
+6617	water	MARANAO	ig
+6618	we	MARANAO	kita
+6624	you	MARANAO	ka
+6625	I	MASBATENYO	ako
+6632	blood	MASBATENYO	dugo
+6633	bone	MASBATENYO	tulaŋ
+6634	breast	MASBATENYO	suso
+6638	come	MASBATENYO	magdajo
+6639	die	MASBATENYO	mamataj
+6640	dog	MASBATENYO	aso
+6641	drink	MASBATENYO	maginom
+6643	ear	MASBATENYO	taliŋa
+6647	eye	MASBATENYO	mata
+6649	fire	MASBATENYO	kalajo
+6650	fish	MASBATENYO	isda
+6659	hand	MASBATENYO	kamot
+6661	hear	MASBATENYO	magbati
+6667	leaf	MASBATENYO	dahon
+6669	liver	MASBATENYO	ataj
+6671	louse	MASBATENYO	kuto
+6676	name	MASBATENYO	ŋaran
+6678	new	MASBATENYO	bago
+6679	night	MASBATENYO	gabi
+6680	nose	MASBATENYO	iroŋ
+6682	one	MASBATENYO	isad
+6683	path	MASBATENYO	dalan
+6684	person	MASBATENYO	tawo
+6690	see	MASBATENYO	magkita
+6692	skin	MASBATENYO	panit
+6697	star	MASBATENYO	bituon
+6698	stone	MASBATENYO	bato
+6704	tongue	MASBATENYO	dila
+6705	tooth	MASBATENYO	ŋipon
+6707	two	MASBATENYO	duha
+6709	water	MASBATENYO	tubig
+6710	we	MASBATENYO	kita
+6716	you	MASBATENYO	ikaw
+6717	I	MINANGALI LOWER TANUDAN KALINGA	sakon
+6724	blood	MINANGALI LOWER TANUDAN KALINGA	da8a
+6725	bone	MINANGALI LOWER TANUDAN KALINGA	tuŋa8
+6730	come	MINANGALI LOWER TANUDAN KALINGA	umali
+6731	die	MINANGALI LOWER TANUDAN KALINGA	natoj
+6732	dog	MINANGALI LOWER TANUDAN KALINGA	asu
+6733	drink	MINANGALI LOWER TANUDAN KALINGA	uminum
+6735	ear	MINANGALI LOWER TANUDAN KALINGA	iŋa
+6739	eye	MINANGALI LOWER TANUDAN KALINGA	ata
+6741	fire	MINANGALI LOWER TANUDAN KALINGA	apuj
+6742	fish	MINANGALI LOWER TANUDAN KALINGA	ugadiw
+6751	hand	MINANGALI LOWER TANUDAN KALINGA	ima
+6753	hear	MINANGALI LOWER TANUDAN KALINGA	doŋo8
+6759	leaf	MINANGALI LOWER TANUDAN KALINGA	tubu
+6761	liver	MINANGALI LOWER TANUDAN KALINGA	agtoj
+6763	louse	MINANGALI LOWER TANUDAN KALINGA	kutu
+6768	name	MINANGALI LOWER TANUDAN KALINGA	ŋadan
+6770	new	MINANGALI LOWER TANUDAN KALINGA	kaka8a
+6771	night	MINANGALI LOWER TANUDAN KALINGA	labi
+6772	nose	MINANGALI LOWER TANUDAN KALINGA	oŋo8
+6774	one	MINANGALI LOWER TANUDAN KALINGA	osan
+6775	path	MINANGALI LOWER TANUDAN KALINGA	ka8sa
+6776	person	MINANGALI LOWER TANUDAN KALINGA	tagu
+6782	see	MINANGALI LOWER TANUDAN KALINGA	ilan
+6784	skin	MINANGALI LOWER TANUDAN KALINGA	kublit
+6789	star	MINANGALI LOWER TANUDAN KALINGA	bituwon
+6790	stone	MINANGALI LOWER TANUDAN KALINGA	batu
+6796	tongue	MINANGALI LOWER TANUDAN KALINGA	dela
+6797	tooth	MINANGALI LOWER TANUDAN KALINGA	baba
+6799	two	MINANGALI LOWER TANUDAN KALINGA	duwa
+6801	water	MINANGALI LOWER TANUDAN KALINGA	danum
+6802	we	MINANGALI LOWER TANUDAN KALINGA	ditaku
+6808	you	MINANGALI LOWER TANUDAN KALINGA	sika
+6809	I	MOKSHA	mon
+6810	all	MOKSHA	sjembje
+6811	ash	MOKSHA	kulu
+6812	big	MOKSHA	ocju
+6813	bird	MOKSHA	narmo5
+6814	bite	MOKSHA	suskoms
+6815	black	MOKSHA	ravZa
+6816	blood	MOKSHA	vjer
+6817	bone	MOKSHA	pakarj
+6818	breast	MOKSHA	potja
+6819	burn	MOKSHA	paloms
+6820	cloud	MOKSHA	kovol
+6821	cold	MOKSHA	keljmje
+6822	come	MOKSHA	sams
+6823	die	MOKSHA	kuloms
+6824	dog	MOKSHA	pi5e
+6825	drink	MOKSHA	sjimoms
+6826	dry	MOKSHA	kosjke
+6827	ear	MOKSHA	pilje
+6828	earth	MOKSHA	moda
+6829	eat	MOKSHA	jarxcams
+6830	egg	MOKSHA	al
+6831	eye	MOKSHA	sjeljmje
+6832	feather	MOKSHA	tolga
+6833	fire	MOKSHA	tol
+6834	fish	MOKSHA	kal
+6835	flesh	MOKSHA	pal
+6836	fly	MOKSHA	ljijems
+6837	foot	MOKSHA	piljge
+6838	full	MOKSHA	paSksje
+6839	good	MOKSHA	para
+6840	grease	MOKSHA	kuja
+6841	green	MOKSHA	piZe
+6842	hair	MOKSHA	Sajarj
+6843	hand	MOKSHA	kadj
+6844	head	MOKSHA	prja
+6845	hear	MOKSHA	marjams
+6846	horn	MOKSHA	sjura
+6847	hot	MOKSHA	ljambje
+6848	kill	MOKSHA	Savoms
+6849	knee	MOKSHA	elj
+6850	know	MOKSHA	sodams
+6851	leaf	MOKSHA	lopa
+6852	lie	MOKSHA	madozj aSCjems
+6853	liver	MOKSHA	maksa
+6854	long	MOKSHA	kuvaka
+6855	louse	MOKSHA	sji
+6856	man	MOKSHA	alja
+6857	moon	MOKSHA	kov
+6858	mountain	MOKSHA	panda
+6859	mouth	MOKSHA	kurga
+6860	name	MOKSHA	ljem
+6861	neck	MOKSHA	sjaldaz
+6862	new	MOKSHA	od
+6863	night	MOKSHA	vje
+6864	nose	MOKSHA	Salxka
+6865	not	MOKSHA	af
+6866	one	MOKSHA	fka
+6867	path	MOKSHA	jan
+6868	person	MOKSHA	loma5
+6869	rain	MOKSHA	pizjem
+6870	red	MOKSHA	jakstjerj
+6871	root	MOKSHA	jur
+6872	sand	MOKSHA	Suvar
+6873	say	MOKSHA	azoms
+6874	see	MOKSHA	5ajems
+6875	sit	MOKSHA	aSCjems ozada
+6876	skin	MOKSHA	kisjke
+6877	sleep	MOKSHA	udoms
+6878	small	MOKSHA	jomla
+6879	smoke	MOKSHA	kaCam
+6880	stand	MOKSHA	aSCjems stjada
+6881	star	MOKSHA	tjaStje
+6882	stone	MOKSHA	kev
+6883	sun	MOKSHA	Si
+6884	swim	MOKSHA	ujems
+6885	tail	MOKSHA	pula
+6886	that	MOKSHA	sja
+6887	this	MOKSHA	tja
+6888	tongue	MOKSHA	kalj
+6889	tooth	MOKSHA	pej
+6890	tree	MOKSHA	Sufta
+6891	two	MOKSHA	kafta
+6892	walk	MOKSHA	jakams
+6893	water	MOKSHA	vjedj
+6894	we	MOKSHA	mji5
+6895	what	MOKSHA	mjezje
+6896	white	MOKSHA	akSa
+6897	who	MOKSHA	kije
+6898	woman	MOKSHA	ava
+6899	yellow	MOKSHA	tjuZa
+6900	you	MOKSHA	ton
+6901	I	MOLBOG	aku
+6908	blood	MOLBOG	dahaʔ
+6909	bone	MOLBOG	tulaŋ
+6910	breast	MOLBOG	duduʔ
+6914	come	MOLBOG	kuan
+6915	die	MOLBOG	patoj
+6916	dog	MOLBOG	idoŋ
+6917	drink	MOLBOG	inum
+6919	ear	MOLBOG	toliŋa
+6923	eye	MOLBOG	mata
+6925	fire	MOLBOG	apuj
+6926	fish	MOLBOG	sodaʔ
+6930	full	MOLBOG	ponuʔ
+6935	hand	MOLBOG	loŋon
+6937	hear	MOLBOG	doŋog
+6938	horn	MOLBOG	tanduk
+6941	knee	MOLBOG	bulanbulan tukud
+6943	leaf	MOLBOG	doʔun
+6945	liver	MOLBOG	atoj
+6947	louse	MOLBOG	kutu
+6950	mountain	MOLBOG	bukid
+6952	name	MOLBOG	ŋadan
+6954	new	MOLBOG	bagu
+6955	night	MOLBOG	gobi
+6956	nose	MOLBOG	oduŋ
+6958	one	MOLBOG	isaʔ
+6959	path	MOLBOG	dalan
+6960	person	MOLBOG	dʒolama
+6966	see	MOLBOG	lotog
+6968	skin	MOLBOG	kulit
+6973	star	MOLBOG	bituʔon
+6974	stone	MOLBOG	batu
+6975	sun	MOLBOG	odow
+6980	tongue	MOLBOG	dilaʔ
+6981	tooth	MOLBOG	nipon
+6982	tree	MOLBOG	kaju
+6983	two	MOLBOG	dua
+6985	water	MOLBOG	danum
+6986	we	MOLBOG	kaj
+6992	you	MOLBOG	ko
+6993	I	MONGOLIAN	pji
+7000	blood	MONGOLIAN	tʃus
+7001	bone	MONGOLIAN	jas
+7002	breast	MONGOLIAN	mem
+7006	come	MONGOLIAN	iri
+7008	dog	MONGOLIAN	murtux
+7009	drink	MONGOLIAN	untLa
+7011	ear	MONGOLIAN	Chix
+7015	eye	MONGOLIAN	nut
+7017	fire	MONGOLIAN	GaL
+7018	fish	MONGOLIAN	caGas
+7022	full	MONGOLIAN	puthiŋ
+7027	hand	MONGOLIAN	Gar
+7029	hear	MONGOLIAN	sonso
+7030	horn	MONGOLIAN	iwir
+7033	knee	MONGOLIAN	uwtug
+7035	leaf	MONGOLIAN	nawCh
+7037	liver	MONGOLIAN	iLig
+7039	louse	MONGOLIAN	pos
+7042	mountain	MONGOLIAN	uL
+7044	name	MONGOLIAN	nir
+7046	new	MONGOLIAN	Sin
+7047	night	MONGOLIAN	Sunu
+7048	nose	MONGOLIAN	xamar
+7050	one	MONGOLIAN	nik
+7051	path	MONGOLIAN	cam
+7052	person	MONGOLIAN	xuŋ
+7058	see	MONGOLIAN	uci
+7060	skin	MONGOLIAN	Erjs
+7065	star	MONGOLIAN	ot
+7066	stone	MONGOLIAN	ChuLu
+7067	sun	MONGOLIAN	nar
+7072	tongue	MONGOLIAN	xiL
+7073	tooth	MONGOLIAN	Sut
+7074	tree	MONGOLIAN	mot
+7075	two	MONGOLIAN	xojor
+7077	water	MONGOLIAN	us
+7078	we	MONGOLIAN	pjit
+7084	you	MONGOLIAN	Chi
+7085	I	MORO MAGINDANAU	aku
+7093	bone	MORO MAGINDANAU	tulan
+7094	breast	MORO MAGINDANAU	susu
+7098	come	MORO MAGINDANAU	sia
+7099	die	MORO MAGINDANAU	mataj
+7100	dog	MORO MAGINDANAU	asu
+7101	drink	MORO MAGINDANAU	inum
+7103	ear	MORO MAGINDANAU	taŋila
+7107	eye	MORO MAGINDANAU	mata
+7109	fire	MORO MAGINDANAU	apuj
+7110	fish	MORO MAGINDANAU	seda
+7114	full	MORO MAGINDANAU	napunu
+7119	hand	MORO MAGINDANAU	lima
+7121	hear	MORO MAGINDANAU	kinug
+7122	horn	MORO MAGINDANAU	siduŋ
+7125	knee	MORO MAGINDANAU	alub
+7127	leaf	MORO MAGINDANAU	laun
+7129	liver	MORO MAGINDANAU	ataj limpa
+7134	mountain	MORO MAGINDANAU	palau
+7136	name	MORO MAGINDANAU	ŋalan
+7138	new	MORO MAGINDANAU	bagu
+7139	night	MORO MAGINDANAU	magabi
+7140	nose	MORO MAGINDANAU	iluŋ
+7142	one	MORO MAGINDANAU	isa
+7143	path	MORO MAGINDANAU	lalan
+7144	person	MORO MAGINDANAU	lanas
+7150	see	MORO MAGINDANAU	ilaj
+7152	skin	MORO MAGINDANAU	upis
+7157	star	MORO MAGINDANAU	bitu
+7158	stone	MORO MAGINDANAU	uatu
+7159	sun	MORO MAGINDANAU	sinaŋ
+7164	tongue	MORO MAGINDANAU	dila
+7165	tooth	MORO MAGINDANAU	ŋipun
+7166	tree	MORO MAGINDANAU	kaju
+7167	two	MORO MAGINDANAU	dua
+7169	water	MORO MAGINDANAU	ig
+7170	we	MORO MAGINDANAU	ta
+7176	you	MORO MAGINDANAU	ka
+7177	I	NORTHERN CATANDUANES	ʔaku
+7184	blood	NORTHERN CATANDUANES	duguʔ
+7185	bone	NORTHERN CATANDUANES	tuʔraŋ
+7186	breast	NORTHERN CATANDUANES	susu
+7190	come	NORTHERN CATANDUANES	ʔabut
+7191	die	NORTHERN CATANDUANES	daʔan
+7192	dog	NORTHERN CATANDUANES	ʔajam
+7193	drink	NORTHERN CATANDUANES	ʔinum
+7195	ear	NORTHERN CATANDUANES	tariŋa
+7199	eye	NORTHERN CATANDUANES	mata
+7201	fire	NORTHERN CATANDUANES	karaju
+7202	fish	NORTHERN CATANDUANES	ʔisdaʔ
+7206	full	NORTHERN CATANDUANES	buta
+7211	hand	NORTHERN CATANDUANES	kamut
+7213	hear	NORTHERN CATANDUANES	duŋug
+7214	horn	NORTHERN CATANDUANES	suŋaj
+7217	knee	NORTHERN CATANDUANES	tuhud
+7219	leaf	NORTHERN CATANDUANES	dahun
+7221	liver	NORTHERN CATANDUANES	ʔataj
+7223	louse	NORTHERN CATANDUANES	kutu
+7226	mountain	NORTHERN CATANDUANES	burud
+7228	name	NORTHERN CATANDUANES	ŋaran
+7230	new	NORTHERN CATANDUANES	baʔgu
+7231	night	NORTHERN CATANDUANES	gaʔbi
+7232	nose	NORTHERN CATANDUANES	ʔiluŋ
+7234	one	NORTHERN CATANDUANES	saduʔ
+7235	path	NORTHERN CATANDUANES	daran
+7236	person	NORTHERN CATANDUANES	tahu
+7242	see	NORTHERN CATANDUANES	taʔnaw
+7244	skin	NORTHERN CATANDUANES	panit
+7249	star	NORTHERN CATANDUANES	bituʔun
+7250	stone	NORTHERN CATANDUANES	batu
+7251	sun	NORTHERN CATANDUANES	ʔardaw
+7256	tongue	NORTHERN CATANDUANES	dilaʔ
+7257	tooth	NORTHERN CATANDUANES	tiŋu
+7258	tree	NORTHERN CATANDUANES	kahuj
+7259	two	NORTHERN CATANDUANES	dawha
+7261	water	NORTHERN CATANDUANES	tubig
+7262	we	NORTHERN CATANDUANES	kita
+7268	you	NORTHERN CATANDUANES	kamu
+7269	I	NORTHERN SORSOGON	ʔaku
+7276	blood	NORTHERN SORSOGON	duguʔ
+7277	bone	NORTHERN SORSOGON	tulʔaŋ
+7278	breast	NORTHERN SORSOGON	susu
+7282	come	NORTHERN SORSOGON	ʔabut
+7283	die	NORTHERN SORSOGON	mataj
+7284	dog	NORTHERN SORSOGON	ʔajam
+7285	drink	NORTHERN SORSOGON	ʔinum
+7287	ear	NORTHERN SORSOGON	taliŋa
+7291	eye	NORTHERN SORSOGON	mata
+7293	fire	NORTHERN SORSOGON	kalaju
+7294	fish	NORTHERN SORSOGON	siraʔ
+7298	full	NORTHERN SORSOGON	punuʔ
+7303	hand	NORTHERN SORSOGON	kamut
+7305	hear	NORTHERN SORSOGON	matiʔ
+7306	horn	NORTHERN SORSOGON	suŋaj
+7309	knee	NORTHERN SORSOGON	tuhud
+7311	leaf	NORTHERN SORSOGON	dahun
+7313	liver	NORTHERN SORSOGON	ʔataj
+7315	louse	NORTHERN SORSOGON	kutu
+7318	mountain	NORTHERN SORSOGON	bulud
+7320	name	NORTHERN SORSOGON	ŋaran
+7322	new	NORTHERN SORSOGON	bagʔu
+7323	night	NORTHERN SORSOGON	gabʔi
+7324	nose	NORTHERN SORSOGON	ʔiluŋ
+7326	one	NORTHERN SORSOGON	ʔisad
+7327	path	NORTHERN SORSOGON	dalan
+7328	person	NORTHERN SORSOGON	tawu
+7334	see	NORTHERN SORSOGON	kita
+7336	skin	NORTHERN SORSOGON	panit
+7341	star	NORTHERN SORSOGON	bituʔun
+7342	stone	NORTHERN SORSOGON	batu
+7343	sun	NORTHERN SORSOGON	ʔadlaw
+7348	tongue	NORTHERN SORSOGON	dilaʔ
+7349	tooth	NORTHERN SORSOGON	ŋipun
+7350	tree	NORTHERN SORSOGON	kahuj
+7351	two	NORTHERN SORSOGON	duwa
+7353	water	NORTHERN SORSOGON	tubig
+7354	we	NORTHERN SORSOGON	kita
+7360	you	NORTHERN SORSOGON	kamu
+7361	I	OAS	ʔaku
+7368	blood	OAS	ruguʔ
+7369	bone	OAS	tuʔlaŋ
+7370	breast	OAS	susu
+7374	come	OAS	ratiŋ
+7375	die	OAS	giran
+7376	dog	OAS	ʔajam
+7377	drink	OAS	ʔinum
+7379	ear	OAS	taliŋa
+7383	eye	OAS	mata
+7385	fire	OAS	kalaju
+7386	fish	OAS	ʔisraʔ
+7390	full	OAS	punuʔ
+7395	hand	OAS	kamit
+7397	hear	OAS	riŋig
+7398	horn	OAS	suŋuj
+7401	knee	OAS	tuʔud
+7403	leaf	OAS	dawun
+7405	liver	OAS	ʔataj
+7407	louse	OAS	kutu
+7410	mountain	OAS	bukid
+7412	name	OAS	ŋaran
+7414	new	OAS	baʔgu
+7415	night	OAS	gaʔbi
+7416	nose	OAS	ʔuruŋ
+7418	one	OAS	ʔisad
+7419	path	OAS	raran
+7420	person	OAS	tawu
+7426	see	OAS	kita
+7428	skin	OAS	kulit
+7433	star	OAS	bituʔun
+7434	stone	OAS	batu
+7435	sun	OAS	ʔanriw
+7440	tongue	OAS	dilaʔ
+7441	tooth	OAS	ŋipin
+7442	tree	OAS	kawuj
+7443	two	OAS	duwa
+7445	water	OAS	tubig
+7446	we	OAS	kita
+7452	you	OAS	kamu
+7453	I	PALAWANO BATAK	aku
+7460	blood	PALAWANO BATAK	tagək
+7461	bone	PALAWANO BATAK	tulaŋ
+7462	breast	PALAWANO BATAK	dudu
+7466	come	PALAWANO BATAK	muʔatkakaʔini
+7467	die	PALAWANO BATAK	napataj
+7468	dog	PALAWANO BATAK	kədəŋ
+7469	drink	PALAWANO BATAK	inum
+7471	ear	PALAWANO BATAK	taliŋa
+7475	eye	PALAWANO BATAK	mata
+7477	fire	PALAWANO BATAK	apuj
+7478	fish	PALAWANO BATAK	sədaʔ
+7487	hand	PALAWANO BATAK	alima
+7489	hear	PALAWANO BATAK	batiʔ
+7495	leaf	PALAWANO BATAK	daun
+7497	liver	PALAWANO BATAK	ataj
+7499	louse	PALAWANO BATAK	kutu
+7504	name	PALAWANO BATAK	ŋaran
+7506	new	PALAWANO BATAK	bagu
+7507	night	PALAWANO BATAK	dələm
+7508	nose	PALAWANO BATAK	uruŋ
+7510	one	PALAWANO BATAK	əsa
+7511	path	PALAWANO BATAK	dalan
+7512	person	PALAWANO BATAK	taw
+7518	see	PALAWANO BATAK	ləgan
+7520	skin	PALAWANO BATAK	kulit
+7525	star	PALAWANO BATAK	panakonun
+7526	stone	PALAWANO BATAK	batu
+7532	tongue	PALAWANO BATAK	dilaʔ
+7533	tooth	PALAWANO BATAK	nipən
+7535	two	PALAWANO BATAK	dua
+7537	water	PALAWANO BATAK	danum
+7538	we	PALAWANO BATAK	kitami
+7544	you	PALAWANO BATAK	ikaw
+7545	I	PANGASINAN	siak
+7552	blood	PANGASINAN	dala
+7553	bone	PANGASINAN	pokel
+7554	breast	PANGASINAN	suso
+7558	come	PANGASINAN	laka
+7559	die	PANGASINAN	unpatej
+7560	dog	PANGASINAN	aso
+7561	drink	PANGASINAN	inom
+7563	ear	PANGASINAN	lajag
+7567	eye	PANGASINAN	mata
+7569	fire	PANGASINAN	poʔol
+7570	fish	PANGASINAN	sira
+7579	hand	PANGASINAN	lima
+7581	hear	PANGASINAN	deŋuel
+7587	leaf	PANGASINAN	buloŋ
+7589	liver	PANGASINAN	altej
+7591	louse	PANGASINAN	kuto
+7596	name	PANGASINAN	ŋaran
+7598	new	PANGASINAN	balo
+7599	night	PANGASINAN	labi
+7600	nose	PANGASINAN	eleŋ
+7602	one	PANGASINAN	sakej
+7604	person	PANGASINAN	to
+7610	see	PANGASINAN	neŋneŋ
+7612	skin	PANGASINAN	balat
+7617	star	PANGASINAN	biteuen
+7618	stone	PANGASINAN	bato
+7624	tongue	PANGASINAN	dila
+7625	tooth	PANGASINAN	ŋipen
+7627	two	PANGASINAN	duara
+7629	water	PANGASINAN	danom
+7630	we	PANGASINAN	sikami
+7636	you	PANGASINAN	sika
+7637	I	PANGUTARAN SAMA	aku
+7644	blood	PANGUTARAN SAMA	lahaʔ
+7645	bone	PANGUTARAN SAMA	bokog
+7646	breast	PANGUTARAN SAMA	dagha
+7650	come	PANGUTARAN SAMA	"t""ka"
+7651	die	PANGUTARAN SAMA	mataj
+7652	dog	PANGUTARAN SAMA	eroʔ
+7653	drink	PANGUTARAN SAMA	inum
+7655	ear	PANGUTARAN SAMA	taiŋa
+7659	eye	PANGUTARAN SAMA	mata
+7661	fire	PANGUTARAN SAMA	api
+7662	fish	PANGUTARAN SAMA	daiŋ
+7671	hand	PANGUTARAN SAMA	taŋan
+7673	hear	PANGUTARAN SAMA	ke
+7679	leaf	PANGUTARAN SAMA	daun
+7681	liver	PANGUTARAN SAMA	ataj
+7683	louse	PANGUTARAN SAMA	kutu
+7688	name	PANGUTARAN SAMA	on
+7690	new	PANGUTARAN SAMA	bahu
+7691	night	PANGUTARAN SAMA	saŋom
+7694	one	PANGUTARAN SAMA	dakajoʔ
+7696	person	PANGUTARAN SAMA	aʔa
+7702	see	PANGUTARAN SAMA	nda
+7704	skin	PANGUTARAN SAMA	kuwit
+7709	star	PANGUTARAN SAMA	bitun
+7710	stone	PANGUTARAN SAMA	batu
+7719	two	PANGUTARAN SAMA	duwa
+7721	water	PANGUTARAN SAMA	boheʔ
+7722	we	PANGUTARAN SAMA	kita
+7728	you	PANGUTARAN SAMA	kaʔu
+7729	I	PROTO PALAWAN	ʔaku
+7736	blood	PROTO PALAWAN	duguʔ
+7737	bone	PROTO PALAWAN	tuʔlaŋ
+7743	die	PROTO PALAWAN	pataj
+7744	dog	PROTO PALAWAN	ʔidəŋ
+7745	drink	PROTO PALAWAN	ʔinum
+7747	ear	PROTO PALAWAN	taliŋa
+7751	eye	PROTO PALAWAN	mata
+7753	fire	PROTO PALAWAN	ʔapuj
+7754	fish	PROTO PALAWAN	sədaʔ
+7763	hand	PROTO PALAWAN	lima
+7765	hear	PROTO PALAWAN	eŋeg
+7771	leaf	PROTO PALAWAN	daʔun
+7773	liver	PROTO PALAWAN	ʔataj
+7775	louse	PROTO PALAWAN	kutu
+7778	mountain	PROTO PALAWAN	bukid
+7780	name	PROTO PALAWAN	ŋaran
+7782	new	PROTO PALAWAN	baʔgu
+7783	night	PROTO PALAWAN	gebiʔi
+7784	nose	PROTO PALAWAN	ʔaruŋ
+7786	one	PROTO PALAWAN	ʔisaʔ
+7787	path	PROTO PALAWAN	dalan
+7788	person	PROTO PALAWAN	taʔu
+7794	see	PROTO PALAWAN	lətəg
+7796	skin	PROTO PALAWAN	kubal
+7801	star	PROTO PALAWAN	bituʔən
+7802	stone	PROTO PALAWAN	batu
+7803	sun	PROTO PALAWAN	ʔaldaw
+7808	tongue	PROTO PALAWAN	dilaʔ
+7809	tooth	PROTO PALAWAN	nipən
+7810	tree	PROTO PALAWAN	kaju
+7811	two	PROTO PALAWAN	dua
+7813	water	PROTO PALAWAN	danum
+7814	we	PROTO PALAWAN	kami
+7820	you	PROTO PALAWAN	ka
+7821	I	QUEZON PALAWAN	aku
+7828	blood	QUEZON PALAWAN	duguʔ
+7829	bone	QUEZON PALAWAN	tuʔlaŋ
+7835	die	QUEZON PALAWAN	patəj
+7837	drink	QUEZON PALAWAN	minum
+7839	ear	QUEZON PALAWAN	təliŋa
+7843	eye	QUEZON PALAWAN	mata
+7845	fire	QUEZON PALAWAN	apuj
+7846	fish	QUEZON PALAWAN	sədaʔ
+7855	hand	QUEZON PALAWAN	lima
+7857	hear	QUEZON PALAWAN	kineg
+7863	leaf	QUEZON PALAWAN	dəʔun
+7865	liver	QUEZON PALAWAN	atəj
+7867	louse	QUEZON PALAWAN	kutu
+7870	mountain	QUEZON PALAWAN	bukid
+7872	name	QUEZON PALAWAN	ŋaran
+7874	new	QUEZON PALAWAN	baʔgu
+7875	night	QUEZON PALAWAN	gebi
+7876	nose	QUEZON PALAWAN	əduŋ
+7878	one	QUEZON PALAWAN	isa
+7879	path	QUEZON PALAWAN	dalan
+7880	person	QUEZON PALAWAN	taw
+7893	star	QUEZON PALAWAN	bituʔən
+7894	stone	QUEZON PALAWAN	batu
+7895	sun	QUEZON PALAWAN	əldəw
+7900	tongue	QUEZON PALAWAN	dilaʔ
+7901	tooth	QUEZON PALAWAN	nipən
+7902	tree	QUEZON PALAWAN	kaju
+7903	two	QUEZON PALAWAN	dua
+7905	water	QUEZON PALAWAN	danum
+7906	we	QUEZON PALAWAN	kami
+7912	you	QUEZON PALAWAN	kə
+7913	I	ROMBLOMANON 2	ʔaku
+7920	blood	ROMBLOMANON 2	duguʔ
+7921	bone	ROMBLOMANON 2	tujʔan
+7922	breast	ROMBLOMANON 2	susu
+7926	come	ROMBLOMANON 2	ʔabut
+7927	die	ROMBLOMANON 2	bugtuʔ
+7928	dog	ROMBLOMANON 2	ʔajam
+7929	drink	ROMBLOMANON 2	inum
+7931	ear	ROMBLOMANON 2	taliŋa
+7935	eye	ROMBLOMANON 2	mata
+7937	fire	ROMBLOMANON 2	kalaju
+7938	fish	ROMBLOMANON 2	isda
+7942	full	ROMBLOMANON 2	punuʔ
+7947	hand	ROMBLOMANON 2	kamut
+7949	hear	ROMBLOMANON 2	banawbanaw
+7950	horn	ROMBLOMANON 2	suŋaj
+7953	knee	ROMBLOMANON 2	tuhud
+7955	leaf	ROMBLOMANON 2	dahun
+7957	liver	ROMBLOMANON 2	ʔataj
+7959	louse	ROMBLOMANON 2	tuma
+7962	mountain	ROMBLOMANON 2	bakujud
+7964	name	ROMBLOMANON 2	tawag
+7966	new	ROMBLOMANON 2	bagʔu
+7967	night	ROMBLOMANON 2	gabʔi
+7968	nose	ROMBLOMANON 2	ʔiluŋ
+7970	one	ROMBLOMANON 2	ʔisa
+7971	path	ROMBLOMANON 2	dajan
+7972	person	ROMBLOMANON 2	tawu
+7978	see	ROMBLOMANON 2	batjag
+7980	skin	ROMBLOMANON 2	panit
+7985	star	ROMBLOMANON 2	bituʔun
+7986	stone	ROMBLOMANON 2	batu
+7987	sun	ROMBLOMANON 2	ʔadlaw
+7992	tongue	ROMBLOMANON 2	dilaʔ
+7993	tooth	ROMBLOMANON 2	ŋipun
+7994	tree	ROMBLOMANON 2	kahuj
+7995	two	ROMBLOMANON 2	duha
+7997	water	ROMBLOMANON 2	tubiʔ
+7998	we	ROMBLOMANON 2	kita
+8004	you	ROMBLOMANON 2	ʔikaw
+8005	I	SAMAL	aku
+8012	blood	SAMAL	lahaʔ
+8013	bone	SAMAL	koaʔ
+8014	breast	SAMAL	duduʔ
+8020	dog	SAMAL	edoʔ
+8021	drink	SAMAL	inum
+8023	ear	SAMAL	taliŋa
+8027	eye	SAMAL	mata
+8029	fire	SAMAL	api
+8030	fish	SAMAL	daiŋ
+8034	full	SAMAL	apənnoʔ
+8039	hand	SAMAL	taŋan
+8041	hear	SAMAL	kale
+8045	knee	SAMAL	tuʔut
+8047	leaf	SAMAL	daun
+8049	liver	SAMAL	ataj
+8051	louse	SAMAL	kutu
+8054	mountain	SAMAL	buud
+8056	name	SAMAL	oon
+8058	new	SAMAL	bahaʔu
+8059	night	SAMAL	saŋom
+8060	nose	SAMAL	uuŋ
+8062	one	SAMAL	isa
+8063	path	SAMAL	laan
+8064	person	SAMAL	aʔa
+8070	see	SAMAL	əndaʔ
+8072	skin	SAMAL	kulit
+8077	star	SAMAL	bituʔun
+8078	stone	SAMAL	batu
+8084	tongue	SAMAL	dəllaʔ
+8085	tooth	SAMAL	empon
+8086	tree	SAMAL	kaju
+8087	two	SAMAL	dua
+8089	water	SAMAL	boheʔ
+8090	we	SAMAL	kitam
+8096	you	SAMAL	kaʔa
+8097	I	SAMBAL BOTOLAN	hiko
+8104	blood	SAMBAL BOTOLAN	dajaʔ
+8105	bone	SAMBAL BOTOLAN	botʔo
+8106	breast	SAMBAL BOTOLAN	nonoʔ
+8112	dog	SAMBAL BOTOLAN	ahoʔ
+8113	drink	SAMBAL BOTOLAN	minom
+8115	ear	SAMBAL BOTOLAN	toli
+8119	eye	SAMBAL BOTOLAN	mata
+8121	fire	SAMBAL BOTOLAN	apoj
+8122	fish	SAMBAL BOTOLAN	ikan
+8126	full	SAMBAL BOTOLAN	napnoʔ
+8131	hand	SAMBAL BOTOLAN	gamət
+8133	hear	SAMBAL BOTOLAN	maləŋəʔ
+8137	knee	SAMBAL BOTOLAN	toʔol
+8139	leaf	SAMBAL BOTOLAN	boloŋ
+8141	liver	SAMBAL BOTOLAN	agtaj
+8143	louse	SAMBAL BOTOLAN	koto
+8146	mountain	SAMBAL BOTOLAN	bakil
+8148	name	SAMBAL BOTOLAN	ŋalan
+8150	new	SAMBAL BOTOLAN	bajo
+8151	night	SAMBAL BOTOLAN	jabi
+8152	nose	SAMBAL BOTOLAN	baloŋo
+8154	one	SAMBAL BOTOLAN	miha
+8155	path	SAMBAL BOTOLAN	daan
+8156	person	SAMBAL BOTOLAN	tao
+8162	see	SAMBAL BOTOLAN	makit
+8164	skin	SAMBAL BOTOLAN	katat
+8169	star	SAMBAL BOTOLAN	bitoʔən
+8170	stone	SAMBAL BOTOLAN	bato
+8176	tongue	SAMBAL BOTOLAN	dilaʔ
+8177	tooth	SAMBAL BOTOLAN	ŋipən
+8178	tree	SAMBAL BOTOLAN	kajo
+8179	two	SAMBAL BOTOLAN	loa
+8181	water	SAMBAL BOTOLAN	lanom
+8182	we	SAMBAL BOTOLAN	hitamo
+8188	you	SAMBAL BOTOLAN	hika
+8189	I	SANGIL SARANGANI ISLANDS	iaʔ
+8196	blood	SANGIL SARANGANI ISLANDS	dara
+8197	bone	SANGIL SARANGANI ISLANDS	duri
+8198	breast	SANGIL SARANGANI ISLANDS	susu
+8204	dog	SANGIL SARANGANI ISLANDS	asu
+8205	drink	SANGIL SARANGANI ISLANDS	maŋinuŋ
+8207	ear	SANGIL SARANGANI ISLANDS	tuli
+8211	eye	SANGIL SARANGANI ISLANDS	mata
+8213	fire	SANGIL SARANGANI ISLANDS	putuŋ
+8214	fish	SANGIL SARANGANI ISLANDS	kinaʔ
+8218	full	SANGIL SARANGANI ISLANDS	mapeneʔ
+8223	hand	SANGIL SARANGANI ISLANDS	lima
+8225	hear	SANGIL SARANGANI ISLANDS	makadiŋirəʔ
+8229	knee	SANGIL SARANGANI ISLANDS	buku
+8231	leaf	SANGIL SARANGANI ISLANDS	dauŋ
+8233	liver	SANGIL SARANGANI ISLANDS	ate
+8235	louse	SANGIL SARANGANI ISLANDS	kutuʔ
+8238	mountain	SANGIL SARANGANI ISLANDS	budəʔ
+8240	name	SANGIL SARANGANI ISLANDS	aleŋ
+8242	new	SANGIL SARANGANI ISLANDS	buru
+8243	night	SANGIL SARANGANI ISLANDS	rəbi
+8244	nose	SANGIL SARANGANI ISLANDS	iluŋ
+8246	one	SANGIL SARANGANI ISLANDS	sa
+8247	path	SANGIL SARANGANI ISLANDS	daleŋ
+8248	person	SANGIL SARANGANI ISLANDS	taw
+8254	see	SANGIL SARANGANI ISLANDS	makasilaw
+8256	skin	SANGIL SARANGANI ISLANDS	pisi
+8261	star	SANGIL SARANGANI ISLANDS	bituiŋ
+8262	stone	SANGIL SARANGANI ISLANDS	batu
+8268	tongue	SANGIL SARANGANI ISLANDS	dila
+8269	tooth	SANGIL SARANGANI ISLANDS	isi
+8270	tree	SANGIL SARANGANI ISLANDS	kaju
+8271	two	SANGIL SARANGANI ISLANDS	dalua
+8273	water	SANGIL SARANGANI ISLANDS	akeʔ
+8274	we	SANGIL SARANGANI ISLANDS	ikame
+8280	you	SANGIL SARANGANI ISLANDS	ikaw
+8281	I	SEDANG	a
+8282	all	SEDANG	tai taŋ
+8283	ash	SEDANG	kodʒa
+8284	big	SEDANG	kan
+8285	bird	SEDANG	Cem
+8286	bite	SEDANG	ren
+8287	black	SEDANG	praŋ
+8288	blood	SEDANG	moheam
+8289	bone	SEDANG	koSiaŋ
+8290	breast	SEDANG	tou
+8291	burn	SEDANG	Cou
+8292	cloud	SEDANG	Sok
+8293	cold	SEDANG	hoŋiu
+8295	die	SEDANG	hla
+8296	dog	SEDANG	Co
+8297	drink	SEDANG	ou
+8298	dry	SEDANG	koCoh
+8299	ear	SEDANG	tuan
+8300	earth	SEDANG	tonei
+8301	eat	SEDANG	ka
+8302	egg	SEDANG	kota
+8303	eye	SEDANG	ma
+8305	fire	SEDANG	on
+8306	fish	SEDANG	ka
+8307	flesh	SEDANG	honeh
+8308	fly	SEDANG	koneaŋ
+8309	foot	SEDANG	Ceaŋ
+8310	full	SEDANG	peŋ
+8311	good	SEDANG	lem
+8313	green	SEDANG	dʒeh
+8314	hair	SEDANG	Sak
+8315	hand	SEDANG	koŋ
+8316	head	SEDANG	ko
+8317	hear	SEDANG	taŋ
+8319	hot	SEDANG	to
+8321	knee	SEDANG	kraŋ
+8322	know	SEDANG	nai
+8323	leaf	SEDANG	hla
+8324	lie	SEDANG	koi
+8325	liver	SEDANG	kliam
+8326	long	SEDANG	Son
+8327	louse	SEDANG	Sro
+8328	man	SEDANG	konou
+8329	moon	SEDANG	ke
+8330	mountain	SEDANG	ŋo
+8331	mouth	SEDANG	rokoŋ
+8332	name	SEDANG	inai
+8333	neck	SEDANG	ronoŋ
+8334	new	SEDANG	neo
+8335	night	SEDANG	koŋ maŋ
+8336	nose	SEDANG	moh
+8337	not	SEDANG	oh ta
+8338	one	SEDANG	moi
+8339	path	SEDANG	troaŋ
+8340	person	SEDANG	ŋe
+8341	rain	SEDANG	mei
+8342	red	SEDANG	kei
+8343	root	SEDANG	rei
+8344	sand	SEDANG	prei
+8346	see	SEDANG	honai
+8347	sit	SEDANG	oi a taŋ
+8348	skin	SEDANG	kea
+8349	sleep	SEDANG	koi
+8350	small	SEDANG	toSin
+8351	smoke	SEDANG	ŋoi
+8352	stand	SEDANG	Suoŋ
+8353	star	SEDANG	holoŋ
+8354	stone	SEDANG	hmou
+8355	sun	SEDANG	hai
+8356	swim	SEDANG	kle tea
+8357	tail	SEDANG	tiŋ
+8358	that	SEDANG	me
+8359	this	SEDANG	ko
+8360	tongue	SEDANG	rope
+8361	tooth	SEDANG	honeŋ
+8362	tree	SEDANG	loaŋ
+8363	two	SEDANG	pea
+8364	walk	SEDANG	lam Ceaŋ
+8365	water	SEDANG	tea
+8366	we	SEDANG	pa
+8367	what	SEDANG	ki klai
+8368	white	SEDANG	boŋ
+8369	who	SEDANG	kobo
+8370	woman	SEDANG	kodrai
+8371	yellow	SEDANG	triŋ
+8372	you	SEDANG	eh
+8373	I	SIBUTU SOUTHERN SAMA	aku
+8380	blood	SIBUTU SOUTHERN SAMA	lahaʔ
+8381	bone	SIBUTU SOUTHERN SAMA	tolaŋ
+8382	breast	SIBUTU SOUTHERN SAMA	susu
+8386	come	SIBUTU SOUTHERN SAMA	pitu
+8387	die	SIBUTU SOUTHERN SAMA	matej
+8388	dog	SIBUTU SOUTHERN SAMA	eroʔ
+8389	drink	SIBUTU SOUTHERN SAMA	inum
+8391	ear	SIBUTU SOUTHERN SAMA	tejŋa
+8395	eye	SIBUTU SOUTHERN SAMA	mata
+8398	fish	SIBUTU SOUTHERN SAMA	dejŋ
+8407	hand	SIBUTU SOUTHERN SAMA	taŋan
+8409	hear	SIBUTU SOUTHERN SAMA	kale
+8415	leaf	SIBUTU SOUTHERN SAMA	down
+8417	liver	SIBUTU SOUTHERN SAMA	atej
+8419	louse	SIBUTU SOUTHERN SAMA	kutu
+8426	new	SIBUTU SOUTHERN SAMA	bahau
+8427	night	SIBUTU SOUTHERN SAMA	saŋom
+8428	nose	SIBUTU SOUTHERN SAMA	uŋ
+8430	one	SIBUTU SOUTHERN SAMA	isa
+8431	path	SIBUTU SOUTHERN SAMA	lan
+8438	see	SIBUTU SOUTHERN SAMA	nda
+8440	skin	SIBUTU SOUTHERN SAMA	kulit
+8445	star	SIBUTU SOUTHERN SAMA	mamahi
+8446	stone	SIBUTU SOUTHERN SAMA	batu
+8452	tongue	SIBUTU SOUTHERN SAMA	delaʔ
+8453	tooth	SIBUTU SOUTHERN SAMA	empon
+8455	two	SIBUTU SOUTHERN SAMA	duwa
+8457	water	SIBUTU SOUTHERN SAMA	boheʔ
+8458	we	SIBUTU SOUTHERN SAMA	kita
+8464	you	SIBUTU SOUTHERN SAMA	kow
+8465	I	SOGODNIN BORACAY	ak
+8472	blood	SOGODNIN BORACAY	dogo
+8473	bone	SOGODNIN BORACAY	tolʔan
+8474	breast	SOGODNIN BORACAY	soso
+8478	come	SOGODNIN BORACAY	hindon
+8479	die	SOGODNIN BORACAY	tigbak
+8480	dog	SOGODNIN BORACAY	ajam
+8481	drink	SOGODNIN BORACAY	iʔinom
+8483	ear	SOGODNIN BORACAY	taliŋa
+8487	eye	SOGODNIN BORACAY	mata
+8489	fire	SOGODNIN BORACAY	jimpon
+8490	fish	SOGODNIN BORACAY	isdaʔ
+8499	hand	SOGODNIN BORACAY	alima
+8501	hear	SOGODNIN BORACAY	batiʔ
+8507	leaf	SOGODNIN BORACAY	dahon
+8509	liver	SOGODNIN BORACAY	ataj
+8511	louse	SOGODNIN BORACAY	koto
+8516	name	SOGODNIN BORACAY	ŋaran
+8518	new	SOGODNIN BORACAY	badjo
+8519	night	SOGODNIN BORACAY	kalap
+8520	nose	SOGODNIN BORACAY	oroŋ
+8522	one	SOGODNIN BORACAY	isaŋ
+8523	path	SOGODNIN BORACAY	dalan
+8524	person	SOGODNIN BORACAY	tawo
+8530	see	SOGODNIN BORACAY	kitaʔ
+8532	skin	SOGODNIN BORACAY	panit
+8537	star	SOGODNIN BORACAY	biton
+8538	stone	SOGODNIN BORACAY	bato
+8544	tongue	SOGODNIN BORACAY	dilaʔ
+8545	tooth	SOGODNIN BORACAY	hipon
+8547	two	SOGODNIN BORACAY	darwa
+8549	water	SOGODNIN BORACAY	awad
+8550	we	SOGODNIN BORACAY	ikam
+8557	I	SOUTH SAAMI	manə
+8564	blood	SOUTH SAAMI	vərə
+8565	bone	SOUTH SAAMI	moaroə
+8566	breast	SOUTH SAAMI	5amah
+8570	come	SOUTH SAAMI	boetə
+8571	die	SOUTH SAAMI	jaemə
+8572	dog	SOUTH SAAMI	bəe5ə
+8573	drink	SOUTH SAAMI	jowkə
+8575	ear	SOUTH SAAMI	bieLiə
+8579	eye	SOUTH SAAMI	Cjelmiə
+8581	fire	SOUTH SAAMI	dolə
+8582	fish	SOUTH SAAMI	gueliə
+8586	full	SOUTH SAAMI	dəevəs
+8591	hand	SOUTH SAAMI	gəetə
+8593	hear	SOUTH SAAMI	gowlə
+8594	horn	SOUTH SAAMI	Cjoerviə
+8597	knee	SOUTH SAAMI	boelvə
+8599	leaf	SOUTH SAAMI	lastə
+8601	liver	SOUTH SAAMI	libriə
+8603	louse	SOUTH SAAMI	dikiə
+8606	mountain	SOUTH SAAMI	Cjakə
+8608	name	SOUTH SAAMI	nomə
+8610	new	SOUTH SAAMI	orə
+8611	night	SOUTH SAAMI	əjə
+8612	nose	SOUTH SAAMI	5ueniə
+8614	one	SOUTH SAAMI	aktə
+8615	path	SOUTH SAAMI	balka
+8616	person	SOUTH SAAMI	almeCjə
+8622	see	SOUTH SAAMI	vuenə
+8624	skin	SOUTH SAAMI	5alCja
+8629	star	SOUTH SAAMI	naestiə
+8630	stone	SOUTH SAAMI	gierkiə
+8631	sun	SOUTH SAAMI	biejiə
+8636	tongue	SOUTH SAAMI	5oekCjemə
+8637	tooth	SOUTH SAAMI	baeniə
+8638	tree	SOUTH SAAMI	moerə
+8639	two	SOUTH SAAMI	gektə
+8641	water	SOUTH SAAMI	Cjaeciə
+8642	we	SOUTH SAAMI	mijieh
+8648	you	SOUTH SAAMI	datnə
+8649	I	SOUTHERN CATANDUANES	ʔaku
+8656	blood	SOUTHERN CATANDUANES	duguʔ
+8657	bone	SOUTHERN CATANDUANES	tulʔaŋ
+8658	breast	SOUTHERN CATANDUANES	susu
+8662	come	SOUTHERN CATANDUANES	ʔabut
+8663	die	SOUTHERN CATANDUANES	gadan
+8664	dog	SOUTHERN CATANDUANES	ʔajam
+8665	drink	SOUTHERN CATANDUANES	ʔinum
+8667	ear	SOUTHERN CATANDUANES	tariŋa
+8671	eye	SOUTHERN CATANDUANES	mata
+8673	fire	SOUTHERN CATANDUANES	kalaju
+8674	fish	SOUTHERN CATANDUANES	silaʔ
+8678	full	SOUTHERN CATANDUANES	panuʔ
+8683	hand	SOUTHERN CATANDUANES	kamut
+8685	hear	SOUTHERN CATANDUANES	daŋug
+8686	horn	SOUTHERN CATANDUANES	suŋaj
+8689	knee	SOUTHERN CATANDUANES	tuhud
+8691	leaf	SOUTHERN CATANDUANES	dahun
+8693	liver	SOUTHERN CATANDUANES	katuj
+8695	louse	SOUTHERN CATANDUANES	kutu
+8698	mountain	SOUTHERN CATANDUANES	bulud
+8700	name	SOUTHERN CATANDUANES	ŋalan
+8702	new	SOUTHERN CATANDUANES	bagʔu
+8703	night	SOUTHERN CATANDUANES	baŋgi
+8704	nose	SOUTHERN CATANDUANES	duŋuʔ
+8706	one	SOUTHERN CATANDUANES	saluʔ
+8707	path	SOUTHERN CATANDUANES	dalan
+8708	person	SOUTHERN CATANDUANES	tawu
+8714	see	SOUTHERN CATANDUANES	hiliŋ
+8716	skin	SOUTHERN CATANDUANES	panit
+8721	star	SOUTHERN CATANDUANES	bituʔun
+8722	stone	SOUTHERN CATANDUANES	batu
+8723	sun	SOUTHERN CATANDUANES	ʔaldaw
+8728	tongue	SOUTHERN CATANDUANES	dilaʔ
+8729	tooth	SOUTHERN CATANDUANES	tiŋu
+8730	tree	SOUTHERN CATANDUANES	kahuj
+8731	two	SOUTHERN CATANDUANES	duwa
+8733	water	SOUTHERN CATANDUANES	tubig
+8734	we	SOUTHERN CATANDUANES	kita
+8740	you	SOUTHERN CATANDUANES	kamu
+8741	I	SOUTHERN SORSOGON	ʔaku
+8748	blood	SOUTHERN SORSOGON	duguʔ
+8749	bone	SOUTHERN SORSOGON	tulʔaŋ
+8750	breast	SOUTHERN SORSOGON	susu
+8754	come	SOUTHERN SORSOGON	ʔabut
+8755	die	SOUTHERN SORSOGON	mataj
+8756	dog	SOUTHERN SORSOGON	ʔajam
+8757	drink	SOUTHERN SORSOGON	ʔinum
+8759	ear	SOUTHERN SORSOGON	taliŋa
+8763	eye	SOUTHERN SORSOGON	mata
+8765	fire	SOUTHERN SORSOGON	kalaju
+8766	fish	SOUTHERN SORSOGON	ʔisdaʔ
+8770	full	SOUTHERN SORSOGON	punuʔ
+8775	hand	SOUTHERN SORSOGON	kamut
+8777	hear	SOUTHERN SORSOGON	batiʔ
+8778	horn	SOUTHERN SORSOGON	suŋaj
+8781	knee	SOUTHERN SORSOGON	tuhud
+8783	leaf	SOUTHERN SORSOGON	dahun
+8785	liver	SOUTHERN SORSOGON	ʔataj
+8787	louse	SOUTHERN SORSOGON	kutu
+8790	mountain	SOUTHERN SORSOGON	bulud
+8792	name	SOUTHERN SORSOGON	ŋaran
+8794	new	SOUTHERN SORSOGON	bagʔu
+8795	night	SOUTHERN SORSOGON	gabʔi
+8796	nose	SOUTHERN SORSOGON	ʔiruŋ
+8798	one	SOUTHERN SORSOGON	sajuʔ
+8799	path	SOUTHERN SORSOGON	dalan
+8800	person	SOUTHERN SORSOGON	tawu
+8806	see	SOUTHERN SORSOGON	ʔimug
+8808	skin	SOUTHERN SORSOGON	panit
+8813	star	SOUTHERN SORSOGON	bituʔun
+8814	stone	SOUTHERN SORSOGON	batu
+8815	sun	SOUTHERN SORSOGON	ʔadlaw
+8820	tongue	SOUTHERN SORSOGON	dilaʔ
+8821	tooth	SOUTHERN SORSOGON	ŋipun
+8822	tree	SOUTHERN SORSOGON	kahuj
+8823	two	SOUTHERN SORSOGON	duwa
+8825	water	SOUTHERN SORSOGON	tubig
+8826	we	SOUTHERN SORSOGON	kita
+8832	you	SOUTHERN SORSOGON	kamu
+8833	I	SOUTHWEST PALAWANO	ako
+8840	blood	SOUTHWEST PALAWANO	dugoʔ
+8841	bone	SOUTHWEST PALAWANO	tulaŋ
+8842	breast	SOUTHWEST PALAWANO	dudoʔ
+8846	come	SOUTHWEST PALAWANO	atoʔ
+8847	die	SOUTHWEST PALAWANO	patej
+8848	dog	SOUTHWEST PALAWANO	ideŋ
+8849	drink	SOUTHWEST PALAWANO	inom
+8851	ear	SOUTHWEST PALAWANO	teliŋa
+8855	eye	SOUTHWEST PALAWANO	mata
+8857	fire	SOUTHWEST PALAWANO	apoj
+8858	fish	SOUTHWEST PALAWANO	sedaʔ
+8867	hand	SOUTHWEST PALAWANO	elima
+8869	hear	SOUTHWEST PALAWANO	kiŋeg
+8875	leaf	SOUTHWEST PALAWANO	deon
+8877	liver	SOUTHWEST PALAWANO	atej
+8879	louse	SOUTHWEST PALAWANO	kuto
+8884	name	SOUTHWEST PALAWANO	ŋaran
+8886	new	SOUTHWEST PALAWANO	bago
+8887	night	SOUTHWEST PALAWANO	gebi
+8888	nose	SOUTHWEST PALAWANO	edoŋ
+8890	one	SOUTHWEST PALAWANO	isaʔ
+8891	path	SOUTHWEST PALAWANO	dalan
+8892	person	SOUTHWEST PALAWANO	taw
+8898	see	SOUTHWEST PALAWANO	biriʔ
+8900	skin	SOUTHWEST PALAWANO	kulit
+8905	star	SOUTHWEST PALAWANO	bituen
+8906	stone	SOUTHWEST PALAWANO	bato
+8912	tongue	SOUTHWEST PALAWANO	dilaʔ
+8913	tooth	SOUTHWEST PALAWANO	nipen
+8915	two	SOUTHWEST PALAWANO	dua
+8917	water	SOUTHWEST PALAWANO	danom
+8918	we	SOUTHWEST PALAWANO	kami
+8924	you	SOUTHWEST PALAWANO	ikew
+8925	I	SPANISH	jo
+8926	all	SPANISH	todos
+8927	ash	SPANISH	senisa
+8928	big	SPANISH	grande
+8929	bird	SPANISH	ave
+8930	bite	SPANISH	morde
+8931	black	SPANISH	negro
+8932	blood	SPANISH	saŋre
+8933	bone	SPANISH	weso
+8934	breast	SPANISH	peCo
+8935	burn	SPANISH	kema
+8936	cloud	SPANISH	nube
+8937	cold	SPANISH	frio
+8938	come	SPANISH	veni
+8939	die	SPANISH	mori
+8940	dog	SPANISH	pero
+8941	drink	SPANISH	bebe
+8942	dry	SPANISH	seko
+8943	ear	SPANISH	oreha
+8944	earth	SPANISH	tiera
+8945	eat	SPANISH	kome
+8946	egg	SPANISH	wevo
+8947	eye	SPANISH	oho
+8948	feather	SPANISH	pluma
+8949	fire	SPANISH	fuego
+8950	fish	SPANISH	peskado
+8951	flesh	SPANISH	karne
+8952	fly	SPANISH	vola
+8953	foot	SPANISH	pie
+8954	full	SPANISH	jeno
+8955	good	SPANISH	bweno
+8956	grease	SPANISH	grasa
+8957	green	SPANISH	verde
+8958	hair	SPANISH	pelo
+8959	hand	SPANISH	mano
+8960	head	SPANISH	kabesa
+8961	hear	SPANISH	oir
+8962	horn	SPANISH	kwerno
+8963	hot	SPANISH	kaliente
+8964	kill	SPANISH	mata
+8965	knee	SPANISH	rodija
+8966	know	SPANISH	sabe
+8967	leaf	SPANISH	oha
+8968	lie	SPANISH	akosta
+8969	liver	SPANISH	igado
+8970	long	SPANISH	largo
+8971	louse	SPANISH	pioho
+8972	man	SPANISH	ombre
+8973	moon	SPANISH	luna
+8974	mountain	SPANISH	sero
+8975	mouth	SPANISH	boka
+8976	name	SPANISH	nombre
+8977	neck	SPANISH	kwejo
+8978	new	SPANISH	nuevo
+8979	night	SPANISH	noCe
+8980	nose	SPANISH	naris
+8981	not	SPANISH	no
+8982	one	SPANISH	uno
+8983	path	SPANISH	senda
+8984	person	SPANISH	persona
+8985	rain	SPANISH	juvia
+8986	red	SPANISH	roho
+8987	root	SPANISH	rais
+8988	sand	SPANISH	arena
+8989	say	SPANISH	desi
+8990	see	SPANISH	ve
+8991	sit	SPANISH	senta
+8992	skin	SPANISH	piel
+8993	sleep	SPANISH	dormi
+8994	small	SPANISH	peke5o
+8995	smoke	SPANISH	umo
+8996	stand	SPANISH	esta de pie
+8997	star	SPANISH	estreja
+8998	stone	SPANISH	piedra
+8999	sun	SPANISH	sol
+9000	swim	SPANISH	nada
+9001	tail	SPANISH	kola
+9002	that	SPANISH	ese
+9003	this	SPANISH	este
+9004	tongue	SPANISH	leŋwa
+9005	tooth	SPANISH	diente
+9006	tree	SPANISH	arbol
+9007	two	SPANISH	dos
+9008	walk	SPANISH	anda
+9009	water	SPANISH	agwa
+9010	we	SPANISH	nosotros
+9011	what	SPANISH	ke
+9012	white	SPANISH	blanko
+9013	who	SPANISH	kien
+9014	woman	SPANISH	muher
+9015	yellow	SPANISH	amarijo
+9016	you	SPANISH	ustet
+9017	I	SUBANON SIOCON	akon
+9024	blood	SUBANON SIOCON	duguʔ
+9025	bone	SUBANON SIOCON	tulan
+9026	breast	SUBANON SIOCON	duduʔ
+9032	dog	SUBANON SIOCON	gajam
+9033	drink	SUBANON SIOCON	minum
+9035	ear	SUBANON SIOCON	toliŋa
+9039	eye	SUBANON SIOCON	mata
+9041	fire	SUBANON SIOCON	gapoj
+9042	fish	SUBANON SIOCON	sodaʔ
+9046	full	SUBANON SIOCON	omponuʔ
+9051	hand	SUBANON SIOCON	komot
+9053	hear	SUBANON SIOCON	mokinoŋog
+9057	knee	SUBANON SIOCON	glulud
+9059	leaf	SUBANON SIOCON	daon
+9061	liver	SUBANON SIOCON	gatoj
+9063	louse	SUBANON SIOCON	gotu
+9066	mountain	SUBANON SIOCON	bontod
+9068	name	SUBANON SIOCON	ŋalan
+9070	new	SUBANON SIOCON	bogu
+9071	night	SUBANON SIOCON	gobi
+9072	nose	SUBANON SIOCON	suŋ
+9074	one	SUBANON SIOCON	sala bok
+9075	path	SUBANON SIOCON	dalan
+9076	person	SUBANON SIOCON	gotow
+9082	see	SUBANON SIOCON	moktoŋow
+9084	skin	SUBANON SIOCON	panit
+9089	star	SUBANON SIOCON	bitun
+9090	stone	SUBANON SIOCON	batu
+9096	tongue	SUBANON SIOCON	dilaʔ
+9097	tooth	SUBANON SIOCON	ŋisi
+9098	tree	SUBANON SIOCON	kaju
+9099	two	SUBANON SIOCON	duaʔ
+9101	water	SUBANON SIOCON	tubig
+9102	we	SUBANON SIOCON	ita
+9108	you	SUBANON SIOCON	ika
+9109	I	SUBANUN SINDANGAN	inan
+9116	blood	SUBANUN SINDANGAN	duguʔ
+9117	bone	SUBANUN SINDANGAN	tolan
+9118	breast	SUBANUN SINDANGAN	duduʔ
+9124	dog	SUBANUN SINDANGAN	gituʔ
+9125	drink	SUBANUN SINDANGAN	minum
+9127	ear	SUBANUN SINDANGAN	təliŋa
+9131	eye	SUBANUN SINDANGAN	mata
+9133	fire	SUBANUN SINDANGAN	gapuj
+9134	fish	SUBANUN SINDANGAN	sədaʔ
+9138	full	SUBANUN SINDANGAN	mpənuʔ
+9143	hand	SUBANUN SINDANGAN	beŋkən
+9145	hear	SUBANUN SINDANGAN	mədəŋəg
+9149	knee	SUBANUN SINDANGAN	dlulud
+9151	leaf	SUBANUN SINDANGAN	doon
+9153	liver	SUBANUN SINDANGAN	gataj
+9155	louse	SUBANUN SINDANGAN	gutu
+9158	mountain	SUBANUN SINDANGAN	bəntud
+9160	name	SUBANUN SINDANGAN	ŋalan
+9162	new	SUBANUN SINDANGAN	bəgu
+9163	night	SUBANUN SINDANGAN	gəbii
+9164	nose	SUBANUN SINDANGAN	suŋ
+9166	one	SUBANUN SINDANGAN	sala
+9167	path	SUBANUN SINDANGAN	dalan
+9168	person	SUBANUN SINDANGAN	gətau
+9174	see	SUBANUN SINDANGAN	metaʔ
+9176	skin	SUBANUN SINDANGAN	panit
+9181	star	SUBANUN SINDANGAN	bitun
+9182	stone	SUBANUN SINDANGAN	batu
+9188	tongue	SUBANUN SINDANGAN	dilaʔ
+9189	tooth	SUBANUN SINDANGAN	ŋisi
+9190	tree	SUBANUN SINDANGAN	gaju
+9191	two	SUBANUN SINDANGAN	duaʔ
+9193	water	SUBANUN SINDANGAN	tubig
+9194	we	SUBANUN SINDANGAN	ita
+9200	you	SUBANUN SINDANGAN	jaʔa
+9201	I	SURIGAONON	ako
+9208	blood	SURIGAONON	dugoʔ
+9209	bone	SURIGAONON	bukog
+9210	breast	SURIGAONON	suso
+9214	come	SURIGAONON	daliʔ
+9215	die	SURIGAONON	pataj
+9216	dog	SURIGAONON	ido
+9217	drink	SURIGAONON	inom
+9219	ear	SURIGAONON	taliŋa
+9223	eye	SURIGAONON	mata
+9225	fire	SURIGAONON	kajadʒo
+9226	fish	SURIGAONON	isda
+9235	hand	SURIGAONON	alima
+9237	hear	SURIGAONON	duŋog
+9243	leaf	SURIGAONON	dahon
+9245	liver	SURIGAONON	ataj
+9247	louse	SURIGAONON	kuto
+9252	name	SURIGAONON	ŋajan
+9254	new	SURIGAONON	bago
+9255	night	SURIGAONON	dujom
+9256	nose	SURIGAONON	iloŋ
+9258	one	SURIGAONON	isa
+9259	path	SURIGAONON	dajan
+9260	person	SURIGAONON	tawo
+9266	see	SURIGAONON	kita
+9268	skin	SURIGAONON	panit
+9273	star	SURIGAONON	biton
+9274	stone	SURIGAONON	bato
+9280	tongue	SURIGAONON	dila
+9281	tooth	SURIGAONON	ŋipon
+9283	two	SURIGAONON	duha
+9285	water	SURIGAONON	tubig
+9286	we	SURIGAONON	kita
+9292	you	SURIGAONON	ikaw
+9293	I	TAGABAWA	a
+9300	blood	TAGABAWA	dipanug
+9301	bone	TAGABAWA	tulan
+9302	breast	TAGABAWA	susu
+9306	come	TAGABAWA	sadun
+9307	die	TAGABAWA	mate
+9308	dog	TAGABAWA	asu
+9309	drink	TAGABAWA	inam
+9315	eye	TAGABAWA	mata
+9317	fire	TAGABAWA	apuj
+9322	full	TAGABAWA	panu
+9327	hand	TAGABAWA	balad
+9329	hear	TAGABAWA	dinag
+9335	leaf	TAGABAWA	daun
+9342	mountain	TAGABAWA	pabuŋan
+9344	name	TAGABAWA	ŋadan
+9346	new	TAGABAWA	mantu
+9347	night	TAGABAWA	dukilam
+9350	one	TAGABAWA	sabad
+9351	path	TAGABAWA	dalan
+9352	person	TAGABAWA	manubu
+9358	see	TAGABAWA	kita
+9367	sun	TAGABAWA	alo
+9373	tooth	TAGABAWA	ŋipan
+9374	tree	TAGABAWA	kaju
+9375	two	TAGABAWA	duwa
+9377	water	TAGABAWA	wajig
+9378	we	TAGABAWA	ki
+9384	you	TAGABAWA	nu
+9385	I	TAGABILI	oʔuh
+9392	blood	TAGABILI	litoʔ
+9393	bone	TAGABILI	tiʔol
+9394	breast	TAGABILI	tutuʔ
+9400	dog	TAGABILI	ohuh
+9401	drink	TAGABILI	minum
+9403	ear	TAGABILI	kliŋuh
+9407	eye	TAGABILI	matah
+9409	fire	TAGABILI	ofih
+9410	fish	TAGABILI	uton ʔel
+9414	full	TAGABILI	hnok
+9419	hand	TAGABILI	sigəl
+9421	hear	TAGABILI	muŋol
+9425	knee	TAGABILI	bukol
+9427	leaf	TAGABILI	doʔun
+9429	liver	TAGABILI	kataj
+9431	louse	TAGABILI	kutuh
+9434	mountain	TAGABILI	bulul
+9436	name	TAGABILI	boluj
+9438	new	TAGABILI	lomih
+9439	night	TAGABILI	kifuh
+9440	nose	TAGABILI	iluŋ
+9442	one	TAGABILI	sotuh
+9443	path	TAGABILI	lan
+9444	person	TAGABILI	taʔuh
+9450	see	TAGABILI	mton
+9452	skin	TAGABILI	kulit
+9457	star	TAGABILI	blotik
+9458	stone	TAGABILI	botuh
+9464	tongue	TAGABILI	dilak
+9465	tooth	TAGABILI	nihih
+9466	tree	TAGABILI	kojuh
+9467	two	TAGABILI	ləwuh
+9469	water	TAGABILI	el
+9470	we	TAGABILI	təkuj
+9476	you	TAGABILI	uʔuh
+9477	I	TAGALOG	ako
+9478	all	TAGALOG	lahat
+9479	ash	TAGALOG	abo
+9480	big	TAGALOG	malaki
+9481	bird	TAGALOG	ibon
+9482	bite	TAGALOG	kagat
+9483	black	TAGALOG	itim
+9484	blood	TAGALOG	dugo
+9485	bone	TAGALOG	buto
+9486	breast	TAGALOG	susu
+9487	burn	TAGALOG	sunogin
+9488	cloud	TAGALOG	alapap
+9489	cold	TAGALOG	malamig
+9490	come	TAGALOG	datiŋ
+9491	die	TAGALOG	pataj
+9492	dog	TAGALOG	aso
+9493	drink	TAGALOG	inom
+9494	dry	TAGALOG	tujo
+9495	ear	TAGALOG	teŋa
+9496	earth	TAGALOG	lupa
+9497	eat	TAGALOG	kain
+9498	egg	TAGALOG	itlog
+9499	eye	TAGALOG	mata
+9500	feather	TAGALOG	balahibo
+9501	fire	TAGALOG	apoj
+9502	fish	TAGALOG	isda
+9503	flesh	TAGALOG	karne
+9504	fly	TAGALOG	lipad
+9505	foot	TAGALOG	pa
+9506	full	TAGALOG	puno
+9507	good	TAGALOG	mabuti
+9508	grease	TAGALOG	taba
+9509	green	TAGALOG	berde
+9510	hair	TAGALOG	buhok
+9511	hand	TAGALOG	kamaj
+9512	head	TAGALOG	ulo
+9513	hear	TAGALOG	dinig
+9514	horn	TAGALOG	saŋaj
+9515	hot	TAGALOG	mainit
+9516	kill	TAGALOG	pataj
+9517	knee	TAGALOG	tuhod
+9518	know	TAGALOG	alam
+9519	leaf	TAGALOG	dahon
+9520	lie	TAGALOG	higa
+9521	liver	TAGALOG	ataj
+9522	long	TAGALOG	mahaba
+9523	louse	TAGALOG	kuto
+9524	man	TAGALOG	lalaki
+9525	moon	TAGALOG	buwan
+9526	mountain	TAGALOG	bundok
+9527	mouth	TAGALOG	buŋaŋa
+9528	name	TAGALOG	paŋalan
+9529	neck	TAGALOG	leg
+9530	new	TAGALOG	bago
+9531	night	TAGALOG	gabi
+9532	nose	TAGALOG	iloŋ
+9533	not	TAGALOG	hindi
+9534	one	TAGALOG	isa
+9535	path	TAGALOG	dan
+9536	person	TAGALOG	tao
+9537	rain	TAGALOG	ulan
+9538	red	TAGALOG	pula
+9539	root	TAGALOG	ugat
+9540	sand	TAGALOG	buhaŋin
+9541	say	TAGALOG	sabi
+9542	see	TAGALOG	tiŋin
+9543	sit	TAGALOG	upo
+9544	skin	TAGALOG	balat
+9545	sleep	TAGALOG	tulog
+9546	small	TAGALOG	malit
+9547	smoke	TAGALOG	usok
+9548	stand	TAGALOG	tajo
+9549	star	TAGALOG	bituin
+9550	stone	TAGALOG	batu
+9551	sun	TAGALOG	araw
+9552	swim	TAGALOG	laŋoj
+9553	tail	TAGALOG	buntoto
+9554	that	TAGALOG	ijan
+9555	this	TAGALOG	ito
+9556	tongue	TAGALOG	dila
+9557	tooth	TAGALOG	ŋipin
+9558	tree	TAGALOG	punuŋkahoj
+9559	two	TAGALOG	dalawa
+9560	walk	TAGALOG	lakad
+9561	water	TAGALOG	tubig
+9562	we	TAGALOG	tajo
+9563	what	TAGALOG	ano
+9564	white	TAGALOG	puti
+9565	who	TAGALOG	sino
+9566	woman	TAGALOG	babae
+9567	yellow	TAGALOG	dilaw
+9568	you	TAGALOG	ikaw
+9569	I	TAGBANWA ABORLAN	aku
+9576	blood	TAGBANWA ABORLAN	duguʔ
+9577	bone	TAGBANWA ABORLAN	tuʔlaŋ
+9578	breast	TAGBANWA ABORLAN	duduʔ
+9584	dog	TAGBANWA ABORLAN	kəʔdəŋ
+9585	drink	TAGBANWA ABORLAN	inum
+9587	ear	TAGBANWA ABORLAN	taliŋa
+9591	eye	TAGBANWA ABORLAN	mata
+9593	fire	TAGBANWA ABORLAN	apuj
+9594	fish	TAGBANWA ABORLAN	sədaʔ
+9598	full	TAGBANWA ABORLAN	punu
+9603	hand	TAGBANWA ABORLAN	alima
+9605	hear	TAGBANWA ABORLAN	gənəg
+9609	knee	TAGBANWA ABORLAN	tuʔud
+9611	leaf	TAGBANWA ABORLAN	daʔun
+9613	liver	TAGBANWA ABORLAN	ataj
+9615	louse	TAGBANWA ABORLAN	kutu
+9618	mountain	TAGBANWA ABORLAN	bukid
+9620	name	TAGBANWA ABORLAN	ŋaran
+9622	new	TAGBANWA ABORLAN	baʔgu
+9623	night	TAGBANWA ABORLAN	dələm
+9624	nose	TAGBANWA ABORLAN	uruŋ
+9626	one	TAGBANWA ABORLAN	əsa
+9627	path	TAGBANWA ABORLAN	dalan
+9628	person	TAGBANWA ABORLAN	taw
+9634	see	TAGBANWA ABORLAN	lətəg
+9636	skin	TAGBANWA ABORLAN	lamilamit
+9641	star	TAGBANWA ABORLAN	bituʔun
+9642	stone	TAGBANWA ABORLAN	batu
+9648	tongue	TAGBANWA ABORLAN	dila
+9649	tooth	TAGBANWA ABORLAN	nipən
+9650	tree	TAGBANWA ABORLAN	kaju
+9651	two	TAGBANWA ABORLAN	dua
+9653	water	TAGBANWA ABORLAN	danum
+9654	we	TAGBANWA ABORLAN	tami
+9660	you	TAGBANWA ABORLAN	ka
+9661	I	TAGBANWA KALAMIAN	juu
+9668	blood	TAGBANWA KALAMIAN	duguʔ
+9669	bone	TAGBANWA KALAMIAN	duliʔ
+9670	breast	TAGBANWA KALAMIAN	susuʔ
+9676	dog	TAGBANWA KALAMIAN	kiruʔ
+9677	drink	TAGBANWA KALAMIAN	inəm
+9679	ear	TAGBANWA KALAMIAN	taliŋaʔ
+9683	eye	TAGBANWA KALAMIAN	mataʔ
+9685	fire	TAGBANWA KALAMIAN	apuj
+9686	fish	TAGBANWA KALAMIAN	ian
+9690	full	TAGBANWA KALAMIAN	punuk
+9695	hand	TAGBANWA KALAMIAN	kalimaʔ
+9697	hear	TAGBANWA KALAMIAN	dəŋəl
+9701	knee	TAGBANWA KALAMIAN	tuud
+9703	leaf	TAGBANWA KALAMIAN	kəlad
+9705	liver	TAGBANWA KALAMIAN	kandas
+9707	louse	TAGBANWA KALAMIAN	tutʔ
+9710	mountain	TAGBANWA KALAMIAN	bukid
+9712	name	TAGBANWA KALAMIAN	aran
+9714	new	TAGBANWA KALAMIAN	bakluʔ
+9715	night	TAGBANWA KALAMIAN	labii
+9716	nose	TAGBANWA KALAMIAN	uruŋ
+9718	one	TAGBANWA KALAMIAN	tasaʔ
+9719	path	TAGBANWA KALAMIAN	dalan
+9720	person	TAGBANWA KALAMIAN	tauʔ
+9726	see	TAGBANWA KALAMIAN	itaʔ
+9728	skin	TAGBANWA KALAMIAN	ulit
+9733	star	TAGBANWA KALAMIAN	bitukun
+9734	stone	TAGBANWA KALAMIAN	batuʔ
+9740	tongue	TAGBANWA KALAMIAN	dilak
+9742	tree	TAGBANWA KALAMIAN	ajuʔ
+9743	two	TAGBANWA KALAMIAN	duruaʔ
+9745	water	TAGBANWA KALAMIAN	waiʔ
+9746	we	TAGBANWA KALAMIAN	ita
+9752	you	TAGBANWA KALAMIAN	jawa
+9753	I	TAUSUG	akuh
+9760	blood	TAUSUG	duguʔ
+9761	bone	TAUSUG	bukug
+9762	breast	TAUSUG	duruʔ
+9768	dog	TAUSUG	ʔiruʔ
+9769	drink	TAUSUG	magʔinum
+9771	ear	TAUSUG	taiŋah
+9775	eye	TAUSUG	matah
+9777	fire	TAUSUG	kajuh
+9778	fish	TAUSUG	istaʔ
+9782	full	TAUSUG	hipuʔ
+9787	hand	TAUSUG	limah
+9789	hear	TAUSUG	magduŋug
+9793	knee	TAUSUG	tuhud
+9795	leaf	TAUSUG	dahun
+9797	liver	TAUSUG	ataj
+9799	louse	TAUSUG	kutuh
+9802	mountain	TAUSUG	buud
+9804	name	TAUSUG	ŋan
+9806	new	TAUSUG	baʔguh
+9807	night	TAUSUG	duum
+9808	nose	TAUSUG	iluŋ
+9810	one	TAUSUG	hambuʔuk
+9811	path	TAUSUG	daan
+9812	person	TAUSUG	taʔuh
+9818	see	TAUSUG	kimitaʔ
+9820	skin	TAUSUG	paʔis
+9825	star	TAUSUG	bituʔun
+9826	stone	TAUSUG	batu
+9832	tongue	TAUSUG	dilaʔ
+9833	tooth	TAUSUG	ipun
+9834	tree	TAUSUG	kahuj
+9835	two	TAUSUG	duah
+9837	water	TAUSUG	tubig
+9838	we	TAUSUG	kitaniuh
+9844	you	TAUSUG	kaw
+9845	I	TIMUGON MURUT	aku
+9852	blood	TIMUGON MURUT	dadaʔ
+9853	bone	TIMUGON MURUT	tulaŋ
+9854	breast	TIMUGON MURUT	titiʔ
+9858	come	TIMUGON MURUT	datoŋ
+9859	die	TIMUGON MURUT	patoj
+9860	dog	TIMUGON MURUT	ukuʔ
+9861	drink	TIMUGON MURUT	inum
+9863	ear	TIMUGON MURUT	taliŋo
+9867	eye	TIMUGON MURUT	mato
+9869	fire	TIMUGON MURUT	apuj
+9870	fish	TIMUGON MURUT	papait
+9879	hand	TIMUGON MURUT	kalinduʔ
+9881	hear	TIMUGON MURUT	doŋog
+9887	leaf	TIMUGON MURUT	daun
+9889	liver	TIMUGON MURUT	aŋkajaw
+9891	louse	TIMUGON MURUT	kutu
+9896	name	TIMUGON MURUT	galan
+9898	new	TIMUGON MURUT	agu
+9899	night	TIMUGON MURUT	dondom
+9900	nose	TIMUGON MURUT	aduŋ
+9902	one	TIMUGON MURUT	ditakaw
+9903	path	TIMUGON MURUT	dalan
+9904	person	TIMUGON MURUT	ulun
+9910	see	TIMUGON MURUT	kito
+9912	skin	TIMUGON MURUT	kuŋkuŋ
+9917	star	TIMUGON MURUT	butitin
+9918	stone	TIMUGON MURUT	batu
+9924	tongue	TIMUGON MURUT	dilaʔ
+9925	tooth	TIMUGON MURUT	dipon
+9927	two	TIMUGON MURUT	dondoʔ
+9929	water	TIMUGON MURUT	timug
+9930	we	TIMUGON MURUT	to
+9936	you	TIMUGON MURUT	kow
+9937	I	TIRURAY	begen
+9944	blood	TIRURAY	dara
+9945	bone	TIRURAY	bukal
+9946	breast	TIRURAY	tutuʔ
+9950	come	TIRURAY	aŋej
+9951	die	TIRURAY	fandus
+9952	dog	TIRURAY	ituʔ
+9953	drink	TIRURAY	inem
+9955	ear	TIRURAY	keliŋoʔ
+9959	eye	TIRURAY	moto
+9961	fire	TIRURAY	afej
+9962	fish	TIRURAY	sedoʔ
+9966	full	TIRURAY	besor
+9971	hand	TIRURAY	kuwonon
+9973	hear	TIRURAY	bohol
+9974	horn	TIRURAY	siduŋ
+9977	knee	TIRURAY	etur
+9979	leaf	TIRURAY	daʔun
+9981	liver	TIRURAY	tagah
+9983	louse	TIRURAY	kuwor
+9986	mountain	TIRURAY	menitej
+9988	name	TIRURAY	dawet
+9990	new	TIRURAY	antu
+9991	night	TIRURAY	buteŋ
+9992	nose	TIRURAY	iruŋ
+9994	one	TIRURAY	uno
+9995	path	TIRURAY	aguwon
+9996	person	TIRURAY	etew
+10004	skin	TIRURAY	kulit
+10009	star	TIRURAY	gitoʔon
+10010	stone	TIRURAY	batew
+10011	sun	TIRURAY	teresaŋ
+10016	tongue	TIRURAY	dilaʔ
+10017	tooth	TIRURAY	kifen
+10018	tree	TIRURAY	kajew
+10019	two	TIRURAY	dos
+10021	water	TIRURAY	reguwas
+10022	we	TIRURAY	betom
+10028	you	TIRURAY	beʔem
+10029	I	TURKISH	ben
+10030	all	TURKISH	bitin
+10031	ash	TURKISH	kil
+10032	big	TURKISH	bijik
+10033	bird	TURKISH	kuS
+10034	bite	TURKISH	əsərma
+10035	black	TURKISH	sijah
+10036	blood	TURKISH	kan
+10037	bone	TURKISH	kemik
+10038	breast	TURKISH	gəGis
+10039	burn	TURKISH	jak
+10040	cloud	TURKISH	bulut
+10041	cold	TURKISH	sojuk
+10042	come	TURKISH	gel
+10043	die	TURKISH	zar
+10044	dog	TURKISH	kəpek
+10045	drink	TURKISH	iCki
+10046	dry	TURKISH	kuru
+10047	ear	TURKISH	kulak
+10048	earth	TURKISH	toprak
+10049	eat	TURKISH	je
+10050	egg	TURKISH	jumurta
+10051	eye	TURKISH	delik
+10052	feather	TURKISH	kuS tiji
+10053	fire	TURKISH	ateS
+10054	fish	TURKISH	balək
+10055	flesh	TURKISH	vidʒut
+10056	fly	TURKISH	uCur
+10057	foot	TURKISH	ajak
+10058	full	TURKISH	dolugun
+10059	good	TURKISH	iji
+10060	grease	TURKISH	ja
+10061	green	TURKISH	jeSil
+10062	hair	TURKISH	saC
+10063	hand	TURKISH	el
+10064	head	TURKISH	baS
+10065	hear	TURKISH	iSitmek
+10066	horn	TURKISH	bonuz
+10067	hot	TURKISH	sədʒak
+10068	kill	TURKISH	əldir
+10069	knee	TURKISH	diz
+10070	know	TURKISH	bil
+10071	leaf	TURKISH	jeprak
+10072	lie	TURKISH	jat
+10073	liver	TURKISH	karadʒijer
+10074	long	TURKISH	uzun
+10075	louse	TURKISH	bit
+10076	man	TURKISH	erkek
+10077	moon	TURKISH	aj
+10078	mountain	TURKISH	da silsilesi
+10079	mouth	TURKISH	ajəz
+10080	name	TURKISH	isim
+10081	neck	TURKISH	bojun
+10082	new	TURKISH	jeni
+10083	night	TURKISH	gedʒe
+10084	nose	TURKISH	burun udʒ
+10085	not	TURKISH	dejil
+10086	one	TURKISH	bir
+10087	path	TURKISH	keCi jolu
+10088	person	TURKISH	sahəs
+10089	rain	TURKISH	jamur
+10090	red	TURKISH	kərməzə
+10091	root	TURKISH	kək
+10092	sand	TURKISH	kum
+10093	say	TURKISH	səl
+10094	see	TURKISH	gər
+10095	sit	TURKISH	otur
+10096	skin	TURKISH	deri
+10097	sleep	TURKISH	uju
+10098	small	TURKISH	kiCik
+10099	smoke	TURKISH	duman
+10100	stand	TURKISH	ajakta dur
+10101	star	TURKISH	jəldəz
+10102	stone	TURKISH	taS
+10103	sun	TURKISH	gineS
+10104	swim	TURKISH	jiz
+10105	tail	TURKISH	kuruk
+10106	that	TURKISH	Su
+10107	this	TURKISH	bu
+10108	tongue	TURKISH	dil
+10109	tooth	TURKISH	diS
+10110	tree	TURKISH	ajaC Sedʒere
+10111	two	TURKISH	iki
+10112	walk	TURKISH	jiri
+10113	water	TURKISH	su
+10114	we	TURKISH	biz
+10115	what	TURKISH	ne
+10116	white	TURKISH	bejaz
+10117	who	TURKISH	kim
+10118	woman	TURKISH	kadən
+10119	yellow	TURKISH	sarə
+10120	you	TURKISH	sen
+10121	I	UGARITIC	an
+10128	blood	UGARITIC	dm
+10129	bone	UGARITIC	X8Xm
+10130	breast	UGARITIC	8d
+10134	come	UGARITIC	atw
+10135	die	UGARITIC	mt
+10136	dog	UGARITIC	klb
+10137	drink	UGARITIC	Stj
+10139	ear	UGARITIC	udn
+10143	eye	UGARITIC	Xn
+10145	fire	UGARITIC	iSitu
+10146	fish	UGARITIC	dg
+10155	hand	UGARITIC	jd
+10157	hear	UGARITIC	SmX
+10158	horn	UGARITIC	ʔrn
+10161	knee	UGARITIC	brk
+10165	liver	UGARITIC	kbd
+10170	mountain	UGARITIC	gbl
+10172	name	UGARITIC	Sm
+10174	new	UGARITIC	Xd8
+10175	night	UGARITIC	ll
+10176	nose	UGARITIC	apu
+10178	one	UGARITIC	aXd
+10179	path	UGARITIC	ntb
+10180	person	UGARITIC	adm
+10186	see	UGARITIC	amr
+10188	skin	UGARITIC	Xoru
+10193	star	UGARITIC	kbkb
+10194	stone	UGARITIC	abn
+10195	sun	UGARITIC	SapSu
+10200	tongue	UGARITIC	laSanu
+10201	tooth	UGARITIC	Sn
+10202	tree	UGARITIC	XsX
+10203	two	UGARITIC	8n
+10205	water	UGARITIC	mj
+10212	you	UGARITIC	ata
+10213	I	UMIRAY DUMAGET AGTA	ako
+10220	blood	UMIRAY DUMAGET AGTA	sagu
+10221	bone	UMIRAY DUMAGET AGTA	kaksan
+10222	breast	UMIRAY DUMAGET AGTA	gusok
+10229	drink	UMIRAY DUMAGET AGTA	inom
+10237	fire	UMIRAY DUMAGET AGTA	apoj
+10242	full	UMIRAY DUMAGET AGTA	pino
+10247	hand	UMIRAY DUMAGET AGTA	komot
+10249	hear	UMIRAY DUMAGET AGTA	ikna
+10253	knee	UMIRAY DUMAGET AGTA	tud
+10255	leaf	UMIRAY DUMAGET AGTA	agid
+10264	name	UMIRAY DUMAGET AGTA	ŋalan
+10266	new	UMIRAY DUMAGET AGTA	bowon
+10267	night	UMIRAY DUMAGET AGTA	abi
+10268	nose	UMIRAY DUMAGET AGTA	aŋut
+10270	one	UMIRAY DUMAGET AGTA	isin
+10271	path	UMIRAY DUMAGET AGTA	bektas
+10272	person	UMIRAY DUMAGET AGTA	agta
+10278	see	UMIRAY DUMAGET AGTA	lawig
+10280	skin	UMIRAY DUMAGET AGTA	katat
+10285	star	UMIRAY DUMAGET AGTA	butatala
+10286	stone	UMIRAY DUMAGET AGTA	beto
+10292	tongue	UMIRAY DUMAGET AGTA	dila
+10293	tooth	UMIRAY DUMAGET AGTA	ŋipon
+10295	two	UMIRAY DUMAGET AGTA	aduwa
+10297	water	UMIRAY DUMAGET AGTA	orat
+10298	we	UMIRAY DUMAGET AGTA	ikami
+10304	you	UMIRAY DUMAGET AGTA	ikaw
+10305	I	WARAY WARAY	ako
+10312	blood	WARAY WARAY	dugo
+10313	bone	WARAY WARAY	tulan
+10314	breast	WARAY WARAY	dughan
+10318	come	WARAY WARAY	kanhi
+10319	die	WARAY WARAY	mataj
+10320	dog	WARAY WARAY	ajam
+10321	drink	WARAY WARAY	inom
+10323	ear	WARAY WARAY	taliŋa
+10327	eye	WARAY WARAY	mata
+10329	fire	WARAY WARAY	kajo
+10330	fish	WARAY WARAY	isda
+10339	hand	WARAY WARAY	kamot
+10341	hear	WARAY WARAY	pamati
+10347	leaf	WARAY WARAY	dahon
+10349	liver	WARAY WARAY	ataj
+10351	louse	WARAY WARAY	tuma
+10356	name	WARAY WARAY	ŋaran
+10358	new	WARAY WARAY	bago
+10359	night	WARAY WARAY	gabi
+10360	nose	WARAY WARAY	iroŋ
+10362	one	WARAY WARAY	usa
+10363	path	WARAY WARAY	dalan
+10364	person	WARAY WARAY	tawo
+10370	see	WARAY WARAY	kita
+10372	skin	WARAY WARAY	panit
+10377	star	WARAY WARAY	biton
+10378	stone	WARAY WARAY	bato
+10379	sun	WARAY WARAY	adlaw
+10384	tongue	WARAY WARAY	dila
+10385	tooth	WARAY WARAY	ŋipon
+10387	two	WARAY WARAY	duha
+10389	water	WARAY WARAY	tubig
+10390	we	WARAY WARAY	kita
+10396	you	WARAY WARAY	ikaw
+10397	I	YAKAN	aku
+10404	blood	YAKAN	lahaʔ
+10405	bone	YAKAN	tolaŋ
+10406	breast	YAKAN	susu
+10410	come	YAKAN	pitu
+10411	die	YAKAN	matej
+10412	dog	YAKAN	asu
+10413	drink	YAKAN	inum
+10415	ear	YAKAN	tajiŋe
+10419	eye	YAKAN	mata
+10421	fire	YAKAN	ebut
+10422	fish	YAKAN	kena
+10431	hand	YAKAN	taŋan
+10433	hear	YAKAN	takale
+10439	leaf	YAKAN	dawen
+10441	liver	YAKAN	buaʔ
+10443	louse	YAKAN	kutu
+10448	name	YAKAN	alen
+10450	new	YAKAN	baʔahu
+10451	night	YAKAN	saŋem
+10452	nose	YAKAN	uŋ
+10454	one	YAKAN	isaʔ
+10455	path	YAKAN	lalan
+10456	person	YAKAN	aʔa
+10462	see	YAKAN	kite
+10464	skin	YAKAN	kuit
+10469	star	YAKAN	bituʔun
+10470	stone	YAKAN	batu
+10476	tongue	YAKAN	delaʔ
+10477	tooth	YAKAN	impen
+10479	two	YAKAN	duwe
+10481	water	YAKAN	boheʔ
+10482	we	YAKAN	kita
+10488	you	YAKAN	kaʔu
+10489	I	YOGAD	ku
+10496	blood	YOGAD	daga
+10497	bone	YOGAD	tulaŋ
+10498	breast	YOGAD	sussu
+10503	die	YOGAD	bajandag
+10504	dog	YOGAD	atu
+10505	drink	YOGAD	inum
+10507	ear	YOGAD	bambaŋ
+10511	eye	YOGAD	mata
+10513	fire	YOGAD	afuj
+10514	fish	YOGAD	ikan
+10518	full	YOGAD	pannu
+10523	hand	YOGAD	kamat
+10525	hear	YOGAD	sim
+10526	horn	YOGAD	tagud
+10529	knee	YOGAD	tud
+10531	leaf	YOGAD	don
+10533	liver	YOGAD	agal
+10535	louse	YOGAD	tuma
+10538	mountain	YOGAD	bakulud
+10540	name	YOGAD	nagan
+10542	new	YOGAD	bagu
+10543	night	YOGAD	gabi
+10544	nose	YOGAD	iguŋ
+10546	one	YOGAD	tata
+10547	path	YOGAD	daddaman
+10548	person	YOGAD	tawlaj
+10554	see	YOGAD	ita
+10556	skin	YOGAD	gaddaŋ
+10561	star	YOGAD	bitun
+10562	stone	YOGAD	batu
+10563	sun	YOGAD	igaw
+10568	tongue	YOGAD	dila
+10569	tooth	YOGAD	ŋipan
+10570	tree	YOGAD	kaju
+10571	two	YOGAD	addu
+10573	water	YOGAD	danum
+10581	I	ZAMBOANGUENO	jo
+10588	blood	ZAMBOANGUENO	sa*ŋre
+10589	bone	ZAMBOANGUENO	weso
+10590	breast	ZAMBOANGUENO	teta
+10594	come	ZAMBOANGUENO	be*i
+10595	die	ZAMBOANGUENO	mori
+10596	dog	ZAMBOANGUENO	iru
+10597	drink	ZAMBOANGUENO	toma
+10599	ear	ZAMBOANGUENO	orehas
+10603	eye	ZAMBOANGUENO	oho
+10605	fire	ZAMBOANGUENO	pwego
+10606	fish	ZAMBOANGUENO	peskaw
+10610	full	ZAMBOANGUENO	lje*o
+10615	hand	ZAMBOANGUENO	ma*o
+10617	hear	ZAMBOANGUENO	si*ti
+10618	horn	ZAMBOANGUENO	kwerno
+10621	knee	ZAMBOANGUENO	rudilja
+10623	leaf	ZAMBOANGUENO	ohas
+10625	liver	ZAMBOANGUENO	igaw
+10627	louse	ZAMBOANGUENO	kutu
+10630	mountain	ZAMBOANGUENO	bu*dak
+10632	name	ZAMBOANGUENO	nombre
+10634	new	ZAMBOANGUENO	nwebo
+10635	night	ZAMBOANGUENO	noCe
+10636	nose	ZAMBOANGUENO	naris
+10638	one	ZAMBOANGUENO	uno
+10639	path	ZAMBOANGUENO	se*dero
+10640	person	ZAMBOANGUENO	he*te
+10646	see	ZAMBOANGUENO	mira
+10648	skin	ZAMBOANGUENO	pjel
+10653	star	ZAMBOANGUENO	estrelja
+10654	stone	ZAMBOANGUENO	pjedra
+10655	sun	ZAMBOANGUENO	sol
+10660	tongue	ZAMBOANGUENO	le*ŋwa
+10661	tooth	ZAMBOANGUENO	dje*te
+10662	tree	ZAMBOANGUENO	pu*o
+10663	two	ZAMBOANGUENO	dos
+10665	water	ZAMBOANGUENO	agwa
+10666	we	ZAMBOANGUENO	kita
+10672	you	ZAMBOANGUENO	ebos
+10674	all	IMOROD	akano
+10675	ash	IMOROD	avo
+10676	big	IMOROD	rako
+10677	bird	IMOROD	miasasalap
+10678	bite	IMOROD	soŋit
+10679	black	IMOROD	vaeŋ
+10680	blood	IMOROD	rala
+10681	bone	IMOROD	totowaŋ
+10682	breast	IMOROD	soso
+10683	burn	IMOROD	asleb
+10684	cloud	IMOROD	cinalab
+10685	cold	IMOROD	ahen
+10686	come	IMOROD	maji
+10687	die	IMOROD	zakat
+10688	dog	IMOROD	agsa
+10689	drink	IMOROD	inom
+10690	dry	IMOROD	akdʒit
+10691	ear	IMOROD	taliŋa
+10692	earth	IMOROD	tana
+10693	eat	IMOROD	kan
+10694	egg	IMOROD	icjoj
+10695	eye	IMOROD	mata
+10697	fire	IMOROD	apoj
+10698	fish	IMOROD	amoŋ
+10699	flesh	IMOROD	asisi
+10700	fly	IMOROD	salap
+10701	foot	IMOROD	aji
+10703	good	IMOROD	ja pia
+10704	grease	IMOROD	avo
+10705	green	IMOROD	garaw
+10706	hair	IMOROD	ovok
+10707	hand	IMOROD	pamamahadan
+10708	head	IMOROD	oho
+10709	hear	IMOROD	mamiziŋ
+10711	hot	IMOROD	anŋet
+10712	kill	IMOROD	zakat
+10714	know	IMOROD	teneŋ
+10715	leaf	IMOROD	vohoŋ
+10716	lie	IMOROD	iraj
+10717	liver	IMOROD	ataj
+10718	long	IMOROD	naro
+10719	louse	IMOROD	toma
+10720	man	IMOROD	mehakaj
+10721	moon	IMOROD	vehan
+10723	mouth	IMOROD	ŋoŋoj
+10724	name	IMOROD	ŋaran
+10725	neck	IMOROD	zagaw
+10726	new	IMOROD	vajo
+10727	night	IMOROD	mahep
+10728	nose	IMOROD	momodan
+10729	not	IMOROD	beken
+10730	one	IMOROD	asa
+10731	path	IMOROD	rarahan
+10732	person	IMOROD	tao
+10733	rain	IMOROD	cimoj
+10734	red	IMOROD	vala
+10735	root	IMOROD	jamot
+10736	sand	IMOROD	anaj
+10738	see	IMOROD	cita
+10739	sit	IMOROD	toratod
+10740	skin	IMOROD	kolit
+10741	sleep	IMOROD	itkeh
+10742	small	IMOROD	likej
+10743	smoke	IMOROD	aob
+10744	stand	IMOROD	tanek
+10745	star	IMOROD	mata no aŋit
+10746	stone	IMOROD	vato
+10748	swim	IMOROD	awawat
+10749	tail	IMOROD	ipos
+10752	tongue	IMOROD	lila
+10753	tooth	IMOROD	ŋepen
+10755	two	IMOROD	dowa
+10756	walk	IMOROD	alam
+10757	water	IMOROD	ranom
+10759	what	IMOROD	ikoŋo
+10760	white	IMOROD	lavaŋ
+10761	who	IMOROD	sino
+10762	woman	IMOROD	mavakes
+10763	yellow	IMOROD	araj
+10772	blood	BABUYAN	raja
+10773	bone	BABUYAN	tohaŋ
+10774	breast	BABUYAN	soso
+10778	come	BABUYAN	aj
+10779	die	BABUYAN	diman
+10780	dog	BABUYAN	Cito
+10781	drink	BABUYAN	inom
+10783	ear	BABUYAN	tadʒi5a
+10787	eye	BABUYAN	mata
+10789	fire	BABUYAN	apoj
+10790	fish	BABUYAN	amoŋ
+10799	hand	BABUYAN	panorowan
+10801	hear	BABUYAN	adŋej
+10807	leaf	BABUYAN	bohoŋ
+10809	liver	BABUYAN	ataji
+10811	louse	BABUYAN	bigaw
+10816	name	BABUYAN	ŋaran
+10818	new	BABUYAN	bajo
+10819	night	BABUYAN	ahep
+10820	nose	BABUYAN	momodan
+10822	one	BABUYAN	asa
+10823	path	BABUYAN	rarahan
+10824	person	BABUYAN	tao
+10832	skin	BABUYAN	kodit
+10837	star	BABUYAN	bitohen
+10838	stone	BABUYAN	bato
+10844	tongue	BABUYAN	rida
+10845	tooth	BABUYAN	5ipen
+10847	two	BABUYAN	dowa
+10849	water	BABUYAN	ranom
+10864	blood	BISAYA SABAH	dra
+10865	bone	BISAYA SABAH	panah
+10866	breast	BISAYA SABAH	susu
+10870	come	BISAYA SABAH	temuloi
+10871	die	BISAYA SABAH	matai
+10872	dog	BISAYA SABAH	asu
+10873	drink	BISAYA SABAH	inum
+10875	ear	BISAYA SABAH	teliŋo
+10879	eye	BISAYA SABAH	mato
+10881	fire	BISAYA SABAH	apoi
+10882	fish	BISAYA SABAH	sada
+10891	hand	BISAYA SABAH	luŋon
+10893	hear	BISAYA SABAH	kruŋau
+10899	leaf	BISAYA SABAH	dun
+10901	liver	BISAYA SABAH	lakaiau
+10906	mountain	BISAYA SABAH	bukit
+10908	name	BISAYA SABAH	naran
+10910	new	BISAYA SABAH	agu
+10911	night	BISAYA SABAH	putoŋ
+10912	nose	BISAYA SABAH	adoŋ
+10915	path	BISAYA SABAH	teŋaio
+10922	see	BISAYA SABAH	intoŋ
+10924	skin	BISAYA SABAH	kulit
+10929	star	BISAYA SABAH	paru
+10930	stone	BISAYA SABAH	tali
+10931	sun	BISAYA SABAH	mataŋadau
+10936	tongue	BISAYA SABAH	dilo
+10937	tooth	BISAYA SABAH	ipan
+10938	tree	BISAYA SABAH	kaju
+10941	water	BISAYA SABAH	aiek
+10956	blood	CAPIZNON	dugo
+10957	bone	CAPIZNON	tul
+10958	breast	CAPIZNON	dughan
+10962	come	CAPIZNON	malakat
+10963	die	CAPIZNON	mapataj
+10964	dog	CAPIZNON	ido
+10965	drink	CAPIZNON	mainum
+10967	ear	CAPIZNON	duluŋan
+10971	eye	CAPIZNON	mata
+10973	fire	CAPIZNON	kalajo
+10974	fish	CAPIZNON	isda
+10983	hand	CAPIZNON	kamot
+10985	hear	CAPIZNON	mabati
+10991	leaf	CAPIZNON	dahon
+10993	liver	CAPIZNON	ataj
+10995	louse	CAPIZNON	kuto
+11000	name	CAPIZNON	ŋalan
+11004	nose	CAPIZNON	iloŋ
+11007	path	CAPIZNON	alagjan
+11008	person	CAPIZNON	tawo
+11014	see	CAPIZNON	makita
+11016	skin	CAPIZNON	panit
+11021	star	CAPIZNON	bito
+11022	stone	CAPIZNON	bato
+11028	tongue	CAPIZNON	dila
+11029	tooth	CAPIZNON	unto
+11033	water	CAPIZNON	tubi
+11048	blood	FINALLIG	Cara
+11049	bone	FINALLIG	ikor
+11050	breast	FINALLIG	susu
+11054	come	FINALLIG	omali
+11055	die	FINALLIG	matoj
+11056	dog	FINALLIG	aso
+11057	drink	FINALLIG	omenom
+11059	ear	FINALLIG	iŋa
+11063	eye	FINALLIG	mata
+11066	fish	FINALLIG	kiaCiw
+11075	hand	FINALLIG	lima
+11077	hear	FINALLIG	Coŋron
+11083	leaf	FINALLIG	tofo
+11085	liver	FINALLIG	agtoj
+11087	louse	FINALLIG	koto
+11092	name	FINALLIG	ŋadan
+11094	new	FINALLIG	fiaro
+11095	night	FINALLIG	lafi
+11096	nose	FINALLIG	aŋor
+11098	one	FINALLIG	osa
+11099	path	FINALLIG	Caran
+11100	person	FINALLIG	tako
+11106	see	FINALLIG	ilaon
+11108	skin	FINALLIG	koblet
+11113	star	FINALLIG	taraw
+11114	stone	FINALLIG	fiato
+11120	tongue	FINALLIG	Cila
+11121	tooth	FINALLIG	fiab
+11123	two	FINALLIG	Cowa
+11125	water	FINALLIG	Canom
+11140	blood	HILIGAYNON	dugoʔ
+11141	bone	HILIGAYNON	tulan
+11142	breast	HILIGAYNON	suso
+11146	come	HILIGAYNON	kadto
+11147	die	HILIGAYNON	pataj
+11148	dog	HILIGAYNON	idu
+11149	drink	HILIGAYNON	ilimnon
+11151	ear	HILIGAYNON	duluŋgan
+11155	eye	HILIGAYNON	mata
+11157	fire	HILIGAYNON	Clajo
+11158	fish	HILIGAYNON	isda
+11167	hand	HILIGAYNON	kamut
+11169	hear	HILIGAYNON	mati
+11175	leaf	HILIGAYNON	dahon
+11177	liver	HILIGAYNON	ataj
+11184	name	HILIGAYNON	ŋalan
+11186	new	HILIGAYNON	bago
+11187	night	HILIGAYNON	gabi
+11188	nose	HILIGAYNON	iloŋ
+11190	one	HILIGAYNON	isa
+11191	path	HILIGAYNON	dalan
+11192	person	HILIGAYNON	tao
+11198	see	HILIGAYNON	kita
+11200	skin	HILIGAYNON	panit
+11205	star	HILIGAYNON	bituon
+11206	stone	HILIGAYNON	bato
+11212	tongue	HILIGAYNON	dilaʔ
+11213	tooth	HILIGAYNON	ŋipon
+11217	water	HILIGAYNON	tubig
+11218	we	HILIGAYNON	kita
+11224	you	HILIGAYNON	ikaw
+11232	blood	INABAKNON	lahaʔ
+11233	bone	INABAKNON	taʔulaŋ
+11234	breast	INABAKNON	darakan
+11238	come	INABAKNON	daʔito
+11239	die	INABAKNON	mataj
+11240	dog	INABAKNON	idoʔ
+11241	drink	INABAKNON	talʔok
+11243	ear	INABAKNON	taliŋa
+11247	eye	INABAKNON	mata
+11249	fire	INABAKNON	api
+11250	fish	INABAKNON	dajiŋ
+11259	hand	INABAKNON	kambag
+11261	hear	INABAKNON	kali
+11267	leaf	INABAKNON	dahon
+11269	liver	INABAKNON	ataj
+11271	louse	INABAKNON	kuspad
+11276	name	INABAKNON	aron
+11278	new	INABAKNON	bagʔo
+11279	night	INABAKNON	saŋom
+11280	nose	INABAKNON	uroŋ
+11283	path	INABAKNON	lalan
+11284	person	INABAKNON	aʔa
+11290	see	INABAKNON	kulaw
+11292	skin	INABAKNON	anit
+11297	star	INABAKNON	bituʔon
+11298	stone	INABAKNON	bato
+11304	tongue	INABAKNON	dalaʔ
+11305	tooth	INABAKNON	impon
+11309	water	INABAKNON	buwahiʔ
+11310	we	INABAKNON	kamiʔ
+11324	blood	KALAGAN KAAGAN	duguʔ
+11325	bone	KALAGAN KAAGAN	pəsaʔ
+11326	breast	KALAGAN KAAGAN	susu
+11332	dog	KALAGAN KAAGAN	iduʔ
+11333	drink	KALAGAN KAAGAN	inim
+11335	ear	KALAGAN KAAGAN	taliŋa
+11339	eye	KALAGAN KAAGAN	mata
+11341	fire	KALAGAN KAAGAN	atun
+11346	full	KALAGAN KAAGAN	bijag
+11351	hand	KALAGAN KAAGAN	bəktən
+11353	hear	KALAGAN KAAGAN	dəŋəg
+11361	liver	KALAGAN KAAGAN	ataj
+11363	louse	KALAGAN KAAGAN	babəŋ
+11368	name	KALAGAN KAAGAN	ŋan
+11370	new	KALAGAN KAAGAN	bagu
+11371	night	KALAGAN KAAGAN	gabi
+11372	nose	KALAGAN KAAGAN	iluŋ
+11376	person	KALAGAN KAAGAN	utaw
+11382	see	KALAGAN KAAGAN	kitaʔ
+11384	skin	KALAGAN KAAGAN	palis
+11389	star	KALAGAN KAAGAN	bitun
+11390	stone	KALAGAN KAAGAN	batu
+11396	tongue	KALAGAN KAAGAN	dilaʔ
+11397	tooth	KALAGAN KAAGAN	untu
+11398	tree	KALAGAN KAAGAN	kawuj
+11399	two	KALAGAN KAAGAN	duwa
+11401	water	KALAGAN KAAGAN	tubig
+11416	blood	KANKANAEY	dada
+11417	bone	KANKANAEY	toŋa
+11418	breast	KANKANAEY	soso
+11422	come	KANKANAEY	omali
+11423	die	KANKANAEY	matej
+11424	dog	KANKANAEY	aso
+11425	drink	KANKANAEY	maninom
+11427	ear	KANKANAEY	keweŋ
+11431	eye	KANKANAEY	mata
+11433	fire	KANKANAEY	apoj
+11434	fish	KANKANAEY	nigaj
+11443	hand	KANKANAEY	takaj
+11445	hear	KANKANAEY	deŋen
+11451	leaf	KANKANAEY	tobo
+11453	liver	KANKANAEY	atej
+11455	louse	KANKANAEY	koto
+11460	name	KANKANAEY	ŋadan
+11462	new	KANKANAEY	balo
+11463	night	KANKANAEY	labi
+11464	nose	KANKANAEY	eŋ
+11466	one	KANKANAEY	esE
+11467	path	KANKANAEY	danan
+11468	person	KANKANAEY	ipogaw
+11474	see	KANKANAEY	ilaen
+11476	skin	KANKANAEY	kopkop
+11481	star	KANKANAEY	talaw
+11482	stone	KANKANAEY	bato
+11488	tongue	KANKANAEY	dila
+11489	tooth	KANKANAEY	baba
+11491	two	KANKANAEY	dowE
+11493	water	KANKANAEY	danom
+11508	blood	MANDAYAN BOSO	duguʔ
+11509	bone	MANDAYAN BOSO	pəsaʔ
+11510	breast	MANDAYAN BOSO	susu
+11516	dog	MANDAYAN BOSO	iduʔ
+11517	drink	MANDAYAN BOSO	iminəm
+11519	ear	MANDAYAN BOSO	taliŋa
+11523	eye	MANDAYAN BOSO	mata
+11525	fire	MANDAYAN BOSO	atulun
+11526	fish	MANDAYAN BOSO	kaja
+11530	full	MANDAYAN BOSO	jamabijag
+11535	hand	MANDAYAN BOSO	bəktən
+11537	hear	MANDAYAN BOSO	jədəŋəg
+11541	knee	MANDAYAN BOSO	tuʔud
+11545	liver	MANDAYAN BOSO	ataj
+11547	louse	MANDAYAN BOSO	kutu
+11550	mountain	MANDAYAN BOSO	bətaj
+11552	name	MANDAYAN BOSO	galan
+11554	new	MANDAYAN BOSO	bagu
+11555	night	MANDAYAN BOSO	gabi
+11556	nose	MANDAYAN BOSO	iluŋ
+11558	one	MANDAYAN BOSO	isa
+11560	person	MANDAYAN BOSO	utaw
+11566	see	MANDAYAN BOSO	jakitaʔ
+11568	skin	MANDAYAN BOSO	palis
+11573	star	MANDAYAN BOSO	bituʔun
+11574	stone	MANDAYAN BOSO	batu
+11580	tongue	MANDAYAN BOSO	dilaʔ
+11581	tooth	MANDAYAN BOSO	untu
+11582	tree	MANDAYAN BOSO	kauj
+11583	two	MANDAYAN BOSO	duwa
+11585	water	MANDAYAN BOSO	tubig
+11600	blood	MANDAYAN ISLAM PISO	duguʔ
+11601	bone	MANDAYAN ISLAM PISO	pusaʔ
+11602	breast	MANDAYAN ISLAM PISO	susu
+11608	dog	MANDAYAN ISLAM PISO	iduʔ
+11609	drink	MANDAYAN ISLAM PISO	inim
+11611	ear	MANDAYAN ISLAM PISO	taliŋa
+11615	eye	MANDAYAN ISLAM PISO	mata
+11617	fire	MANDAYAN ISLAM PISO	atuun
+11622	full	MANDAYAN ISLAM PISO	bijag
+11627	hand	MANDAYAN ISLAM PISO	bəktən
+11629	hear	MANDAYAN ISLAM PISO	dəŋəg
+11633	knee	MANDAYAN ISLAM PISO	tuud
+11637	liver	MANDAYAN ISLAM PISO	ataj
+11639	louse	MANDAYAN ISLAM PISO	kutu
+11642	mountain	MANDAYAN ISLAM PISO	butaj
+11644	name	MANDAYAN ISLAM PISO	gaan
+11646	new	MANDAYAN ISLAM PISO	bagu
+11647	night	MANDAYAN ISLAM PISO	gabi
+11648	nose	MANDAYAN ISLAM PISO	iluŋ
+11650	one	MANDAYAN ISLAM PISO	isa
+11652	person	MANDAYAN ISLAM PISO	utaw
+11658	see	MANDAYAN ISLAM PISO	matanaw
+11660	skin	MANDAYAN ISLAM PISO	palis
+11665	star	MANDAYAN ISLAM PISO	bituun
+11666	stone	MANDAYAN ISLAM PISO	batu
+11672	tongue	MANDAYAN ISLAM PISO	dilaʔ
+11673	tooth	MANDAYAN ISLAM PISO	untu
+11674	tree	MANDAYAN ISLAM PISO	kauj
+11675	two	MANDAYAN ISLAM PISO	duwa
+11677	water	MANDAYAN ISLAM PISO	tubig
+11692	blood	SINAUNA	duguʔ
+11693	bone	SINAUNA	butʔi
+11694	breast	SINAUNA	susu
+11700	dog	SINAUNA	asu
+11701	drink	SINAUNA	inum
+11703	ear	SINAUNA	taliŋa
+11707	eye	SINAUNA	buligaʔ
+11709	fire	SINAUNA	apuj
+11710	fish	SINAUNA	isdaʔ
+11719	hand	SINAUNA	alima
+11721	hear	SINAUNA	landap
+11727	leaf	SINAUNA	hajin
+11729	liver	SINAUNA	ataj
+11731	louse	SINAUNA	kutu
+11736	name	SINAUNA	ŋaran
+11738	new	SINAUNA	baʔju
+11739	night	SINAUNA	abi
+11740	nose	SINAUNA	aʔdoŋ
+11742	one	SINAUNA	isaʔ
+11743	path	SINAUNA	bakas
+11744	person	SINAUNA	ata
+11750	see	SINAUNA	miʔsulʔaŋ
+11752	skin	SINAUNA	balat
+11757	star	SINAUNA	bituʔin
+11758	stone	SINAUNA	igaŋ
+11764	tongue	SINAUNA	dilaʔ
+11765	tooth	SINAUNA	ŋipən
+11767	two	SINAUNA	darʔa
+11769	water	SINAUNA	laʔu
+11784	blood	SOUTHERN KALINGA	Cara
+11785	bone	SOUTHERN KALINGA	Culi
+11786	breast	SOUTHERN KALINGA	susu
+11790	come	SOUTHERN KALINGA	Cumatoŋ
+11791	die	SOUTHERN KALINGA	matoj
+11792	dog	SOUTHERN KALINGA	asu
+11793	drink	SOUTHERN KALINGA	uminum
+11795	ear	SOUTHERN KALINGA	ijaŋa
+11799	eye	SOUTHERN KALINGA	ata
+11802	fish	SOUTHERN KALINGA	ukaCiw
+11811	hand	SOUTHERN KALINGA	ima
+11813	hear	SOUTHERN KALINGA	Coŋron
+11819	leaf	SOUTHERN KALINGA	tufu
+11821	liver	SOUTHERN KALINGA	agtoj
+11823	louse	SOUTHERN KALINGA	utu
+11828	name	SOUTHERN KALINGA	ŋaCan
+11830	new	SOUTHERN KALINGA	ara
+11831	night	SOUTHERN KALINGA	lafi
+11832	nose	SOUTHERN KALINGA	oŋor
+11834	one	SOUTHERN KALINGA	osa
+11835	path	SOUTHERN KALINGA	Caran
+11836	person	SOUTHERN KALINGA	taku
+11842	see	SOUTHERN KALINGA	umila
+11844	skin	SOUTHERN KALINGA	uglit
+11849	star	SOUTHERN KALINGA	fituwon
+11850	stone	SOUTHERN KALINGA	fatu
+11856	tongue	SOUTHERN KALINGA	Cila
+11857	tooth	SOUTHERN KALINGA	fafa
+11859	two	SOUTHERN KALINGA	Cuwa
+11861	water	SOUTHERN KALINGA	Canum

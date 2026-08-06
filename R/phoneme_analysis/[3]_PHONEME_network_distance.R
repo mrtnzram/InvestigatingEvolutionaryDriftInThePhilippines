@@ -370,8 +370,13 @@ plot_network <- function(full_tree_sf, arrow_connectors,
     ) +
     coord_sf(xlim = lon_range, ylim = lat_range) +
     theme_minimal() +
-    labs(title = "Phonemic Historical Routes Waypoint System",
-         x = "Longitude", y = "Latitude")
+    # Coordinates carry no finding; the coastline is the only reference frame the
+    # reader needs, so the axes, ticks and graticule are all dropped.
+    theme(panel.grid = element_blank(),
+          axis.text  = element_blank(),
+          axis.title = element_blank(),
+          axis.ticks = element_blank()) +
+    labs(title = "Phonemic Historical Routes Waypoint System")
 }
 
 print(plot_network(full_tree_sf, arrow_connectors,

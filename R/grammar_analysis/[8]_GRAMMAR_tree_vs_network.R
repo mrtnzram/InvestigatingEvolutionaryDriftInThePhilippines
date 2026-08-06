@@ -76,7 +76,13 @@ plot_network_coloured <- function(full_tree_sf, arrow_connectors,
     scale_fill_manual(values = pal, guide = "none") +
     coord_sf(xlim = lon_range, ylim = lat_range) +
     theme_minimal() +
-    labs(title = title, x = "Longitude", y = "Latitude")
+    # Coordinates carry no finding; the coastline is the only reference frame the
+    # reader needs, so the axes, ticks and graticule are all dropped.
+    theme(panel.grid = element_blank(),
+          axis.text  = element_blank(),
+          axis.title = element_blank(),
+          axis.ticks = element_blank()) +
+    labs(title = title)
 }
 
 network_panel <- plot_network_coloured(full_tree_sf, arrow_connectors,

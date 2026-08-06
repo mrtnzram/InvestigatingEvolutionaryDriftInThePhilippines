@@ -19,9 +19,6 @@ archived_code/
 archived_data/
 python/optimal_path.ipynb
 
-# --- Cognate analysis: excluded from the paper for now ---
-R/cognate_analysis/
-
 # --- Generated figures (regenerate from the R scripts) ---
 figures/
 
@@ -31,3 +28,7 @@ data/languages.csv
 *.rds
 
 .positai
+
+# --- Sourced files --------
+data/NRC-VAD-Lexicon-v2.1/
+data/ne_10m_admin_0_countries/

@@ -2,10 +2,10 @@
 # [5] Phoneme Analysis — Multiple Matrix Regression with Randomization (MMRR)
 #
 # Control analysis for internal linguistic diffusion. Regresses pairwise general
-# phonemic dissimilarity (1 - cosine, not Spanish-specific) jointly on
-# terrain-penalized migration distance and patristic phylogenetic distance,
-# with permutation p-values, so geography and shared ancestry — collinear here —
-# are assessed together rather than by a single-predictor Mantel test.
+# phonemic similarity (cosine, not Spanish-specific) jointly on terrain-penalized
+# migration distance and patristic phylogenetic distance, with permutation
+# p-values, so geography and shared ancestry — collinear here — are assessed
+# together rather than by a single-predictor Mantel test.
 #
 # Note: the pairwise distance matrix is built by Dijkstra routing over the full
 # language-to-language network, not the nearest-node distance used in [3]. Each
@@ -15,7 +15,7 @@
 # Inputs:  data/PHONEME_cosine_matrix.csv, data/RUHLENdf_PH.csv,
 #          data/nodes.csv, data/edges.csv,
 #          data/PHONEME_phylo_dist_matrix.csv  (written by [0]_Phylogenetic_Tree.R)
-# Outputs: data/PHONEME_dist_matrix.csv, data/PHONEME_diss_matrix.csv,
+# Outputs: data/PHONEME_dist_matrix.csv, data/PHONEME_sim_matrix.csv,
 #          data/PHONEME_mmrr_results.csv        (joint two-predictor model)
 #          data/PHONEME_mmrr_single_results.csv (single-predictor models)
 #          figures/phoneme/mmrr/phoneme_mmrr_single_*.png  (3 single-predictor)
@@ -67,9 +67,9 @@ edges$to   <- as.character(edges$to)
 reverse_edges <- edges |> rename(from = to, to = from)
 edges <- bind_rows(edges, reverse_edges) |> distinct()
 
-# ---- 1. Dissimilarity matrix (1 - cosine), Philippine languages -------------
+# ---- 1. Similarity matrix (cosine), Philippine languages --------------------
 cosine_matrix_phil <- cosine_matrix[ph_lang, ph_lang]
-PHONEME_diss_matrix <- 1 - cosine_matrix_phil
+PHONEME_sim_matrix <- cosine_matrix_phil
 
 # ---- 2. Land mask (Philippines + Malaysia) ----------------------------------
 world_map <- map_data("world") |> filter(region %in% c("Philippines", "Malaysia"))
@@ -300,13 +300,13 @@ PHONEME_phylo_dist_matrix <- read.csv(
 # Align all three matrices to a common language set and ordering before
 # vectorizing; the intersection is defensive against upstream tree-set changes.
 common <- Reduce(intersect, list(
-  rownames(PHONEME_diss_matrix),
+  rownames(PHONEME_sim_matrix),
   rownames(PHONEME_dist_matrix),
   rownames(PHONEME_phylo_dist_matrix)
 ))
 
 dropped <- setdiff(
-  union(rownames(PHONEME_diss_matrix), rownames(PHONEME_phylo_dist_matrix)),
+  union(rownames(PHONEME_sim_matrix), rownames(PHONEME_phylo_dist_matrix)),
   common
 )
 if (length(dropped) > 0) {
@@ -315,17 +315,18 @@ if (length(dropped) > 0) {
           paste(dropped, collapse = ", "))
 }
 
-Y_ling  <- PHONEME_diss_matrix[common, common]
+Y_ling  <- PHONEME_sim_matrix[common, common]
 X_geo   <- PHONEME_dist_matrix[common, common]
 X_phylo <- PHONEME_phylo_dist_matrix[common, common]
 
-# 1 - cosine leaves ~1e-10 of noise on Y_ling's diagonal, so all three diagonals
-# are zeroed to make the guards below exact.
-diag(Y_ling) <- 0
+# X diagonals are zeroed for the guards below; Y_ling's diagonal is left at its
+# natural self-similarity of ~1 (unfold() below only reads the strict lower
+# triangle, so the diagonal value never enters the fit either way).
 diag(X_geo) <- 0
 diag(X_phylo) <- 0
 
-# Guards: MMRR assumes symmetric, zero-diagonal matrices sharing one label order.
+# Guards: MMRR assumes symmetric matrices sharing one label order; X's are also
+# zero-diagonal, Y_ling is bounded cosine similarity.
 stopifnot(
   "Y/X_geo labels differ"    = identical(dimnames(Y_ling), dimnames(X_geo)),
   "Y/X_phylo labels differ"  = identical(dimnames(Y_ling), dimnames(X_phylo)),
@@ -333,7 +334,7 @@ stopifnot(
   "Y_ling not symmetric"     = isSymmetric(unname(Y_ling)),
   "X_geo not symmetric"      = isSymmetric(unname(X_geo)),
   "X_phylo not symmetric"    = isSymmetric(unname(X_phylo)),
-  "Y_ling diagonal nonzero"  = all(diag(Y_ling)   == 0),
+  "Y_ling out of [-1, 1]"    = all(Y_ling >= -1 & Y_ling <= 1),
   "X_geo diagonal nonzero"   = all(diag(X_geo)    == 0),
   "X_phylo diagonal nonzero" = all(diag(X_phylo)  == 0)
 )
@@ -357,7 +358,7 @@ heatmap_p <- function(m, title) {
 
 print(
   heatmap_p(X_geo,   "Migration distance") +
-  heatmap_p(Y_ling,  "Phonemic dissimilarity") +
+  heatmap_p(Y_ling,  "Phonemic similarity") +
   heatmap_p(X_phylo, "Phylogenetic distance")
 )
 
@@ -414,6 +415,10 @@ MMRR <- function(Y, X, nperm = 9999, scale = TRUE) {
        Fstatistic = Fstat, Fpvalue = Fp, r.squared = r.squared)
 }
 
+# dir.create() hoisted here, before the first ggsave() in §9a — it used to sit
+# at §11 and left a fresh checkout failing on the very first single-predictor plot.
+dir.create(here("figures", "phoneme", "mmrr"), recursive = TRUE, showWarnings = FALSE)
+
 # ---- 9a. Single-predictor MMRRs (run BEFORE the joint model) ----------------
 # Same MMRR() above, just handed a one-element predictor list — the permutation
 # scheme is identical, so with one predictor this reduces to a permutation-tested
@@ -469,15 +474,15 @@ single_mmrr <- function(Ymat, Xmat, y_lab, x_lab, title, file, nperm = 9999) {
 
 PHONEME_mmrr_single <- bind_rows(
   single_mmrr(Y_ling, X_geo,
-              y_lab = "Phonemic dissimilarity (1 - cosine)",
+              y_lab = "Phonemic similarity (cosine)",
               x_lab = "Relative migration distance (km)",
-              title = "Linguistic dissimilarity vs Geographic distance",
-              file  = "phoneme_mmrr_single_dissimilarity_vs_geography.png"),
+              title = "Linguistic similarity vs Geographic distance",
+              file  = "phoneme_mmrr_single_similarity_vs_geography.png"),
   single_mmrr(Y_ling, X_phylo,
-              y_lab = "Phonemic dissimilarity (1 - cosine)",
+              y_lab = "Phonemic similarity (cosine)",
               x_lab = "Patristic phylogenetic distance",
-              title = "Linguistic dissimilarity vs Phylogenetic distance",
-              file  = "phoneme_mmrr_single_dissimilarity_vs_phylogeny.png"),
+              title = "Linguistic similarity vs Phylogenetic distance",
+              file  = "phoneme_mmrr_single_similarity_vs_phylogeny.png"),
   # Collinearity check: the shared structure that flattens both joint betas.
   single_mmrr(X_geo, X_phylo,
               y_lab = "Relative migration distance (km)",
@@ -512,7 +517,7 @@ write.csv(PHONEME_mmrr_results,
 # ---- 11. Visualization ------------------------------------------------------
 # Both figures are built on the standardized unfolded lower triangles, so they
 # read on the same scale as the fitted (standardized) MMRR coefficients.
-dir.create(here("figures", "phoneme", "mmrr"), recursive = TRUE, showWarnings = FALSE)
+# (figures/phoneme/mmrr already created in §9a, ahead of the first ggsave())
 
 mmrr_df <- tibble(
   ling  = as.numeric(unfold(Y_ling)),
@@ -523,7 +528,7 @@ mmrr_df <- tibble(
 # (a) Pairplot as a single 3x3 facet_grid so every cell shares its column (x) and
 # row (y) scale. Lower triangle: scatter + linear fit; upper: Pearson r;
 # diagonal: marginal density. Built directly to avoid a GGally dependency.
-pair_labs <- c(ling = "Dissimilarity", geo = "Geo distance", phylo = "Phylo distance")
+pair_labs <- c(ling = "Similarity", geo = "Geo distance", phylo = "Phylo distance")
 pair_vars <- names(pair_labs)
 pair_idx  <- setNames(seq_along(pair_vars), pair_vars)
 as_pair_factor <- function(v) factor(pair_labs[v], levels = pair_labs)
@@ -610,20 +615,20 @@ av_plot <- function(y, x, other, xlab, ylab, beta, pval) {
 p_geo_av <- av_plot(
   mmrr_df$ling, mmrr_df$geo, mmrr_df$phylo,
   xlab = "Geo distance | phylo (residuals)",
-  ylab = "Dissimilarity | phylo (residuals)",
+  ylab = "Similarity | phylo (residuals)",
   beta = PHONEME_mmrr_results$beta_geo, pval = PHONEME_mmrr_results$p_geo
 )
 
 p_phylo_av <- av_plot(
   mmrr_df$ling, mmrr_df$phylo, mmrr_df$geo,
   xlab = "Phylo distance | geo (residuals)",
-  ylab = "Dissimilarity | geo (residuals)",
+  ylab = "Similarity | geo (residuals)",
   beta = PHONEME_mmrr_results$beta_phylo, pval = PHONEME_mmrr_results$p_phylo
 )
 
 partial_plot <- (p_geo_av + p_phylo_av) +
   plot_annotation(
-    title = "MMRR partial regression: phonemic dissimilarity vs. geography + phylogeny",
+    title = "MMRR partial regression: phonemic similarity vs. geography + phylogeny",
     subtitle = sprintf("Model R^2 = %.3f,  permutation p = %.4f  (9,999 permutations)",
                        PHONEME_mmrr_results$r_squared, PHONEME_mmrr_results$p_model)
   )
@@ -633,4 +638,4 @@ ggsave(here("figures", "phoneme", "mmrr", "phoneme_mmrr_partial_regression.png")
 
 # ---- 12. Persist matrices ---------------------------------------------------
 write.csv(PHONEME_dist_matrix, file = here("data", "PHONEME_dist_matrix.csv"), row.names = TRUE)
-write.csv(PHONEME_diss_matrix, file = here("data", "PHONEME_diss_matrix.csv"), row.names = TRUE)
+write.csv(PHONEME_sim_matrix, file = here("data", "PHONEME_sim_matrix.csv"), row.names = TRUE)

@@ -208,7 +208,7 @@ ggsave(here("figures", "shared", "grammar_phylogenetic_tree.png"),
 # ── Pairwise phylogenetic (patristic) distance matrix ───────────────────────
 # Some study languages are represented by more than one tree tip; collapsed by
 # averaging every original-tip pair's distance within each gram-to-gram pair,
-# matching GRAMMAR_dist_matrix.csv / GRAMMAR_diss_matrix.csv from [5].
+# matching GRAMMAR_dist_matrix.csv / GRAMMAR_sim_matrix.csv from [5].
 phylo_dist_raw <- cophenetic.phylo(tree_pruned)
 
 phylo_dist_long <- as_tibble(phylo_dist_raw, rownames = "original_1") %>%

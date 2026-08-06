@@ -188,13 +188,13 @@ base_plot_cosine <- ggplot() +
   guides(color = guide_colorbar(title = "Cosine Similarity",
                                 title.position = "top", title.hjust = 0.5)) +
   coord_fixed(xlim = c(115, 130), ylim = c(4, 22)) +
-  scale_x_continuous(breaks = seq(115, 130, by = 2)) +
-  scale_y_continuous(breaks = seq(4, 22, by = 2)) +
-  labs(x = "Longitude", y = "Latitude") +
   theme_minimal() +
+  # Coordinates carry no finding; the coastline is the only reference frame the
+  # reader needs, so the axes, ticks and graticule are all dropped.
   theme(panel.grid = element_blank(),
-        axis.text = element_text(size = 10),
-        axis.title = element_text(size = 12))
+        axis.text  = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
 
 base_plot_cosine
 saveRDS(base_plot_cosine, file = here("data", "base_plot_phoneme_cosine.rds"))

@@ -239,7 +239,13 @@ plot_network_by_cluster <- function(points_df, cluster_pal, refdf1 = MANILA,
     scale_fill_manual(values = cluster_pal, guide = "none") +
     coord_sf(xlim = lon_range, ylim = lat_range) +
     theme_minimal() +
-    labs(title = title, x = "Longitude", y = "Latitude")
+    # Coordinates carry no finding; the coastline is the only reference frame the
+    # reader needs, so the axes, ticks and graticule are all dropped.
+    theme(panel.grid = element_blank(),
+          axis.text  = element_blank(),
+          axis.title = element_blank(),
+          axis.ticks = element_blank()) +
+    labs(title = title)
 }
 
 build_cluster_legend_strip <- function(points_df, cluster_pal) {
