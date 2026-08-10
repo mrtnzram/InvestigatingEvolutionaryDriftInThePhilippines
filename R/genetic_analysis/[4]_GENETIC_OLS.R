@@ -38,7 +38,7 @@ GENETIC_final <- read.csv(here("data", "GENETIC_final.csv"))
 # convention, so a slope reads as fraction of the observed range per unit distance.
 df <- GENETIC_final |>
   dplyr::select(population, span_admx, span_w, dist = all_of(PREDICTOR)) |>
-  filter(!is.na(span_admx), !is.na(span_w)) |>
+  filter(!is.na(span_admx), !is.na(span_w), span_admx != 0) |>
   mutate(span_admx_norm = span_admx / max(span_admx)) |>
   as.data.frame()
 
@@ -81,6 +81,29 @@ inv_sw <- 1 / sqrt(w)   # sigma_i = sigma * inv_sw[i]
 
 dat <- list(N = N, y = y, x = x, inv_sw = inv_sw)
 
+# Fitting stays on the Mm scale above; DISPLAY_UNIT_KM only rescales what is
+# plotted and printed, so coefficients read in "per 100 km".
+DISPLAY_UNIT_KM <- 100
+DISP_PER_MM     <- DISPLAY_UNIT_KM / 1000  # e.g. 0.1 when DISPLAY_UNIT_KM = 100
+
+# Posterior-mean equation per model form, printed under that model's precis() so
+# the console shows the fitted curve next to the parameters it came from.
+eq_linear <- function(post) {
+  b_disp <- mean(post$b) * DISP_PER_MM
+  sprintf("y = %.4f %s %.4f*x", mean(post$a),
+          ifelse(b_disp >= 0, "+", "-"), abs(b_disp))
+}
+eq_exponential <- function(post) {
+  sprintf("y = %.4f * exp(-%.4f*x)", mean(post$a), mean(post$b) * DISP_PER_MM)
+}
+eq_spline <- function(post) {
+  w_mean <- colMeans(post$w)
+  paste0("y = ", sprintf("%.4f", mean(post$a)),
+         paste0(sprintf(" %s %.4f*B%d(x)", ifelse(w_mean >= 0, "+", "-"),
+                        abs(w_mean), seq_along(w_mean)),
+                collapse = ""))
+}
+
 
 # ── 3. Model 1: linear ──────────────────────────────────────────────────────
 # Priors are [4]_PHONEME_PGLS.R's generic weakly-informative ones on the
@@ -96,7 +119,9 @@ m_lin <- ulam(
   ),
   data = dat, chains = 4, cores = 4, cmdstan = TRUE, log_lik = FALSE
 )
+post_lin <- extract.samples(m_lin)
 precis(m_lin, pars = c("a", "b", "sigma"))
+cat("equation:", eq_linear(post_lin), "\n")
 
 
 # ── 4. Model 2: exponential decay ───────────────────────────────────────────
@@ -112,7 +137,9 @@ m_exp <- ulam(
   ),
   data = dat, chains = 4, cores = 4, cmdstan = TRUE, log_lik = FALSE
 )
+post_exp <- extract.samples(m_exp)
 precis(m_exp, pars = c("a", "b", "sigma"))
+cat("equation:", eq_exponential(post_exp), "\n")
 
 
 # ── 5. Model 3: cubic spline ────────────────────────────────────────────────
@@ -131,7 +158,9 @@ m_spline <- ulam(
   ),
   data = dat_sp, chains = 4, cores = 4, cmdstan = TRUE, log_lik = FALSE
 )
+post_sp <- extract.samples(m_spline)
 precis(m_spline, pars = c("a", "sigma"))
+cat("equation:", eq_spline(post_sp), "\n")
 
 
 # ── 6. Model comparison (WAIC + PSIS-LOO via loo) ───────────────────────────
@@ -145,10 +174,7 @@ weighted_loglik <- function(post, mu_of) {
   ll
 }
 
-post_lin <- extract.samples(m_lin)
-post_exp <- extract.samples(m_exp)
-post_sp  <- extract.samples(m_spline)
-
+# post_lin / post_exp / post_sp were extracted alongside each fit above.
 ll_lin <- weighted_loglik(post_lin, \(p, s) p$a[s] + p$b[s] * x)
 ll_exp <- weighted_loglik(post_exp, \(p, s) p$a[s] * exp(-p$b[s] * x))
 ll_sp  <- weighted_loglik(post_sp,  \(p, s) p$a[s] + as.numeric(Bmat %*% p$w[s, ]))
@@ -164,9 +190,8 @@ cat("\n--- PSIS-LOO comparison ---\n"); print(loo::loo_compare(loo_list))
 
 
 # ── 7. Posterior predictions + 95% credible intervals ───────────────────────
-# The ribbon is the 95% quantile interval of mu across posterior draws. Fitting
-# stays on §2's Mm scale; DISPLAY_UNIT_KM only rescales what is plotted.
-DISPLAY_UNIT_KM <- 100
+# The ribbon is the 95% quantile interval of mu across posterior draws;
+# DISPLAY_UNIT_KM (set in §2) rescales the x axis to hundreds of km.
 xseq_km <- seq(min(x_km), max(x_km), length.out = 100)
 xseq    <- xseq_km / 1000
 
@@ -195,8 +220,7 @@ ribbon_sp  <- summarise_mu(mu_sp,  xseq_disp)
 scatter_df <- data.frame(dist = x_km / DISPLAY_UNIT_KM, span_admx_norm = y,
                          span_w = df$span_w)
 
-# nRMSE at the observed points, computed once here so the plot subtitles and
-# §8's comparison table report the same numbers; weighted to match the likelihood.
+# nRMSE at the observed points, for §8\'s comparison table; weighted to match the likelihood.
 mu_lin_obs <- sapply(x, function(xx) post_lin$a + post_lin$b * xx)
 mu_exp_obs <- sapply(x, function(xx) post_exp$a * exp(-post_exp$b * xx))
 mu_sp_obs  <- as.numeric(post_sp$a) + post_sp$w %*% t(matrix(as.numeric(Bmat), nrow = N))
@@ -209,24 +233,7 @@ nrmse_lin <- nrmse(mu_lin_obs)
 nrmse_exp <- nrmse(mu_exp_obs)
 nrmse_sp  <- nrmse(mu_sp_obs)
 
-# Posterior-mean equations for the plot subtitles, with slopes/decay rates
-# converted from the Mm fitting scale to the DISPLAY_UNIT_KM plotting scale.
-disp_per_mm <- DISPLAY_UNIT_KM / 1000
-a_lin <- mean(post_lin$a); b_lin_disp <- mean(post_lin$b) * disp_per_mm
-eq_lin <- sprintf("y = %.4f %s %.4f*x", a_lin, ifelse(b_lin_disp >= 0, "+", "-"), abs(b_lin_disp))
-
-a_exp <- mean(post_exp$a); b_exp_disp <- mean(post_exp$b) * disp_per_mm
-eq_exp <- sprintf("y = %.4f * exp(-%.4f*x)", a_exp, b_exp_disp)
-
-a_sp <- mean(post_sp$a); w_sp <- colMeans(post_sp$w)
-eq_sp <- paste0(
-  "y = ", sprintf("%.4f", a_sp),
-  paste0(sprintf(" %s %.4f*B%d(x)", ifelse(w_sp >= 0, "+", "-"), abs(w_sp), seq_along(w_sp)),
-         collapse = "")
-)
-
-# subtitle wraps so the 6-term spline equation does not clip in the saved PNG.
-plot_fit <- function(ribbon_df, title, eq, nrmse_val) {
+plot_fit <- function(ribbon_df, title) {
   ggplot() +
     geom_point(data = scatter_df,
                aes(x = dist, y = span_admx_norm, size = span_w), alpha = 0.5) +
@@ -237,13 +244,12 @@ plot_fit <- function(ribbon_df, title, eq, nrmse_val) {
     scale_size(trans = "log10", range = c(0.7, 3.5), guide = "none") +
     theme_bw() +
     labs(title = title,
-         subtitle = str_wrap(sprintf("%s   |   weighted nRMSE = %.4f", eq, nrmse_val), width = 70),
          x = "Relative Migration Distance (100 km)", y = "Normalized Spanish Admixture")
 }
 
-p_lin <- plot_fit(ribbon_lin, "Linear (inverse-variance weighted)", eq_lin, nrmse_lin)
-p_exp <- plot_fit(ribbon_exp, "Exponential decay (inverse-variance weighted)", eq_exp, nrmse_exp)
-p_sp  <- plot_fit(ribbon_sp,  "Cubic spline (inverse-variance weighted)", eq_sp, nrmse_sp)
+p_lin <- plot_fit(ribbon_lin, "Linear (inverse-variance weighted)")
+p_exp <- plot_fit(ribbon_exp, "Exponential decay (inverse-variance weighted)")
+p_sp  <- plot_fit(ribbon_sp,  "Cubic spline (inverse-variance weighted)")
 print(p_lin); print(p_exp); print(p_sp)
 
 dir.create(here("figures", "genetic", "regression"),
@@ -258,7 +264,7 @@ ggsave(here("figures", "genetic", "regression", "genetic_spline_model.png"),
 
 
 # ── 8. Comparison report (WAIC + normalized RMSE) ───────────────────────────
-# nRMSE values (nrmse_lin/exp/sp) computed in §7 alongside the plot subtitles.
+# nRMSE values (nrmse_lin/exp/sp) computed in §7.
 report <- tibble(
   model  = c("m_lin", "m_exp", "m_spline"),
   WAIC   = sapply(waic_list, \(w) w$estimates["waic", "Estimate"]),

@@ -20,7 +20,7 @@ points_df <- PH_cognate |> filter(!is.na(loans_norm))
 
 # Point size is constant: with no standard error there is nothing for point area
 # to encode, and 108 languages crowd the map.
-POINT_SIZE <- 2
+POINT_SIZE <- 3
 
 # ---- Base map ---------------------------------------------------------------
 map_subset <- map_data("world") |> filter(region %in% c("Philippines", "Malaysia"))
