@@ -9,19 +9,34 @@
 # against. No cartopy — that's only used for the notebooks' publication-quality
 # figures; this script's --plot output is plain matplotlib.
 #
-# numpy is pinned to >=2 explicitly: feems imports msprime -> tskit at import
-# time (feems/sim.py), and current tskit/msprime builds (both PyPI wheels and
-# the conda-forge builds) are compiled against NumPy 2.x's C-API (numpy._core,
-# only present in numpy>=2.0). An unpinned solve, or patching tskit/msprime
-# into an already-solved env with `conda install` after the fact, can leave
-# numpy on the pre-2.0 series (numpy.core, no `_core`) and this import fails:
-#   RuntimeError: module was compiled against NumPy C-API version 0x12 ...
-#   but the running NumPy has C-API version 0x11
-#   ImportError: numpy._core.multiarray failed to import
-# tskit/msprime are listed here explicitly (not left as transitive deps) so
-# they're solved together with numpy in one pass. If this recurs, don't patch
-# packages into a live env — `conda env remove -n genetic_feems` and recreate
-# from this file so everything is solved together.
+# --- numpy / feems / tskit note (read before touching pins below) -----------
+# bioconda's `feems` recipe hard-pins `numpy <2` and has not been rebuilt to
+# track tskit/msprime's move to NumPy 2.x. There is currently NO single set of
+# conda packages that satisfies both feems (`numpy<2`) and tskit/msprime's real
+# compiled ABI (`numpy>=2`) at once — conda/mamba will refuse to solve it
+# (`could not solve for environment specs`) if you pin numpy>=2 here directly.
+#
+# The fix is two steps, not one file: let conda solve everything under
+# feems's own numpy<2 pin (below), so tskit/msprime install as builds actually
+# compiled against that numpy — then upgrade numpy alone with pip, *after* the
+# env exists. That direction is safe: NumPy guarantees code compiled against
+# an older C-API keeps working under a newer NumPy at runtime (the reverse —
+# newer-compiled code under an older NumPy — is what actually breaks, and is
+# what an unpinned/numpy>=2-pinned solve produces):
+#   conda env create -f genetic_feems_env.yml
+#   conda activate genetic_feems
+#   pip install --upgrade "numpy>=2,<3"
+#   python -c "import numpy, feems; print(numpy.__version__, 'feems OK')"
+# Do not `pip install --force-reinstall tskit msprime` after that pip upgrade —
+# that would pull numpy2-ABI wheels for them and reintroduce the original
+# `numpy._core.multiarray failed to import` error.
+#
+# scikit-sparse is pinned <0.5: 0.5.0 changed cholmod.cholesky()'s return type
+# from a Factor object to a tuple, a breaking API change feems (last touched
+# pre-0.5.0) doesn't know about — SpatialGraph.comp_graph_laplacian assigns
+# that return value to self.factor and later calls it directly, so under 0.5.0
+# CV/fit fails with `TypeError: 'tuple' object is not callable`. 0.4.16 is
+# confirmed compatible with numpy>=2 at runtime, same as tskit/msprime above.
 name: genetic_feems
 channels:
   - conda-forge
@@ -30,10 +45,10 @@ dependencies:
   - python=3.10
   - feems
   - pandas-plink
-  - numpy>=2
+  - numpy<2
   - tskit
   - msprime
-  - scikit-sparse
+  - scikit-sparse<0.5
   - pandas
   - scipy
   - scikit-learn

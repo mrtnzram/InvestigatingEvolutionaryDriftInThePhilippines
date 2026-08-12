@@ -38,7 +38,7 @@ GENETIC_final <- read.csv(here("data", "GENETIC_final.csv"))
 # convention, so a slope reads as fraction of the observed range per unit distance.
 df <- GENETIC_final |>
   dplyr::select(population, span_admx, span_w, dist = all_of(PREDICTOR)) |>
-  filter(!is.na(span_admx), !is.na(span_w), span_admx != 0) |>
+  filter(!is.na(span_admx), !is.na(span_w)) |>
   mutate(span_admx_norm = span_admx / max(span_admx)) |>
   as.data.frame()
 

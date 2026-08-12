@@ -34,10 +34,24 @@ missing its package data.
 
 ## Server setup
 
+Two steps, not one — bioconda's `feems` recipe pins `numpy<2` and hasn't been rebuilt
+to track `tskit`/`msprime`'s move to NumPy 2.x, so no single conda solve can satisfy
+both at once. Let conda solve everything under `feems`'s own `numpy<2` pin first (so
+`tskit`/`msprime` install as builds actually compiled against that numpy), then upgrade
+`numpy` alone with pip, outside the solver. That direction is safe — NumPy guarantees
+code compiled against an older C-API keeps working under a newer NumPy at runtime; it's
+only the reverse (newer-compiled code under an older NumPy) that breaks:
+
 ```bash
-conda env create -f genetic_feems_env.yml
+conda env create -f genetic_feems_env.yml   # or mamba, same file
 conda activate genetic_feems
+pip install --upgrade "numpy>=2,<3"
+python -c "import numpy, feems; print(numpy.__version__, 'feems OK')"
 ```
+
+Don't `pip install --force-reinstall tskit msprime` after the numpy upgrade — that
+pulls numpy2-ABI wheels for them and reintroduces
+`ImportError: numpy._core.multiarray failed to import`.
 
 ## Running
 

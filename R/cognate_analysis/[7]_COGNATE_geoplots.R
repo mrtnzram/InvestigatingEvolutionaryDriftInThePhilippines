@@ -1,7 +1,8 @@
 # =============================================================================
 # [7] Cognate Analysis — Geo-plot: Spanish loanwords over the waypoint network
 # Maps each language's normalized Spanish loanword count on the Philippine base
-# map, with the [3] migration-route arrows underneath.
+# map, with the [3] migration-route arrows underneath. Covers the 94-language
+# analysis set, the same one [4] regresses on — [3] applied the restriction.
 #
 # Input:   data/cognate/COGNATE_final.csv, data/cognate/cognate_waypoint_plot.rds (from [3])
 # Outputs: figures/cognate/mst_waypoints/COGNATE_loans.png
@@ -19,7 +20,7 @@ arrows     <- readRDS(here("data", "cognate", "cognate_waypoint_plot.rds"))
 points_df <- PH_cognate |> filter(!is.na(loans_norm))
 
 # Point size is constant: with no standard error there is nothing for point area
-# to encode, and 108 languages crowd the map.
+# to encode, and 94 languages crowd the map.
 POINT_SIZE <- 3
 
 # ---- Base map ---------------------------------------------------------------

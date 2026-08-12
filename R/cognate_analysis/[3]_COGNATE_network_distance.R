@@ -1,9 +1,11 @@
 # ── [3]_COGNATE_network_distance.R ───────────────────────────────────────────
 # Graph network creation + per-language distance calculation.
-# Input:   data/cognate/COGNATE_loans.csv (from [0]), data/nodes.csv, data/edges.csv
-# Outputs: data/cognate/COGNATE_final.csv (loan counts + geodist_H1_span/H2_span,
-#          the final per-language table), data/cognate/cognate_waypoint_plot.rds
-#          (overview arrow plot)
+# Input:   data/cognate/COGNATE_loans.csv (all 108, from [0]_COGNATE_LOANS.R),
+#          data/cognate/COGNATE_tree_languages.csv (the 94-language analysis set,
+#          from [0]_Phylogenetic_Tree.R), data/nodes.csv, data/edges.csv
+# Outputs: data/cognate/COGNATE_final.csv (loan counts + geodist_H1_span/H2_span;
+#          the final per-language table, restricted to the 94),
+#          data/cognate/cognate_waypoint_plot.rds (overview arrow plot)
 # Note:    nodes/edges are the shared Philippine waypoint network, the same
 #          geography the phoneme, grammar and genetic analyses use.
 # ──────────────────────────────────────────────────────────────────────────────
@@ -17,6 +19,16 @@ library(here)
 
 # ── 0. Load data ─────────────────────────────────────────────────────────────
 PH_cognate <- read.csv(here("data", "cognate", "COGNATE_loans.csv"))
+
+# The analysis set is the tree-matched subset from [0]_Phylogenetic_Tree.R.
+# Restricting here rather than in each consumer cuts both outputs at once:
+# COGNATE_final.csv and the per-language connectors in the waypoint RDS.
+# Distances are computed per language against a fixed network, so the 94 that
+# remain get exactly the values they would have had in the full run.
+tree_languages <- read.csv(here("data", "cognate", "COGNATE_tree_languages.csv"))
+message("Analysis set: ", sum(PH_cognate$glottocode %in% tree_languages$glottocode),
+        " tree-matched languages of ", nrow(PH_cognate), ".")
+PH_cognate <- PH_cognate |> semi_join(tree_languages, by = "glottocode")
 
 nodes <- read.csv(here("data", "nodes.csv")) |> mutate(id = as.character(id))
 edges <- read.csv(here("data", "edges.csv")) |>
