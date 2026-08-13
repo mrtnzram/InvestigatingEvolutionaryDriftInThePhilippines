@@ -5,7 +5,10 @@
 #          from [0]_Phylogenetic_Tree.R), data/nodes.csv, data/edges.csv
 # Outputs: data/cognate/COGNATE_final.csv (loan counts + geodist_H1_span/H2_span;
 #          the final per-language table, restricted to the 94),
-#          data/cognate/cognate_waypoint_plot.rds (overview arrow plot)
+#          data/cognate/cognate_waypoint_plot.rds (overview arrow plot),
+#          data/cognate/COGNATE_dist_matrix.csv (pairwise language x language
+#          migration cost, keyed by glottocode to match [4]/[4.1]'s tree tip
+#          labels; read by [4.1] — cognate never had this asset before)
 # Note:    nodes/edges are the shared Philippine waypoint network, the same
 #          geography the phoneme, grammar and genetic analyses use.
 # ──────────────────────────────────────────────────────────────────────────────
@@ -299,6 +302,25 @@ PH_cognate |>
          number_of_entries, number_of_loans, loans_norm,
          nearest_node, geodist_H1_span, geodist_H2_span, using_network) |>
   write.csv(file = here("data", "cognate", "COGNATE_final.csv"), row.names = FALSE)
+
+
+# ── 6a. Pairwise language x language distance matrix ────────────────────────
+# New asset — cognate never had one. Keyed by glottocode (not language) to
+# match [0]_Phylogenetic_Tree.R's tip_map/tree_pruned$tip.label convention,
+# so [4.1]_COGNATE_PVR_sPCA.R can index it directly against the tree order.
+source(here("R", "shared", "pairwise_network_distance.R"))
+
+COGNATE_dist_matrix <- build_pairwise_distance_matrix(
+  points_df     = PH_cognate,
+  id_col        = "glottocode",
+  nodes         = nodes,
+  network_edges = network_edges,
+  land_sf       = land_sf,
+  land_penalty  = 4.44
+)
+
+write.csv(COGNATE_dist_matrix,
+          file = here("data", "cognate", "COGNATE_dist_matrix.csv"), row.names = TRUE)
 
 
 # ── 7. Assemble full_tree_sf (main edges + per-language connectors) ──────────

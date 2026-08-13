@@ -7,16 +7,15 @@
 # with permutation p-values, so geography and shared ancestry — collinear here —
 # are assessed together rather than by a single-predictor Mantel test.
 #
-# Note: the pairwise distance matrix is built by Dijkstra routing over the full
-# language-to-language network, not the nearest-node distance used in [3]. Each
-# pair takes the cheaper of the via-network route and a direct terrain-penalized
-# line (§6), under a single land penalty shared by every leg (§3) — brought to
-# parity with [5]_PHONEME_MMRR.R, which this script otherwise mirrors.
+# Note: the pairwise distance matrix (X_geo) is built once by
+# [3]_GRAMMAR_network_distance.R (all-pairs network routing, ratio-bounded
+# direct-line fallback) and read back here rather than rebuilt — this script
+# used to rebuild the same matrix from scratch with a hand-rolled Dijkstra.
 #
 # Inputs:  data/GRAMMAR_cosine_matrix.csv, data/GRAMBANKdf_full.csv,
-#          data/nodes.csv, data/edges.csv,
-#          data/GRAMMAR_phylo_dist_matrix.csv  (written by [0]_Phylogenetic_Tree.R)
-# Outputs: data/GRAMMAR_dist_matrix.csv, data/GRAMMAR_sim_matrix.csv,
+#          data/GRAMMAR_dist_matrix.csv       (written by [3])
+#          data/GRAMMAR_phylo_dist_matrix.csv (written by [0]_Phylogenetic_Tree.R)
+# Outputs: data/GRAMMAR_sim_matrix.csv,
 #          data/GRAMMAR_mmrr_results.csv        (joint two-predictor model)
 #          data/GRAMMAR_mmrr_single_results.csv (single-predictor models)
 #          figures/grammar/mmrr/grammar_mmrr_single_*.png  (3 single-predictor)
@@ -27,10 +26,6 @@
 library(readr)
 library(tidyverse)
 library(dplyr)
-library(geosphere)
-library(sf)
-library(maps)
-library(sfheaders)
 library(ggplot2)
 library(patchwork)
 library(here)
@@ -57,235 +52,21 @@ cosine_matrix <- read.csv(here("data", "GRAMMAR_cosine_matrix.csv"),
                           row.names = 1, check.names = FALSE) |>
   as.matrix()
 
-nodes <- read.csv(here("data", "nodes.csv"))
-edges <- read.csv(here("data", "edges.csv"))
-
-nodes$id   <- as.character(nodes$id)
-edges$from <- as.character(edges$from)
-edges$to   <- as.character(edges$to)
-
-# Add reverse edges for bidirectional routing
-reverse_edges <- edges |> rename(from = to, to = from)
-edges <- bind_rows(edges, reverse_edges) |> distinct()
-
 # ---- 1. Similarity matrix (cosine), Philippine languages --------------------
 cosine_matrix_phil <- cosine_matrix[ph_lang, ph_lang]
 GRAMMAR_sim_matrix <- cosine_matrix_phil
 
-# ---- 2. Land mask (Philippines + Malaysia) ----------------------------------
-world_map <- map_data("world") |> filter(region %in% c("Philippines", "Malaysia"))
-
-land_sf <- sf_polygon(obj = world_map, polygon_id = "group", x = "long", y = "lat") |>
-  st_union() |>
-  st_sf(geometry = _) |>
-  st_set_crs(4326)
-
-# ---- 3. Terrain-penalized network edges + weighted graph --------------------
-# ONE terrain penalty for every leg of every route — network edges, language
-# connectors, and the direct language-to-language line in §6. Land travel costs
-# LAND_PENALTY x sea travel per metre, which is a property of the terrain, not
-# of which layer a segment belongs to. This resolves the mismatch inherited from
-# the original monolith (edges at 44.18 vs connectors at 4.44), which made a
-# metre of land 10x dearer on the network than on a connector and left the
-# routing internally inconsistent. 4.44 is the value [3] already uses.
-LAND_PENALTY <- 4.44
-edge_land_penalty <- LAND_PENALTY
-
-edges <- edges |>
-  rowwise() |>
-  mutate(weight = {
-    from_coords <- nodes |> filter(id == from)
-    to_coords   <- nodes |> filter(id == to)
-    if (nrow(from_coords) == 0 || nrow(to_coords) == 0) NA_real_
-    else distHaversine(c(from_coords$longitude, from_coords$latitude),
-                       c(to_coords$longitude, to_coords$latitude))
-  }) |>
-  ungroup()
-
-edge_lines <- edges |>
-  rowwise() |>
-  mutate(
-    geometry = list(st_linestring(matrix(c(
-      nodes$longitude[nodes$id == from], nodes$latitude[nodes$id == from],
-      nodes$longitude[nodes$id == to],   nodes$latitude[nodes$id == to]
-    ), ncol = 2, byrow = TRUE)))
-  ) |>
-  ungroup() |>
-  st_as_sf(crs = 4326)
-
-edge_lines <- edge_lines |>
-  rowwise() |>
-  mutate(
-    land_part = list(st_intersection(geometry, land_sf)),
-    sea_part  = list(st_difference(geometry, land_sf)),
-
-    land_len = as.numeric(if (!is.null(land_part) && length(land_part) > 0) st_length(land_part) else 0),
-    sea_len  = as.numeric(if (!is.null(sea_part)  && length(sea_part)  > 0) st_length(sea_part)  else 0),
-
-    weighted_cost = land_len * edge_land_penalty + sea_len,
-    crosses_land  = land_len > 0
-  ) |>
-  ungroup()
-
-# Adjacency list keyed by node id, weighted by terrain-penalized cost
-all_ids <- unique(c(edge_lines$from, edge_lines$to))
-graph <- lapply(all_ids, function(id) {
-  neighbors <- edge_lines |> filter(from == id) |> select(to, weighted_cost)
-  if (nrow(neighbors) == 0) tibble(to = character(), weight = numeric())
-  else rename(neighbors, weight = weighted_cost)
-})
-names(graph) <- all_ids
-
-# ---- 4. Routing helpers -----------------------------------------------------
-# shortest_path_trace() is a hand-rolled Dijkstra kept verbatim from the original
-# Mantel script so X_geo stays bit-for-bit reproducible; igraph::distances() on
-# the same weighted graph (the [3] pattern) is the faster equivalent.
-find_nearest_node <- function(coords) {
-  distances <- distHaversine(matrix(c(nodes$longitude, nodes$latitude), ncol = 2),
-                             coords)
-  nodes$id[which.min(distances)]
-}
-
-shortest_path_trace <- function(start_id, end_id, graph) {
-  visited <- setNames(rep(FALSE, length(graph)), names(graph))
-  dist <- setNames(rep(Inf, length(graph)), names(graph))
-  prev <- setNames(rep(NA_character_, length(graph)), names(graph))
-  dist[start_id] <- 0
-  queue <- data.frame(id = start_id, dist = 0)
-
-  while (nrow(queue) > 0) {
-    queue <- queue[order(queue$dist), ]
-    current <- queue$id[1]
-    current_dist <- queue$dist[1]
-    queue <- queue[-1, ]
-
-    if (visited[current]) next
-    visited[current] <- TRUE
-
-    neighbors <- graph[[current]]
-    if (is.null(neighbors)) next
-
-    for (i in seq_len(nrow(neighbors))) {
-      neighbor <- neighbors$to[i]
-      weight <- neighbors$weight[i]
-      if (is.na(weight)) next
-      if (dist[neighbor] > current_dist + weight) {
-        dist[neighbor] <- current_dist + weight
-        prev[neighbor] <- current
-        queue <- rbind(queue, data.frame(id = neighbor, dist = dist[neighbor]))
-      }
-    }
-  }
-
-  if (!is.finite(dist[end_id])) return(list(distance = NA_real_, path = NULL))
-
-  # Reconstruct path
-  path <- end_id
-  while (!is.na(prev[path[1]])) {
-    path <- c(prev[path[1]], path)
-  }
-  return(list(distance = dist[end_id], path = path))
-}
-
-# ---- 5. Per-language connector penalties (coord -> nearest node) -------------
-land_penalty <- LAND_PENALTY   # same terrain penalty as the network edges (§3)
-
-phil_df <- GRAMBANKdf_PH |>
-  filter(Language_Type == "Philippine Language") |>
-  mutate(
-    start_coords = map2(Longitude, Latitude, ~ c(.x, .y)),
-    nearest_node = map_chr(start_coords, find_nearest_node)
-  )
-
-connector_df <- phil_df |>
-  mutate(
-    connector_geom = map2(start_coords, nearest_node, ~ st_linestring(rbind(
-      .x,
-      c(nodes$longitude[nodes$id == .y], nodes$latitude[nodes$id == .y])
-    )))
-  ) |>
-  mutate(connector_geom_sfc = st_sfc(connector_geom, crs = 4326)) |>
-  rowwise() |>
-  mutate(
-    land_part = list(st_intersection(connector_geom_sfc, land_sf)),
-    sea_part  = list(st_difference(connector_geom_sfc, land_sf)),
-
-    land_len = as.numeric(if (!is.null(land_part) && length(land_part) > 0) st_length(land_part) else 0),
-    sea_len  = as.numeric(if (!is.null(sea_part)  && length(sea_part)  > 0) st_length(sea_part)  else 0),
-
-    connector_penalty = land_len * land_penalty + sea_len
-  ) |>
-  ungroup()
-
-# ---- 6. Pairwise terrain-penalized distance matrix (X_geo) ------------------
-# Each pair takes the cheaper of two candidate routes (a true least-cost choice,
-# mirroring the pmin() [3] uses for its H2 measure):
-#
-#   via-network : connector1 + shortest path(node1 -> node2) + connector2
-#   direct      : the terrain-penalized straight line between the two languages
-#
-# Without the direct option every pair was forced out to the network and back,
-# which is indefensible for nearby languages: the [3] land/sea split shows 10%
-# of population pairs share a nearest node, so the network leg often contributes
-# 0 — leaving a pure out-and-back detour. Both legs are penalized with the same
-# LAND_PENALTY (§3), so the comparison is like-for-like.
-phil_pairs <- expand_grid(lang1 = phil_df$language, lang2 = phil_df$language) |>
-  filter(lang1 != lang2) |>
-  left_join(phil_df |> select(language, node1 = nearest_node), by = c("lang1" = "language")) |>
-  left_join(phil_df |> select(language, node2 = nearest_node), by = c("lang2" = "language")) |>
-  left_join(connector_df |> select(language, penalty1 = connector_penalty), by = c("lang1" = "language")) |>
-  left_join(connector_df |> select(language, penalty2 = connector_penalty), by = c("lang2" = "language")) |>
-  left_join(phil_df |> select(language, lon1 = Longitude, lat1 = Latitude), by = c("lang1" = "language")) |>
-  left_join(phil_df |> select(language, lon2 = Longitude, lat2 = Latitude), by = c("lang2" = "language"))
-
-# Direct-line cost, split into land/sea exactly like the connectors in §5.
-# Degenerate zero-length lines (languages recorded at identical coordinates)
-# would make st_linestring/st_intersection misbehave, so they short-circuit to 0.
-direct_penalized_cost <- function(lon1, lat1, lon2, lat2) {
-  if (isTRUE(all.equal(c(lon1, lat1), c(lon2, lat2)))) return(0)
-  geom <- st_sfc(st_linestring(rbind(c(lon1, lat1), c(lon2, lat2))), crs = 4326)
-  land_part <- st_intersection(geom, land_sf)
-  sea_part  <- st_difference(geom, land_sf)
-  land_part <- land_part[!st_is_empty(land_part)]
-  sea_part  <- sea_part[!st_is_empty(sea_part)]
-  land_len <- if (length(land_part) > 0) as.numeric(sum(st_length(land_part))) else 0
-  sea_len  <- if (length(sea_part)  > 0) as.numeric(sum(st_length(sea_part)))  else 0
-  land_len * LAND_PENALTY + sea_len
-}
-
-phil_pairs <- phil_pairs |>
-  rowwise() |>
-  mutate(
-    trace = list(shortest_path_trace(node1, node2, graph)),
-    tree_dist = trace$distance,
-    via_network_cost = if (is.na(tree_dist)) NA_real_ else penalty1 + tree_dist + penalty2,
-    direct_cost      = direct_penalized_cost(lon1, lat1, lon2, lat2),
-    # na.rm: an unreachable network route must not veto the direct one.
-    geodist_H1_span  = pmin(via_network_cost, direct_cost, na.rm = TRUE) / 1000,
-    used_direct      = !is.na(direct_cost) &
-      (is.na(via_network_cost) | direct_cost < via_network_cost)
-  ) |>
-  ungroup()
-
-message(sprintf(
-  "X_geo routing: %d of %d ordered pairs (%.0f%%) took the direct line rather than the network.",
-  sum(phil_pairs$used_direct), nrow(phil_pairs), 100 * mean(phil_pairs$used_direct)
-))
-
-dist_matrix <- phil_pairs |>
-  select(lang1, lang2, geodist_H1_span) |>
-  pivot_wider(names_from = lang2, values_from = geodist_H1_span) |>
-  column_to_rownames("lang1") |>
+# ---- 2. Pairwise terrain-penalized distance matrix (X_geo) ------------------
+# Built once by [3]_GRAMMAR_network_distance.R (all-pairs network routing,
+# ratio-bounded direct-line fallback via R/shared/pairwise_network_distance.R)
+# and read back here instead of rebuilt with a second hand-rolled Dijkstra.
+# NOT re-indexed by the full ph_lang here: [3] already restricts to the
+# 26 tree-matched languages (a strict subset of ph_lang), so indexing by the
+# wider ph_lang would error on the languages [3] correctly dropped. §7's
+# common-label intersection is what reconciles this against Y_ling/X_phylo.
+GRAMMAR_dist_matrix <- read.csv(here("data", "GRAMMAR_dist_matrix.csv"),
+                                row.names = 1, check.names = FALSE) |>
   as.matrix()
-
-GRAMMAR_dist_matrix <- dist_matrix[ph_lang, ph_lang]
-# phil_pairs excludes lang1 == lang2, so the diagonal comes back NA from
-# pivot_wider(); the graph is connected, so no other NAs arise.
-GRAMMAR_dist_matrix[is.na(GRAMMAR_dist_matrix)] <- 0
-
-# i->j and j->i sum the same weights in a different order, leaving ~1e-12 of
-# asymmetry; symmetrize so the MMRR guard below is exact.
-GRAMMAR_dist_matrix <- (GRAMMAR_dist_matrix + t(GRAMMAR_dist_matrix)) / 2
 
 # ---- 7. Phylogenetic distance matrix (X_phylo) + alignment ------------------
 # check.names = FALSE preserves names-with-spaces so the labels still match the
@@ -635,5 +416,6 @@ ggsave(here("figures", "grammar", "mmrr", "grammar_mmrr_partial_regression.png")
        partial_plot, width = 10, height = 4.5, units = "in", dpi = 300)
 
 # ---- 12. Persist matrices ---------------------------------------------------
-write.csv(GRAMMAR_dist_matrix, file = here("data", "GRAMMAR_dist_matrix.csv"), row.names = TRUE)
+# GRAMMAR_dist_matrix.csv is now [3]'s to write (it built the matrix); this
+# script only persists the similarity matrix it computed itself.
 write.csv(GRAMMAR_sim_matrix, file = here("data", "GRAMMAR_sim_matrix.csv"), row.names = TRUE)

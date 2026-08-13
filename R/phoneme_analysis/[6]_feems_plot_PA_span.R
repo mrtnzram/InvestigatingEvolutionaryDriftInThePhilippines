@@ -3,13 +3,17 @@
 # Renders the FEEMS effective-migration surface (the log10(w/w-bar) raster from
 # python/phoneme_feems.ipynb) as a ggplot base map of the Philippines, with each
 # language's subgroup membership overlaid as points (same palette/legend as
-# [8]), plus a matching legend strip. Saved as RDS that [7] loads to overlay
-# the waypoint routes.
+# [8]), plus a matching legend strip. Also renders the geographic-shuffle null
+# model's averaged surface (same notebook) as a second base map, on the SAME
+# color scale as the real one, so the two are directly comparable. Both saved
+# as RDS that [7] loads to overlay the waypoint routes.
 #
-# Input:   data/phoneme_surface_raster.csv (FEEMS surface, from phoneme_feems.ipynb),
+# Input:   data/phoneme_surface_raster.csv, data/phoneme_surface_raster_null_mean.csv
+#          (FEEMS surface + null-model average, from phoneme_feems.ipynb),
 #          data/PHONEME_cossim.csv (per-language coordinates, from [1]),
 #          data/PHONEME_subgroup_lookup.csv (subgroup + colour, from [0]_Phylogenetic_Tree.R)
-# Outputs: data/base_plot_phoneme_FEEMS.rds, data/legend_strip_phoneme_subgroup.rds
+# Outputs: data/base_plot_phoneme_FEEMS.rds, data/base_plot_phoneme_FEEMS_null.rds,
+#          data/legend_strip_phoneme_subgroup.rds
 # Next:    [7]_PA_geoplots.R
 # =============================================================================
 
@@ -18,10 +22,15 @@ library(dplyr)
 library(here)
 library(scales)
 
-phon_surface   <- read.csv(here("data", "phoneme_surface_raster.csv"))
-PHONEME_cossim <- read.csv(here("data", "PHONEME_cossim.csv"))
+phon_surface      <- read.csv(here("data", "phoneme_surface_raster.csv"))
+phon_surface_null <- read.csv(here("data", "phoneme_surface_raster_null_mean.csv"))
+PHONEME_cossim    <- read.csv(here("data", "PHONEME_cossim.csv"))
 
-vmax <- max(abs(phon_surface$log_w_ratio), na.rm = TRUE)
+# Shared color scale across the real and null maps (not each normalized to its own
+# max) — this is what makes a flatter null surface visibly wash out next to the real
+# one; it also means the real plot's scale below is now anchored to this combined
+# vmax, not phon_surface's own max as in earlier versions of this script.
+vmax <- max(abs(phon_surface$log_w_ratio), abs(phon_surface_null$log_w_ratio_null_mean), na.rm = TRUE)
 lims <- c(-vmax, vmax)
 
 world_map  <- map_data("world")
@@ -75,6 +84,41 @@ base_plot <- ggplot() +
 
 base_plot
 saveRDS(base_plot, file = here("data", "base_plot_phoneme_FEEMS.rds"))
+
+# ---- Null-model base map (same points, same shared color scale) -------------
+# Geographic-shuffle null: average FEEMS surface across 100 permutations that
+# shuffle which language sits at which location, from phoneme_feems.ipynb. Same
+# point overlay and `lims` as the real map above, so [7] can render it as a
+# directly comparable figure.
+base_plot_null <- ggplot() +
+  geom_tile(data = phon_surface_null, aes(x = lon, y = lat, fill = log_w_ratio_null_mean), alpha = 0.6) +
+  geom_polygon(data = map_subset, aes(x = long, y = lat, group = group),
+               fill = NA, color = "black") +
+  geom_point(data = points_coloured, aes(x = longitude, y = latitude),
+             size = 4.8, colour = "grey20") +
+  geom_point(data = points_coloured, aes(x = longitude, y = latitude),
+             size = 4.4, colour = "white") +
+  geom_point(data = points_coloured, aes(x = longitude, y = latitude, colour = subgroup),
+             size = 4.0) +
+  scale_colour_manual(values = pal, guide = "none") +
+  guides(
+    fill = guide_colorbar(title = expression(log[10](w/bar(w))), title.position = "top", title.hjust = 0.5)
+  ) +
+  coord_fixed(xlim = c(115, 130), ylim = c(4, 22)) +
+  scale_fill_gradientn(
+    colors = c("orange", "white", "cyan"),
+    values = rescale(c(-vmax, 0, vmax), from = lims),  # same lims as the real plot
+    limits = lims,
+    na.value = "transparent"
+  ) +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),
+        axis.text  = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+
+base_plot_null
+saveRDS(base_plot_null, file = here("data", "base_plot_phoneme_FEEMS_null.rds"))
 
 # ---- Legend strip (identical construction to [8]) ---------------------------
 # Hand-built stacked colour tiles, ordered by mean latitude (north first) so

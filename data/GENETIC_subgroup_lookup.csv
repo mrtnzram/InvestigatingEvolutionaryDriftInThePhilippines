@@ -1,0 +1,116 @@
+"population","glottocode","glottolog_name","level","subgroup","colour","match_tier","note"
+"AgtaBulusan","mtir1236","Mt. Iraya Agta","language","Central Philippine","#565153",5,"Sorsogon Ayta exists but is level='unattested' with a truncated affiliation ('Austronesian (Unattested)')"
+"AgtaCasiguran","casi1235","Casiguran-Nagtipunan Agta","language","Northeastern Luzon","#95A459",4,NA
+"AgtaDumagat","umir1236","Umiray Dumaget Agta","language","Greater Central Philippine","#ED6BB1",4,NA
+"AgtaDupaningan","dupa1235","Dupaninan Agta","language","Northeastern Luzon","#95A459",4,NA
+"AgtaIraya","mtir1236","Mt. Iraya Agta","language","Central Philippine","#565153",4,NA
+"AgtaIriga","mtir1235","Mt. Iriga Agta","language","Central Philippine","#565153",4,NA
+"AgtaIsarog","isar1235","Isarog Agta","language","Central Philippine","#565153",3,NA
+"AgtaLabin","cent2084","Central Cagayan Agta","language","Cagayan Valley","#79F287",4,NA
+"AgtaLopez","alab1246","Alabat Island Agta","language","Central Philippine","#565153",4,NA
+"AgtaMaddela","casi1235","Casiguran-Nagtipunan Agta","language","Northeastern Luzon","#95A459",4,NA
+"AgtaManide","cama1250","Camarines Norte Agta","language","Central Philippine","#565153",4,NA
+"AgtaMatnog","mtir1236","Mt. Iraya Agta","language","Central Philippine","#565153",5,"Sorsogon Ayta exists but is level='unattested' with a truncated affiliation ('Austronesian (Unattested)')"
+"AgtaRemontado","remo1247","Hatang Kayi","language","Central Luzon","#477C65",4,NA
+"Agutaya","agut1237","Agutaynen","language","Palawanic-Kalamian","#87B1F1",4,NA
+"Apayao","isna1241","Isnag","language","Cagayan Valley","#79F287",4,NA
+"Arta","arta1239","Arta","language","Northern Luzon","#7E6E40",1,NA
+"AtaManobo","atam1240","Ata Manobo","language","Manobo","#F16DEF",2,NA
+"AtiNegros","atii1237","Ati","language","Malayo-Polynesian","#C1E868",4,NA
+"AtiPanay","atii1237","Ati","language","Malayo-Polynesian","#C1E868",4,NA
+"AttaRizal","fair1238","Faire Atta","language","Cagayan Valley","#79F287",4,"Rizal, Cagayan is the former municipality of Faire"
+"AyanganIfugao","ayan1239","Ayangan Ifugao","dialect","Meso-Cordilleran","#EA7B81",2,NA
+"AytaAmbala","amba1267","Ambala Ayta","language","Sambalic","#F1C878",3,NA
+"AytaMag-antsi","maga1263","Mag-Anchi Ayta","language","Sambalic","#F1C878",4,NA
+"AytaMag-indi","magi1241","Mag-Indi Ayta","language","Sambalic","#F1C878",4,NA
+"AytaMagbukon","bata1297","Bataan Ayta","language","Sambalic","#F1C878",4,NA
+"AytaSambal","boto1242","Botolan Sambal","language","Sambalic","#F1C878",4,NA
+"BagoboKlata","gian1241","Giangan","language","Bilic","#BA7862",4,NA
+"Balangao","bala1310","Balangao","language","Meso-Cordilleran","#EA7B81",1,NA
+"Batak","bata1301","Batak","language","Palawanic-Kalamian","#87B1F1",1,NA
+"Bicolano","cent2087","Coastal-Naga Bikol","language","Central Philippine","#565153",4,NA
+"BinukidnonNegros","maga1264","Southern Binukidnon","language","Central Philippine","#565153",4,NA
+"BlaanKoronadal","koro1310","Koronadal Blaan","language","Tboli-Blaan","#5C7193",3,NA
+"BlaanSarangani","sara1326","Sarangani Blaan","language","Tboli-Blaan","#5C7193",3,NA
+"Boholano","boho1237","Boholano","dialect","Central Philippine","#565153",1,NA
+"Bolinao","boli1256","Bolinao","language","Sambalic","#F1C878",1,NA
+"Bontoc","cent2292","Central Bontoc","language","Meso-Cordilleran","#EA7B81",4,NA
+"Bugkalot","ilon1239","Ilongot","language","Meso-Cordilleran","#EA7B81",4,NA
+"BukdinonMatigsalug","mati1250","Matigsalug Manobo","language","Manobo","#F16DEF",4,NA
+"BukidnonBinukid","binu1244","Talaandig-Binukid","language","Manobo","#F16DEF",4,NA
+"BukidnonHigaonon","higa1237","Higaonon","language","Manobo","#F16DEF",4,NA
+"BukidnonManobo","west2555","Western Bukidnon Manobo","language","Manobo","#F16DEF",4,NA
+"BukidnonTalaandig","binu1244","Talaandig-Binukid","language","Manobo","#F16DEF",4,NA
+"BukidnonTigwahanon","tigw1237","Tigwa","dialect","Manobo","#F16DEF",5,"Glottolog dialect-level node, no language-level entry"
+"BukidnonUmayamnon","umay1237","Umayam","dialect","Manobo","#F16DEF",5,"Glottolog dialect-level node, no language-level entry"
+"Cebuano","cebu1242","Cebuano","language","Central Philippine","#565153",1,NA
+"Chavacano","chav1241","Chavacano","language","Latino-Faliscan","#B68FA9",1,NA
+"Cinamiguin","cina1236","Cinamiguin Manobo","language","Manobo","#F16DEF",4,NA
+"Cuyonon","cuyo1237","Cuyonon","language","Central Philippine","#565153",1,NA
+"DavaoMatigsalug","mati1250","Matigsalug Manobo","language","Manobo","#F16DEF",4,NA
+"Dibabaon","diba1242","Dibabawon Manobo","language","Manobo","#F16DEF",4,NA
+"Gaddang","gadd1244","Gaddang","language","Cagayan Valley","#79F287",1,NA
+"Gddang","gada1258","Ga'dang","language","Cagayan Valley","#79F287",4,"distinct from Gaddang (resolved separately by tier 1)"
+"Hilgaynon","hili1240","Hiligaynon","language","Central Philippine","#565153",4,NA
+"Ibaloi","ibal1244","Ibaloi","language","Meso-Cordilleran","#EA7B81",1,NA
+"Ibanag","iban1267","Ibanag","language","Cagayan Valley","#79F287",1,NA
+"Ibatan","ibat1238","Ibatan","language","Batanic","#60B57B",1,NA
+"Ilocano","ilok1237","Iloko","language","Northern Luzon","#7E6E40",4,NA
+"Iranun","iran1262","Iranun","language","Danaw","#C573F1",1,NA
+"Itawis","itaw1240","Itawit","language","Cagayan Valley","#79F287",4,NA
+"Itbayaten","ivat1242","Itbayat","language","Yami-Itbayat","#9ECCC9",4,NA
+"Itneg","itne1252","Itneg","family","Meso-Cordilleran","#EA7B81",1,NA
+"Ivatan","ibat1238","Ibatan","language","Batanic","#60B57B",4,"no 'Ivatan' language row in this Glottolog build, only Basco/Southern Ivatan dialects"
+"Kagayanen","kaga1256","Kagayanen","language","Manobo","#F16DEF",1,NA
+"Kalagan","kala1388","Kalagan","language","Central Philippine","#565153",1,NA
+"Kalanguya","kall1244","Kalanguya","family","Meso-Cordilleran","#EA7B81",1,NA
+"Kalinga","kali1311","Kalinga","family","Meso-Cordilleran","#EA7B81",1,NA
+"Kamayo","kama1363","Kamayo","language","Central Philippine","#565153",1,NA
+"Kankanaey","kank1243","Kankanaey","language","Meso-Cordilleran","#EA7B81",1,NA
+"Kapampangan","pamp1243","Pampanga","language","Central Luzon","#477C65",4,NA
+"Kinaray-a","kina1250","Kinaray-a","language","Central Philippine","#565153",1,NA
+"Lambanguian","tiru1241","Tiruray","language","Bilic","#BA7862",5,"Lambangian are a Teduray-Dulangan community, Maguindanao"
+"Maguindanaon","magu1243","Maguindanao","language","Danaw","#C573F1",4,NA
+"Malaweg","mala1534","Malaweg","language","Cagayan Valley","#79F287",1,NA
+"Mamanwa","mama1275","Minamanwa","language","Central Philippine","#565153",4,NA
+"Mandaya","kara1489","Mandaya","language","Central Philippine","#565153",1,NA
+"Manguangan","diba1242","Dibabawon Manobo","language","Manobo","#F16DEF",5,"no Mangguangan row in this Glottolog build; nearest attested relative, Davao de Oro neighbour"
+"MangyanBangon","east2482","Eastern Tawbuid","language","South Mangyan","#85DEF2",5,"no Bangon Mangyan row; Bangon groups with Tawbuid, same province"
+"MangyanBuhid","buhi1245","Buhid","language","South Mangyan","#85DEF2",4,NA
+"MangyanHanunuo","hanu1241","Hanunoo","language","South Mangyan","#85DEF2",4,NA
+"MangyanIraya","iray1237","Iraya","language","North Mangyan","#ECBEBD",4,NA
+"ManoboAgusan","agus1235","Agusan Manobo","language","Manobo","#F16DEF",3,NA
+"ManoboDulangan","cota1241","Cotabato Manobo","language","Manobo","#F16DEF",4,NA
+"ManoboIlianen","ilia1236","Ilianen Manobo","language","Manobo","#F16DEF",3,NA
+"ManoboRK","raja1254","Rajah Kabunsuwan Manobo","language","Manobo","#F16DEF",4,NA
+"ManoboSarangani","sara1327","Sarangani Manobo","language","Manobo","#F16DEF",3,NA
+"ManoboTagabawa","taga1272","Tagabawa","language","Manobo","#F16DEF",4,NA
+"Mansaka","mans1262","Mansaka","language","Central Philippine","#565153",1,NA
+"Meranao","mara1404","Maranao","language","Danaw","#C573F1",4,NA
+"Molbog","molb1237","Molbog","language","Palawanic-Kalamian","#87B1F1",1,NA
+"Obo","obom1235","Obo Manobo","language","Manobo","#F16DEF",4,NA
+"OvuManuvo","obom1235","Obo Manobo","language","Manobo","#F16DEF",4,NA
+"Palawano","cent2091","Central Palawano","language","Palawanic-Kalamian","#87B1F1",4,NA
+"Pangasinan","pang1290","Pangasinan","language","Meso-Cordilleran","#EA7B81",1,NA
+"SamaBangingi","bala1311","Balangingi","language","Greater Barito linkage","#A74B82",4,NA
+"SamaDeyaBonggao","cent2092","Central Sama","language","Greater Barito linkage","#A74B82",4,NA
+"SamaDilautBonggao","sout2918","Southern Sama","language","Greater Barito linkage","#A74B82",4,NA
+"SamaDilautMampang","sout2918","Southern Sama","language","Greater Barito linkage","#A74B82",4,NA
+"SamaDilautTaluksangay","sout2918","Southern Sama","language","Greater Barito linkage","#A74B82",4,NA
+"SamaKabingaan","kabi1262","Kabinga'an","dialect","Greater Barito linkage","#A74B82",5,"Glottolog dialect-level node, no language-level entry"
+"Sambal","tina1248","Tinà Sambal","language","Sambalic","#F1C878",4,NA
+"Sangil","sang1337","Sangil","language","Sangiric","#A852A0",1,NA
+"Subanen","suba1253","Subanen","family","Subanen","#7CF2D9",1,NA
+"Subanon","west2557","Western Subanon","language","Subanen","#7CF2D9",4,NA
+"Sulodnon","sulo1237","Sulod","language","Central Philippine","#565153",4,NA
+"Surigaonon","suri1273","Surigaonon","language","Central Philippine","#565153",1,NA
+"Tagakaolo","taga1268","Tagakaulu Kalagan","language","Central Philippine","#565153",4,NA
+"Tagalog","taga1270","Tagalog","language","Central Philippine","#565153",1,NA
+"Tagbanwa","tagb1258","Tagbanwa","language","Palawanic-Kalamian","#87B1F1",1,NA
+"Tausug","taus1251","Tausug","language","Central Philippine","#565153",1,NA
+"Tboli","tbol1240","Tboli","language","Tboli-Blaan","#5C7193",1,NA
+"Teduray","tiru1241","Tiruray","language","Bilic","#BA7862",4,NA
+"TuwaliIfugao","tuwa1243","Tuwali Ifugao","language","Meso-Cordilleran","#EA7B81",2,NA
+"Waray","wara1247","Waray","dialect","Central Philippine","#565153",1,NA
+"Yakan","yaka1277","Yakan","language","Greater Barito linkage","#A74B82",1,NA
+"Yogad","yoga1237","Yogad","language","Cagayan Valley","#79F287",1,NA

@@ -3,9 +3,8 @@
 # Input:   data/PHONEME_cossim_marked.csv (from [2]), data/nodes.csv, data/edges.csv
 # Outputs: data/PHONEME_final.csv (cossim + geodist_H1_span, the final
 #          per-language table for the regression file), data/phoneme_waypoint_plot.rds
-#          (overview arrow plot)
-# Note:    pairwise inter-language distances for the MMRR analysis are computed
-#          separately in [5]_PHONEME_MMRR.R (Dijkstra routing).
+#          (overview arrow plot), data/PHONEME_dist_matrix.csv (pairwise
+#          language x language migration cost, read by [4.1] and [5])
 # ──────────────────────────────────────────────────────────────────────────────
 
 library(tidyverse)
@@ -286,6 +285,23 @@ PHONEME_cossim |>
          any_of(c("span_influenced", "jap_influenced", "eng_influenced")),
          geodist_H1_span, geodist_H2_span, using_network) |>
   write.csv(file = here("data", "PHONEME_final.csv"), row.names = FALSE)
+
+
+# ── 6a. Pairwise language x language distance matrix ────────────────────────
+# Moved here from [5]_PHONEME_MMRR.R so [4.1]_PHONEME_PVR_sPCA.R can read it
+# too, without either script rebuilding the network graph a second time.
+source(here("R", "shared", "pairwise_network_distance.R"))
+
+PHONEME_dist_matrix <- build_pairwise_distance_matrix(
+  points_df     = PHONEME_cossim,
+  id_col        = "language",
+  nodes         = nodes,
+  network_edges = network_edges,
+  land_sf       = land_sf,
+  land_penalty  = 4.44
+)
+
+write.csv(PHONEME_dist_matrix, file = here("data", "PHONEME_dist_matrix.csv"), row.names = TRUE)
 
 
 # ── 7. Assemble full_tree_sf (main edges + per-language connectors) ─────────

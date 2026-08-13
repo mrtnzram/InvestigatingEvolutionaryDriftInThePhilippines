@@ -1,4 +1,4 @@
 "model","beta","p_value","r_squared"
-"Linguistic similarity vs Geographic distance",-0.125976805619236,5e-04,0.0158701555540268
+"Linguistic similarity vs Geographic distance",-0.102791710498578,0.0017,0.0105661357472234
 "Linguistic similarity vs Phylogenetic distance",-0.122629601686231,7e-04,0.0150380192097239
-"Geographic distance vs Phylogenetic distance",0.678550518224284,1e-04,0.460430805782435
+"Geographic distance vs Phylogenetic distance",0.647758951341132,1e-04,0.419591659042559

@@ -1,0 +1,13 @@
+{
+  "n_perm": 100,
+  "n_completed": 48,
+  "n_skipped": 52,
+  "perm_seed": 0,
+  "lamb_handling": "fixed at 2.06913808111479",
+  "lamb_cv_reused": 2.06913808111479,
+  "T_het_observed": 0.5985778051265986,
+  "T_het_null_mean": 0.29083603760923055,
+  "T_het_null_max": 0.7516856458824045,
+  "T_het_p": 0.10204081632653061,
+  "T_cv_p": null
+}

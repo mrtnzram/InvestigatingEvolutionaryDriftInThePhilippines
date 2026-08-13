@@ -6,7 +6,9 @@ genetic PLINK data, run headless on a remote server over SSH.
 Inputs:  --bfile PLINK prefix (bed/bim/fam, already QC'd/pruned — this script never
          shells out to a PLINK binary), --coords population coordinates CSV.
 Outputs: genetic_surface_raster.csv, nodepos_genetic.csv, edgew_genetic.csv,
-         genetic_feems_meta.json, GENETIC_feems_sample_match.csv.
+         genetic_feems_meta.json, GENETIC_feems_sample_match.csv. With --permute,
+         also: genetic_surface_raster_null_mean.csv, genetic_null_density.png,
+         genetic_feems_null_meta.json (and genetic_null_surface.png if --plot too).
 
 Usage:
     python genetic_feems.py --stage match --bfile /path/to/Phil_1000g_SGDP_1.66M \
@@ -16,6 +18,15 @@ Usage:
         --coords philippine_ethnolinguistic_coords.csv --out ./out
 
     python genetic_feems.py --stage all ...   # match, then fit, in one call (default)
+
+    # Geographic-shuffle null model (100 permutations, fixed lambda, no CV per
+    # permutation) run immediately after a real fit:
+    python genetic_feems.py --stage all --permute --bfile ... --coords ... --out ./out
+
+    # Re-run just the null model later against an already-fit --out directory,
+    # skipping CV by passing the lamb_cv it already found:
+    python genetic_feems.py --stage fit --permute --lamb 0.0123 \\
+        --bfile ... --coords ... --out ./out
 
 """
 
@@ -358,6 +369,333 @@ def rasterize(sp_graph, outer, raster_res: int):
     return LON, LAT, Z
 
 
+def _rasterize_fixed_grid(sp_graph, LON, LAT, valid_mask):
+    """Same node-averaging + triangulation as rasterize(), but reuses a precomputed
+    LON/LAT grid and point-in-polygon mask instead of rebuilding them. Valid because
+    node_pos (and hence the mask) is a property of grid/edges/outer alone — it never
+    changes across null permutations, only the fitted edge weights do. Used by
+    run_permutations() to avoid repeating rasterize()'s point-in-polygon loop
+    (the expensive part, at raster_res=300 a few hundred thousand Point.contains
+    calls) n_perm times."""
+    import matplotlib.tri as mtri
+
+    n_nodes = sp_graph.node_pos.shape[0]
+    edge_arr = np.array(sp_graph.edges)
+    log_w = np.log10(sp_graph.w / sp_graph.w.mean())
+
+    node_val = np.zeros(n_nodes)
+    node_cnt = np.zeros(n_nodes)
+    for k in range(len(edge_arr)):
+        i, j = edge_arr[k]
+        node_val[i] += log_w[k]
+        node_cnt[i] += 1
+        node_val[j] += log_w[k]
+        node_cnt[j] += 1
+    node_val = np.divide(
+        node_val, node_cnt, out=np.full(n_nodes, np.nan), where=node_cnt > 0
+    )
+
+    triang = mtri.Triangulation(sp_graph.node_pos[:, 0], sp_graph.node_pos[:, 1])
+    interp = mtri.LinearTriInterpolator(triang, node_val)
+    Z = interp(LON, LAT)
+    return np.ma.array(Z, mask=~valid_mask | np.ma.getmaskarray(Z))
+
+
+def is_degenerate_fit(sp_graph, tol=1e-9):
+    """True if every edge got (numerically) the same weight — the signature of a
+    FEEMS fit that never actually fit anything.
+
+    This happens when fit_null_model's constant-w MLE is unbounded (the likelihood
+    keeps improving as w -> inf), so Nelder-Mead walks out to an arbitrary huge w0,
+    L-BFGS starts there with non-finite gradients and returns its starting point
+    unchanged. Because fit_null_model does not depend on lamb, EVERY lambda then
+    returns the same uniform surface and the CV curve is perfectly flat. Observed
+    on the 26-language GRAMBANK subset (16 demes, 10 singletons); guarded here
+    because the failure is otherwise silent — it yields a plausible-looking flat
+    map rather than an error.
+    """
+    w = np.asarray(sp_graph.w)
+    return bool(np.ptp(w) <= tol * max(abs(float(np.mean(w))), 1.0))
+
+
+def run_permutations(args, sp_graph, genotypes, coord, grid, edges, outer, LON, LAT, Z, lamb_cv):
+    """Geographic-shuffle null model: reassign coord rows onto genotypes in random
+    order (genotypes never reordered — only which sample owns which lon/lat is
+    shuffled), refit, and summarise across args.n_perm permutations.
+
+    Test statistic. Two are recorded:
+      * T_het = sd of log10(w/wbar) over valid raster cells. Simple, but it is a
+        function of the fitted w(lamb) and therefore inherits lamb's shrinkage:
+        as lamb -> inf, T_het -> 0 regardless of signal. Holding lamb fixed across
+        permutations embeds that nuisance parameter in the statistic, so a
+        T_het-based p-value is only interpretable at a fixed, shared lamb.
+      * T_cv  = min over lamb of the LODO CV error (--perm-cv). Profiling over lamb
+        removes the nuisance parameter, and it tests the question the null model is
+        actually asking: does the sample->location correspondence improve
+        out-of-sample prediction? Costs one CV sweep per permutation.
+
+    Note on the averaged null raster: independent permutations produce independently
+    oriented surfaces, so their mean cancels toward 0 at roughly
+    (per-permutation sd)/sqrt(n_perm) whether or not geography alone can generate
+    structure. The averaged map is therefore NOT evidence of a flat null — the
+    per-cell null sd (also exported) and the per-permutation statistic are the
+    informative quantities.
+
+    Resumable: progress is checkpointed to {args.out}/genetic_null_checkpoint.npz
+    every 10 iterations, since this is the heaviest of the three FEEMS pipelines
+    (1000+ samples) and may run unattended on a server. Pass --perm-restart to
+    ignore an existing checkpoint and start over.
+    """
+    import time
+
+    from feems import SpatialGraph
+
+    n = coord.shape[0]
+    valid_mask = ~np.ma.getmaskarray(Z)  # grid/outer/node_pos are permutation-invariant
+    vmax_real = float(np.nanmax(np.abs(Z)))
+    # Fixed histogram bins (not a growing pooled array) so density accumulates in
+    # O(1) memory per iteration and survives a checkpoint/resume cleanly.
+    hist_edges = np.linspace(-3 * vmax_real, 3 * vmax_real, 161)
+
+    ckpt_path = args.out / "genetic_null_checkpoint.npz"
+    start_i = 0
+    raster_sum = np.zeros_like(LON, dtype=float)
+    raster_sq = np.zeros_like(LON, dtype=float)  # for the per-cell null sd
+    raster_count = np.zeros_like(LON, dtype=int)
+    hist_counts = np.zeros(len(hist_edges) - 1, dtype=np.int64)
+    perm_het = []  # per-permutation T_het
+    perm_cv = []  # per-permutation T_cv (only when --perm-cv)
+    n_completed = 0
+    n_skipped = 0
+    skipped_log = []
+
+    if ckpt_path.exists() and not args.perm_restart:
+        ckpt = np.load(ckpt_path)
+        if int(ckpt["n_perm"]) == args.n_perm and int(ckpt["perm_seed"]) == args.perm_seed:
+            start_i = int(ckpt["next_i"])
+            raster_sum = ckpt["raster_sum"]
+            raster_sq = ckpt["raster_sq"]
+            raster_count = ckpt["raster_count"]
+            hist_counts = ckpt["hist_counts"]
+            perm_het = list(ckpt["perm_het"])
+            perm_cv = list(ckpt["perm_cv"])
+            n_completed = int(ckpt["n_completed"])
+            n_skipped = int(ckpt["n_skipped"])
+            print(f"[permute] resuming from checkpoint: {start_i}/{args.n_perm} already attempted")
+        else:
+            print(
+                "[permute] checkpoint doesn't match --n-perm/--perm-seed — ignoring it "
+                "(pass --perm-restart to silence this and always start fresh)"
+            )
+
+    if args.perm_cv:
+        from feems.cross_validation import run_cv
+
+        perm_lamb_grid = np.geomspace(args.lamb_min, args.lamb_max, args.lamb_n)[::-1]
+        n_folds_perm = args.n_folds if args.n_folds > 0 else sp_graph.n_observed_nodes
+        print(
+            f"[permute] {args.n_perm} permutations, CV re-run per permutation "
+            f"({args.lamb_n} lambdas x {n_folds_perm} folds each) — statistic: T_cv (lambda-free)"
+        )
+    else:
+        print(
+            f"[permute] {args.n_perm} permutations at FIXED lamb={lamb_cv:.6g} — statistic: T_het.\n"
+            f"[permute] NOTE: T_het inherits lambda's shrinkage; a fixed-lambda p-value is only "
+            f"comparable within this lambda. Use --perm-cv for the lambda-free T_cv statistic."
+        )
+
+    t0 = time.time()
+    for i in range(start_i, args.n_perm):
+        rng = np.random.default_rng(args.perm_seed + i)
+        perm = rng.permutation(n)
+        coord_null = coord[perm]
+        try:
+            sp_graph_null = SpatialGraph(genotypes, coord_null, grid, edges, scale_snps=True)
+            # occupancy is a property of the fixed point set, not the label assignment —
+            # this should never fire; it's a cheap sanity check against an implementation bug.
+            assert sp_graph_null.n_observed_nodes == sp_graph.n_observed_nodes
+            if args.perm_cv:
+                cv_err_p = run_cv(
+                    sp_graph_null, perm_lamb_grid, n_folds=n_folds_perm, factr=1e10
+                )
+                mean_err_p = np.mean(cv_err_p, axis=0).ravel()
+                lamb_p = float(perm_lamb_grid[np.argmin(mean_err_p)])
+                perm_cv.append(float(mean_err_p.min()))
+            else:
+                lamb_p = lamb_cv
+            sp_graph_null.fit(lamb=lamb_p, optimize_q=None)
+            if is_degenerate_fit(sp_graph_null):
+                raise RuntimeError(
+                    "degenerate fit (all edge weights equal) — the model did not "
+                    "converge for this permutation"
+                )
+            Z_null = _rasterize_fixed_grid(sp_graph_null, LON, LAT, valid_mask)
+        except Exception as e:
+            n_skipped += 1
+            skipped_log.append((i, str(e)))
+            continue
+
+        ok = ~np.ma.getmaskarray(Z_null)
+        vals = Z_null[ok].data
+        raster_sum[ok] += vals
+        raster_sq[ok] += vals ** 2
+        raster_count[ok] += 1
+        counts, _ = np.histogram(vals, bins=hist_edges)
+        hist_counts += counts
+        perm_het.append(float(vals.std()))
+        n_completed += 1
+
+        if i == start_i:
+            per_iter = time.time() - t0
+            remaining = args.n_perm - start_i
+            print(
+                f"[permute] first iteration took {per_iter:.1f}s — "
+                f"est. total ~{per_iter * remaining:.0f}s for the remaining {remaining}"
+            )
+        if (i + 1) % 10 == 0 or (i + 1) == args.n_perm:
+            print(f"[permute] {i + 1}/{args.n_perm} done ({time.time() - t0:.0f}s elapsed)")
+            np.savez(
+                ckpt_path,
+                raster_sum=raster_sum,
+                raster_sq=raster_sq,
+                raster_count=raster_count,
+                hist_counts=hist_counts,
+                hist_edges=hist_edges,
+                perm_het=np.asarray(perm_het, dtype=float),
+                perm_cv=np.asarray(perm_cv, dtype=float),
+                next_i=i + 1,
+                n_completed=n_completed,
+                n_skipped=n_skipped,
+                n_perm=args.n_perm,
+                perm_seed=args.perm_seed,
+            )
+
+    print(f"[permute] completed {n_completed}/{args.n_perm} ({n_skipped} skipped): {skipped_log}")
+    if n_completed == 0:
+        sys.exit("error: no permutation completed — nothing to summarise")
+    skip_frac = n_skipped / max(args.n_perm, 1)
+    if skip_frac > 0.05:
+        print(
+            f"[permute] WARNING: {skip_frac:.0%} of permutations failed to converge and were "
+            f"dropped. The p-values below are therefore CONDITIONAL ON CONVERGENCE, not a "
+            f"clean permutation test: non-converged nulls are degenerate (uniform w, T_het=0), "
+            f"so dropping them removes the low end of the null distribution and inflates the "
+            f"T_het p-value. Report the skip rate alongside any p-value, and treat a skip rate "
+            f"this high as evidence the model is poorly identified on this data."
+        )
+
+    null_mean = np.divide(
+        raster_sum, raster_count, out=np.full_like(raster_sum, np.nan), where=raster_count > 0
+    )
+    # Per-cell null sd. This, not the mean, is what says how much structure geography
+    # alone can generate at each location: independent permutations cancel in the mean
+    # (~sd/sqrt(n_perm)) but not in the spread.
+    null_var = np.divide(
+        raster_sq, raster_count, out=np.full_like(raster_sq, np.nan), where=raster_count > 0
+    ) - null_mean ** 2
+    null_sd = np.sqrt(np.clip(null_var, 0.0, None))
+    valid_mean = raster_count > 0
+
+    # Per-cell z of the observed surface against the null, so the map can be read
+    # cell-by-cell instead of collapsing to one scalar.
+    with np.errstate(divide="ignore", invalid="ignore"):
+        z_obs = np.where(null_sd > 0, (np.asarray(Z) - null_mean) / null_sd, np.nan)
+
+    null_raster_df = pd.DataFrame(
+        {
+            "lon": LON[valid_mean],
+            "lat": LAT[valid_mean],
+            "log_w_ratio_null_mean": null_mean[valid_mean],
+            "log_w_ratio_null_sd": null_sd[valid_mean],
+            "log_w_ratio_obs": np.asarray(Z)[valid_mean],
+            "z_obs_vs_null": z_obs[valid_mean],
+        }
+    )
+    null_raster_path = args.out / "genetic_surface_raster_null_mean.csv"
+    null_raster_df.to_csv(null_raster_path, index=False)
+    print(f"[permute] wrote {null_raster_path} ({null_raster_df.shape})")
+
+    # --- permutation test -----------------------------------------------------
+    perm_het_arr = np.asarray(perm_het, dtype=float)
+    obs_het = float(np.asarray(Z)[valid_mask].std())
+    p_het = (1 + int(np.sum(perm_het_arr >= obs_het))) / (len(perm_het_arr) + 1)
+    print(
+        f"[permute] T_het observed {obs_het:.5f} | null mean {perm_het_arr.mean():.5f} "
+        f"max {perm_het_arr.max():.5f} | p = {p_het:.4f}"
+    )
+    p_cv = None
+    if args.perm_cv and perm_cv:
+        perm_cv_arr = np.asarray(perm_cv, dtype=float)
+        # obs_cv is the real run's profiled CV minimum, passed through args by run_fit.
+        obs_cv = getattr(args, "_obs_cv_min", None)
+        if obs_cv is not None:
+            p_cv = (1 + int(np.sum(perm_cv_arr <= obs_cv))) / (len(perm_cv_arr) + 1)
+            print(
+                f"[permute] T_cv  observed {obs_cv:.6f} | null mean {perm_cv_arr.mean():.6f} "
+                f"min {perm_cv_arr.min():.6f} | p = {p_cv:.4f}"
+            )
+        else:
+            print("[permute] T_cv null collected but no observed CV minimum available "
+                  "(run with --stage fit/all and without --lamb to enable the T_cv test)")
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    bin_centers = (hist_edges[:-1] + hist_edges[1:]) / 2
+    bin_width = hist_edges[1] - hist_edges[0]
+    total = hist_counts.sum()
+    density = hist_counts / (total * bin_width) if total else hist_counts.astype(float)
+
+    fig, ax = plt.subplots(figsize=(5, 3), dpi=120)
+    ax.bar(bin_centers, density, width=bin_width, alpha=0.7)
+    ax.set_xlabel(r"null $\log_{10}(w/\bar{w})$ (pooled raster cells, all permutations)")
+    ax.set_ylabel("density")
+    density_path = args.out / "genetic_null_density.png"
+    fig.savefig(density_path, bbox_inches="tight")
+    plt.close(fig)
+    print(f"[permute] wrote {density_path}")
+
+    if args.plot:
+        from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
+
+        feems_cmap = LinearSegmentedColormap.from_list(
+            "feems_oc", ["#E8890C", "#FFFFFF", "#00C6D6"]
+        )
+        norm = TwoSlopeNorm(vmin=-vmax_real, vcenter=0.0, vmax=vmax_real)
+        fig, ax = plt.subplots(figsize=(7, 9), dpi=150)
+        ax.pcolormesh(
+            LON, LAT, np.ma.array(null_mean, mask=~valid_mean),
+            cmap=feems_cmap, norm=norm, shading="auto", alpha=0.85,
+        )
+        ax.scatter(coord[:, 0], coord[:, 1], s=12, c="black")
+        ax.set_aspect("equal")
+        surface_path = args.out / "genetic_null_surface.png"
+        fig.savefig(surface_path, bbox_inches="tight")
+        plt.close(fig)
+        print(f"[permute] wrote {surface_path}")
+
+    null_meta = {
+        "n_perm": args.n_perm,
+        "n_completed": n_completed,
+        "n_skipped": n_skipped,
+        "perm_seed": args.perm_seed,
+        "lamb_handling": "re-selected per permutation (--perm-cv)" if args.perm_cv
+                        else f"fixed at {lamb_cv}",
+        "lamb_cv_reused": lamb_cv,
+        "T_het_observed": obs_het,
+        "T_het_null_mean": float(perm_het_arr.mean()),
+        "T_het_null_max": float(perm_het_arr.max()),
+        "T_het_p": p_het,
+        "T_cv_p": p_cv,
+    }
+    null_meta_path = args.out / "genetic_feems_null_meta.json"
+    with open(null_meta_path, "w") as f:
+        json.dump(null_meta, f, indent=2)
+    print(f"[permute] wrote {null_meta_path}")
+
+
 def run_fit(args, match_df: pd.DataFrame):
     import networkx as nx
     from feems import SpatialGraph
@@ -416,34 +754,52 @@ def run_fit(args, match_df: pd.DataFrame):
     # scale_snps=True: FEEMS default for real genotypes (Patterson-scaled allele frequencies).
     sp_graph = SpatialGraph(genotypes, coord, grid, edges, scale_snps=True)
 
-    n_folds = args.n_folds if args.n_folds > 0 else sp_graph.n_observed_nodes
-    lamb_grid = np.geomspace(args.lamb_min, args.lamb_max, args.lamb_n)[::-1]
-    print(f"[fit] running CV: {args.lamb_n} lambdas x {n_folds} folds")
-    cv_err = run_cv(sp_graph, lamb_grid, n_folds=n_folds, factr=1e10)
-    mean_cv_err = np.mean(cv_err, axis=0)
-    argmin = int(np.argmin(mean_cv_err))
-    lamb_cv = float(lamb_grid[argmin])
-    print(f"[fit] lamb_cv = {lamb_cv:.6g}")
-    if argmin in (0, len(lamb_grid) - 1):
-        print(
-            "[fit] WARNING: CV minimum at lambda-grid boundary — widen --lamb-min/--lamb-max"
-        )
+    if args.lamb is not None:
+        # Explicit lambda override — skip the expensive leave-one-deme-out CV sweep
+        # entirely. This is what lets --permute be re-run later against an already-
+        # fit --out directory without repeating CV (pass the lamb_cv a prior run
+        # already found, e.g. read from that run's genetic_feems_meta.json).
+        lamb_cv = float(args.lamb)
+        print(f"[fit] --lamb given: skipping CV, lamb_cv = {lamb_cv:.6g}")
+    else:
+        n_folds = args.n_folds if args.n_folds > 0 else sp_graph.n_observed_nodes
+        lamb_grid = np.geomspace(args.lamb_min, args.lamb_max, args.lamb_n)[::-1]
+        print(f"[fit] running CV: {args.lamb_n} lambdas x {n_folds} folds")
+        cv_err = run_cv(sp_graph, lamb_grid, n_folds=n_folds, factr=1e10)
+        mean_cv_err = np.mean(cv_err, axis=0)
+        argmin = int(np.argmin(mean_cv_err))
+        lamb_cv = float(lamb_grid[argmin])
+        # observed profiled CV minimum — the T_cv test statistic for --perm-cv
+        args._obs_cv_min = float(mean_cv_err.min())
+        print(f"[fit] lamb_cv = {lamb_cv:.6g}")
+        if argmin in (0, len(lamb_grid) - 1):
+            print(
+                "[fit] WARNING: CV minimum at lambda-grid boundary — widen --lamb-min/--lamb-max"
+            )
 
-    if args.plot:
-        import matplotlib
+        if args.plot:
+            import matplotlib
 
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
+            matplotlib.use("Agg")
+            import matplotlib.pyplot as plt
 
-        fig, ax = plt.subplots(figsize=(5, 3), dpi=120)
-        ax.plot(np.log10(lamb_grid), mean_cv_err, "o-")
-        ax.axvline(np.log10(lamb_cv), ls="--", c="r")
-        ax.set_xlabel(r"$\log_{10}\lambda$")
-        ax.set_ylabel("LOO CV error")
-        fig.savefig(args.out / "feems_cv_curve.png", bbox_inches="tight")
-        plt.close(fig)
+            fig, ax = plt.subplots(figsize=(5, 3), dpi=120)
+            ax.plot(np.log10(lamb_grid), mean_cv_err, "o-")
+            ax.axvline(np.log10(lamb_cv), ls="--", c="r")
+            ax.set_xlabel(r"$\log_{10}\lambda$")
+            ax.set_ylabel("LOO CV error")
+            fig.savefig(args.out / "feems_cv_curve.png", bbox_inches="tight")
+            plt.close(fig)
 
     sp_graph.fit(lamb=lamb_cv, optimize_q=None)
+    if is_degenerate_fit(sp_graph):
+        sys.exit(
+            "error: degenerate fit — every edge received the same weight, so no migration "
+            "surface was actually estimated. This means the constant-w null model had no "
+            "finite MLE (w -> inf) and every lambda returns the same uniform surface; check "
+            "whether the CV curve is flat and how many demes are occupied. Refusing to "
+            "export a surface that carries no information."
+        )
     log_ratio = np.log10(sp_graph.w / sp_graph.w.mean())
     print(
         f"[fit] log10(w/wbar): min {log_ratio.min():.3f} max {log_ratio.max():.3f} sd {log_ratio.std():.3f}"
@@ -530,6 +886,9 @@ def run_fit(args, match_df: pd.DataFrame):
         json.dump(meta, f, indent=2)
     print(f"[fit] wrote {meta_path}")
     print(json.dumps(meta, indent=2))
+
+    if args.permute:
+        run_permutations(args, sp_graph, genotypes, coord, grid, edges, outer, LON, LAT, Z, lamb_cv)
 
 
 # --------------------------------------------------------------------------- #
@@ -636,16 +995,63 @@ def parse_args():
     p.add_argument(
         "--max-snps",
         type=int,
-        default=None,
-        help="randomly subsample to this many SNPs before fitting (default: use all)",
+        default=100000,
+        help="randomly subsample to this many SNPs before fitting (default: 100000; "
+        "pass 0 to use all). 100000 is what produced the recorded run in "
+        "genetic_feems_meta.json (2246051 total -> 100000 subsampled -> 69833 after "
+        "dropping invariant SNPs). FEEMS collapses genotypes to per-deme allele "
+        "frequencies, so beyond ~1e5 SNPs the surface changes little while the "
+        "per-permutation cost keeps scaling",
     )
     p.add_argument(
-        "--seed", type=int, default=42, help="RNG seed for --max-snps subsampling"
+        "--seed",
+        type=int,
+        default=42,
+        help="RNG seed for --max-snps subsampling; with the same --bfile and --seed "
+        "the subsample is reproducible across runs (default 42)",
     )
     p.add_argument(
         "--plot",
         action="store_true",
         help="also write feems_cv_curve.png / feems_surface.png (plain matplotlib, no cartopy)",
+    )
+
+    p.add_argument(
+        "--lamb",
+        type=float,
+        default=None,
+        help="skip CV and fit at this lambda directly — lets --permute be re-run "
+        "later without repeating the expensive CV sweep (e.g. --lamb <lamb_cv from "
+        "a prior genetic_feems_meta.json>)",
+    )
+    p.add_argument(
+        "--permute",
+        action="store_true",
+        help="after the real fit, run a geographic-shuffle null model (see --n-perm)",
+    )
+    p.add_argument(
+        "--n-perm", type=int, default=100, help="number of null permutations (default 100)"
+    )
+    p.add_argument(
+        "--perm-seed",
+        type=int,
+        default=0,
+        help="base RNG seed for the permutation loop — separate from --seed, which "
+        "only controls --max-snps subsampling (default 0)",
+    )
+    p.add_argument(
+        "--perm-restart",
+        action="store_true",
+        help="ignore any existing genetic_null_checkpoint.npz and restart the permutation loop from 0",
+    )
+    p.add_argument(
+        "--perm-cv",
+        action="store_true",
+        help="re-run cross-validation inside every permutation so each gets its own "
+        "lambda, and use the profiled CV minimum (T_cv) as the test statistic. "
+        "Removes lambda from the statistic — without this, the fixed-lambda T_het "
+        "statistic inherits lambda's shrinkage and is only comparable at that lambda. "
+        "Costs one CV sweep per permutation.",
     )
     return p.parse_args()
 

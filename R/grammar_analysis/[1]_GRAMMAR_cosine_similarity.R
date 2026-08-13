@@ -12,7 +12,8 @@
 # rather than swept per column; the cosine step itself is unchanged.
 #
 # Input:   data/GRAMBANKdf_full.csv, data/gramfeature_freq.csv
-# Outputs: data/GRAMMAR_cosine_matrix.csv, data/GRAMMAR_cossim.csv
+# Outputs: data/GRAMMAR_cosine_matrix.csv, data/GRAMMAR_cossim.csv,
+#          data/base_plot_grammar_cosine.rds (cosine base map, for [7])
 # Next:    [2]_GRAMMAR_cosine_distribution_analysis.R,
 #          [3]_GRAMMAR_network_distance.R (then regression / MMRR)
 # =============================================================================
@@ -211,3 +212,35 @@ GRAMMAR_cossim <- GRAMMAR_cossim |>
   mutate(cossim_span_norm = cossim_span / cossim_span_max)
 
 write.csv(GRAMMAR_cossim, file = here("data", "GRAMMAR_cossim.csv"), row.names = TRUE)
+
+# ---- Cosine base map --------------------------------------------------------
+# The per-language scores on a Philippines map, saved for [7] to overlay the
+# waypoint routes onto. Built here rather than in [6] so the geographic
+# distribution can be read straight off [1], before FEEMS or the arrows exist.
+world_map  <- map_data("world")
+map_subset <- world_map %>% filter(region %in% c("Philippines", "Malaysia"))
+
+global_lim <- c(0, cossim_span_max)
+
+base_plot_cosine <- ggplot() +
+  geom_polygon(data = map_subset, aes(x = long, y = lat, group = group),
+               fill = "gray95", color = "gray70") +
+  geom_point(data = GRAMMAR_cossim,
+             aes(x = longitude, y = latitude, color = cossim_span),
+             size = 4, alpha = 0.7) +
+  geom_point(data = GRAMMAR_cossim, aes(x = longitude, y = latitude),
+             size = 4, shape = 21, color = "black") +
+  scale_color_gradient(low = "white", high = "navy", limits = global_lim) +
+  guides(color = guide_colorbar(title = "Cosine Similarity",
+                                title.position = "top", title.hjust = 0.5)) +
+  coord_fixed(xlim = c(115, 130), ylim = c(4, 22)) +
+  theme_minimal() +
+  # Coordinates carry no finding; the coastline is the only reference frame the
+  # reader needs, so the axes, ticks and graticule are all dropped.
+  theme(panel.grid = element_blank(),
+        axis.text  = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+
+base_plot_cosine
+saveRDS(base_plot_cosine, file = here("data", "base_plot_grammar_cosine.rds"))

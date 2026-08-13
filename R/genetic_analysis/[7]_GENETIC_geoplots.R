@@ -3,13 +3,16 @@
 # Combines two independent base maps — Spanish admixture points on a plain
 # outline, and the [6] FEEMS migration surface — with the [3] migration-route
 # arrows and marks the colonial capital (Manila), then saves each as its own
+# figure. Also renders the [6] null-model base map (geographic-shuffle FEEMS
+# null, same routes/capital/color scale as the real FEEMS figure) as its own
 # figure.
 #
 # Input:   data/GENETIC_final.csv (per-population admixture + coordinates, from [0]),
-#          data/base_plot_genetic_FEEMS.rds (from [6]),
+#          data/base_plot_genetic_FEEMS.rds, data/base_plot_genetic_FEEMS_null.rds (from [6]),
 #          data/genetic_waypoint_plot.rds (arrow layers, from [3])
 # Outputs: figures/genetic/mst_waypoints/GENETIC_span_admx_weighted.png,
-#          figures/genetic/mst_waypoints/GENETIC_weight_mst_feems.png
+#          figures/genetic/mst_waypoints/GENETIC_weight_mst_feems.png,
+#          figures/genetic/mst_waypoints/GENETIC_weight_mst_feems_null.png
 # =============================================================================
 
 library(ggplot2)
@@ -102,3 +105,14 @@ print(final_plot_feems)
 
 ggsave(here("figures", "genetic", "mst_waypoints", "GENETIC_weight_mst_feems.png"),
        final_plot_feems, width = 7, height = 9, units = "in", dpi = 300)
+
+# ---- Figure C: FEEMS null-model surface + routes ------------------------------
+# Geographic-shuffle null (100 permutations, from genetic_feems.py --permute), on
+# the same color scale as Figure B (set jointly in [6]) so the two are comparable.
+base_plot_feems_null  <- readRDS(here("data", "base_plot_genetic_FEEMS_null.rds"))
+final_plot_feems_null <- add_routes_and_capital(base_plot_feems_null)
+
+print(final_plot_feems_null)
+
+ggsave(here("figures", "genetic", "mst_waypoints", "GENETIC_weight_mst_feems_null.png"),
+       final_plot_feems_null, width = 7, height = 9, units = "in", dpi = 300)

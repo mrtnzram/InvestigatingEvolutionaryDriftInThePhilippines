@@ -278,6 +278,23 @@ PH_genetic |>
   arrange(geodist_H2_span) |>
   print(n = 20)
 
+# ── 6a. Pairwise population x population distance matrix ────────────────────
+# Moved here from [5]_GENETIC_MMRR.R so [4.1]_GENETIC_PVR_sPCA.R can read it
+# too, without either script rebuilding the network graph a second time.
+source(here("R", "shared", "pairwise_network_distance.R"))
+
+GENETIC_dist_matrix <- build_pairwise_distance_matrix(
+  points_df     = PH_genetic,
+  id_col        = "population",
+  nodes         = nodes,
+  network_edges = network_edges,
+  land_sf       = land_sf,
+  land_penalty  = 4.44
+)
+
+write.csv(GENETIC_dist_matrix, file = here("data", "GENETIC_dist_matrix.csv"), row.names = TRUE)
+
+
 # ── 6b. Inverse-variance weights for span_admx ──────────────────────────────
 # span_se is winsorized at these quantiles before inverting, bounding the weight
 # ratio; set here so [4] and [7] share one weight definition.

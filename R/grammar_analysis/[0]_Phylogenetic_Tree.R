@@ -14,12 +14,13 @@
 # are passed in-environment, since PART B writes GRAMBANKdf_full.csv only after
 # consuming the pruned set built here.
 #
-# Input:   data/mcc.tree
+# Input:   data/mcc.tree, data/subgroup_palette.csv (canonical subgroup -> colour,
+#          from R/shared/subgroup_palette.R — run that first)
 # Outputs: data/GRAMMAR_phylo_dist_matrix.csv (patristic distance matrix,
 #          consumed by [5]_GRAMMAR_MMRR.R), data/GRAMMAR_subgroup_lookup.csv
 #          (language -> subgroup -> colour, consumed by [8]), and
 #          figures/shared/grammar_phylogenetic_tree.png.
-# In-env:  tree_pruned, tree_df_matched — consumed by [4]_GRAMMAR_PGLS.R.
+# In-env:  tree_pruned, tree_df_matched — consumed by [4]_GRAMMAR_PVR.R.
 # Next:    [1]_GRAMMAR_cosine_similarity.R
 # =============================================================================
 
@@ -130,14 +131,15 @@ tip_subgroup <- tibble(original = tree_pruned$tip.label) %>%
 # Palette assigned in order of clade size (largest first).
 subgroup_levels <- tip_subgroup %>% count(subgroup, sort = TRUE) %>% pull(subgroup)
 
-soften <- function(cols, s_mult = 0.55, v_mult = 0.95) {
-  h <- grDevices::rgb2hsv(grDevices::col2rgb(cols))
-  grDevices::hsv(h["h", ], h["s", ] * s_mult, pmin(h["v", ] * v_mult, 1))
-}
-.poly <- grDevices::palette.colors(NULL, "Polychrome 36")
-.lum  <- colSums(grDevices::col2rgb(.poly) * c(0.299, 0.587, 0.114))  # 0..255
-subgroup_pal <- setNames(
-  soften(.poly[.lum < 200])[seq_along(subgroup_levels)], subgroup_levels
+# Colours come from the canonical cross-domain palette (R/shared/subgroup_palette.R),
+# not a locally-derived one, so the same subgroup is the same colour in every
+# domain's figures (phoneme/grammar/cognate/genetic).
+subgroup_pal <- read_csv(here("data", "subgroup_palette.csv"), show_col_types = FALSE) %>%
+  select(subgroup, colour) %>%
+  deframe()
+stopifnot(
+  "Some subgroups are missing from data/subgroup_palette.csv — rerun R/shared/subgroup_palette.R." =
+    all(subgroup_levels %in% names(subgroup_pal))
 )
 
 # Export the subgroup -> colour lookup so [8]'s map points match these tip
@@ -208,7 +210,7 @@ ggsave(here("figures", "shared", "grammar_phylogenetic_tree.png"),
 # ── Pairwise phylogenetic (patristic) distance matrix ───────────────────────
 # Some study languages are represented by more than one tree tip; collapsed by
 # averaging every original-tip pair's distance within each gram-to-gram pair,
-# matching GRAMMAR_dist_matrix.csv / GRAMMAR_sim_matrix.csv from [5].
+# matching GRAMMAR_dist_matrix.csv (from [3]) / GRAMMAR_sim_matrix.csv (from [5]).
 phylo_dist_raw <- cophenetic.phylo(tree_pruned)
 
 phylo_dist_long <- as_tibble(phylo_dist_raw, rownames = "original_1") %>%

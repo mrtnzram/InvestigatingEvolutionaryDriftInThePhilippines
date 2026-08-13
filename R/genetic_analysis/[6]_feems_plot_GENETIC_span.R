@@ -1,14 +1,21 @@
 # =============================================================================
 # [6] Genetic Analysis — FEEMS migration-surface base map
 # Renders the FEEMS effective-migration surface (the log10(w/w-bar) raster from
-# python/genetic_feems.py) as a ggplot base map, with plain points marking
-# sampled population locations. No subgroup or admixture colouring here — those
-# are separate variables, plotted on their own in [7]'s span_admx figure. Saved
-# as an RDS that [7] loads to overlay the waypoint routes.
+# python/genetic_feems.py) as a ggplot base map, with each population's
+# Glottolog subgroup membership overlaid as points (same palette/legend as the
+# phoneme/grammar FEEMS maps), plus a matching legend strip. Also renders the
+# geographic-shuffle null model's averaged surface (genetic_feems.py --permute)
+# as a second base map, on the SAME color scale as the real one, so the two are
+# directly comparable. Both saved as RDS that [7] loads to overlay the waypoint
+# routes.
 #
-# Input:   data/genetic_surface_raster.csv (FEEMS surface, from genetic_feems.py),
-#          data/GENETIC_final.csv (per-population coordinates, from [0])
-# Outputs: data/base_plot_genetic_FEEMS.rds
+# Input:   data/genetic_surface_raster.csv, data/genetic_surface_raster_null_mean.csv
+#          (FEEMS surface + null-model average, from genetic_feems.py),
+#          data/GENETIC_final.csv (per-population coordinates, from [0]),
+#          data/GENETIC_subgroup_lookup.csv (subgroup + colour, from
+#          [0]_GENETIC_subgroups.R)
+# Outputs: data/base_plot_genetic_FEEMS.rds, data/base_plot_genetic_FEEMS_null.rds,
+#          data/legend_strip_genetic_subgroup.rds
 # Next:    [7]_GENETIC_geoplots.R
 # =============================================================================
 
@@ -17,21 +24,49 @@ library(dplyr)
 library(here)
 library(scales)
 
-gen_surface <- read.csv(here("data", "genetic_surface_raster.csv"))
-PH_genetic  <- read.csv(here("data", "GENETIC_final.csv"))
+gen_surface      <- read.csv(here("data", "genetic_surface_raster.csv"))
+gen_surface_null <- read.csv(here("data", "genetic_surface_raster_null_mean.csv"))
+PH_genetic       <- read.csv(here("data", "GENETIC_final.csv"))
 
-vmax <- max(abs(gen_surface$log_w_ratio), na.rm = TRUE)
+# Shared color scale across the real and null maps (not each normalized to its own
+# max) — this is what makes a flatter null surface visibly wash out next to the real
+# one; it also means the real plot's scale below is now anchored to this combined
+# vmax, not gen_surface's own max as in earlier versions of this script.
+vmax <- max(abs(gen_surface$log_w_ratio), abs(gen_surface_null$log_w_ratio_null_mean), na.rm = TRUE)
 lims <- c(-vmax, vmax)
 
 world_map  <- map_data("world")
 map_subset <- world_map %>% filter(region %in% c("Philippines", "Malaysia"))
 
+# ---- Subgroup palette + membership -------------------------------------------
+subgroup_lookup <- read.csv(here("data", "GENETIC_subgroup_lookup.csv"))
+pal <- setNames(subgroup_lookup$colour, subgroup_lookup$subgroup)
+
+points_coloured <- PH_genetic |>
+  dplyr::left_join(dplyr::select(subgroup_lookup, population, subgroup), by = "population")
+stopifnot(
+  "Some populations have no subgroup colour — rerun [0]_GENETIC_subgroups.R to refresh the lookup." =
+    !anyNA(points_coloured$subgroup)
+)
+
 base_plot <- ggplot() +
   geom_tile(data = gen_surface, aes(x = lon, y = lat, fill = log_w_ratio), alpha = 0.6) +
   geom_polygon(data = map_subset, aes(x = long, y = lat, group = group),
                fill = NA, color = "black") +
-  geom_point(data = PH_genetic, aes(x = longitude, y = latitude),
-             size = 1.8, colour = "black", alpha = 0.6) +
+  # Population points, coloured by subgroup. Three concentric layers: a thin dark
+  # outer rim, a white halo, then the subgroup colour at size 4 — identical
+  # construction to the phoneme/grammar FEEMS maps. The halo lifts the dot off
+  # the orange/cyan raster; the rim keeps the edge visible where the raster
+  # passes through white (log ratio ~ 0), which a white-only ring would
+  # disappear into. shape defaults to 19 so `colour` fills the disc — `fill` is
+  # spoken for by the raster.
+  geom_point(data = points_coloured, aes(x = longitude, y = latitude),
+             size = 4.8, colour = "grey20") +
+  geom_point(data = points_coloured, aes(x = longitude, y = latitude),
+             size = 4.4, colour = "white") +
+  geom_point(data = points_coloured, aes(x = longitude, y = latitude, colour = subgroup),
+             size = 4.0) +
+  scale_colour_manual(values = pal, guide = "none") +
   guides(
     fill = guide_colorbar(title = expression(log[10](w/bar(w))), title.position = "top", title.hjust = 0.5)
   ) +
@@ -52,3 +87,64 @@ base_plot <- ggplot() +
 
 base_plot
 saveRDS(base_plot, file = here("data", "base_plot_genetic_FEEMS.rds"))
+
+# ---- Null-model base map (same points, same shared color scale) -------------
+# Geographic-shuffle null: average FEEMS surface across 100 permutations that
+# shuffle which population sits at which location, from genetic_feems.py
+# --permute. Same point overlay and `lims` as the real map above, so [7] can
+# render it as a directly comparable figure.
+base_plot_null <- ggplot() +
+  geom_tile(data = gen_surface_null, aes(x = lon, y = lat, fill = log_w_ratio_null_mean), alpha = 0.6) +
+  geom_polygon(data = map_subset, aes(x = long, y = lat, group = group),
+               fill = NA, color = "black") +
+  geom_point(data = points_coloured, aes(x = longitude, y = latitude),
+             size = 4.8, colour = "grey20") +
+  geom_point(data = points_coloured, aes(x = longitude, y = latitude),
+             size = 4.4, colour = "white") +
+  geom_point(data = points_coloured, aes(x = longitude, y = latitude, colour = subgroup),
+             size = 4.0) +
+  scale_colour_manual(values = pal, guide = "none") +
+  guides(
+    fill = guide_colorbar(title = expression(log[10](w/bar(w))), title.position = "top", title.hjust = 0.5)
+  ) +
+  coord_fixed(xlim = c(115, 130), ylim = c(4, 22)) +
+  scale_fill_gradientn(
+    colors = c("orange", "white", "cyan"),
+    values = rescale(c(-vmax, 0, vmax), from = lims),  # same lims as the real plot
+    limits = lims,
+    na.value = "transparent"
+  ) +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),
+        axis.text  = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+
+base_plot_null
+saveRDS(base_plot_null, file = here("data", "base_plot_genetic_FEEMS_null.rds"))
+
+# ---- Legend strip (identical construction to phoneme/grammar) ---------------
+# Hand-built stacked colour tiles, ordered by mean latitude (north first) so
+# the strip reads top-to-bottom the way the subgroups sit on the map.
+subgroup_lat <- points_coloured %>%
+  dplyr::group_by(subgroup) %>%
+  dplyr::summarise(mean_lat = mean(latitude), .groups = "drop")
+
+legend_df <- subgroup_lookup %>%
+  dplyr::distinct(subgroup, colour) %>%
+  dplyr::left_join(subgroup_lat, by = "subgroup") %>%
+  dplyr::arrange(dplyr::desc(mean_lat)) %>%
+  dplyr::mutate(row = dplyr::row_number())
+
+legend_strip <- ggplot(legend_df) +
+  geom_tile(aes(x = 0, y = -row, fill = subgroup), width = 0.9, height = 0.8) +
+  geom_text(aes(x = 0.65, y = -row, label = subgroup),
+            hjust = 0, size = 2.8, colour = "grey15") +
+  scale_fill_manual(values = pal, guide = "none") +
+  scale_x_continuous(limits = c(-0.5, 6.5), expand = c(0, 0)) +
+  coord_cartesian(clip = "off") +
+  theme_void() +
+  theme(plot.margin = margin(6, 2, 6, 2))
+
+legend_strip
+saveRDS(legend_strip, file = here("data", "legend_strip_genetic_subgroup.rds"))

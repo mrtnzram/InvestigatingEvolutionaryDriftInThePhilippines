@@ -10,18 +10,16 @@
 #
 # Input:   data/genetic_dist.mdist, data/genetic_dist.mdist.id (PLINK, individual-
 #          level), data/GENETIC_final.csv (from [3], population connector costs),
-#          data/nodes.csv, data/edges.csv
-# Outputs: data/GENETIC_dist_matrix.csv, data/GENETIC_sim_matrix.csv,
+#          data/GENETIC_dist_matrix.csv (pairwise cost matrix, also written by [3]
+#          — read back here rather than rebuilt, so the network graph is only
+#          built once, in [3])
+# Outputs: data/GENETIC_sim_matrix.csv,
 #          data/GENETIC_mmrr_results.csv,
 #          figures/genetic/mmrr/genetic_mmrr_single_similarity_vs_geography.png,
 #          figures/genetic/mmrr/genetic_mmrr_pairplot.png
 # ──────────────────────────────────────────────────────────────────────────────
 
 library(tidyverse)
-library(geosphere)
-library(sf)
-library(maps)
-library(sfheaders)
 library(patchwork)
 library(here)
 library(conflicted)
@@ -71,115 +69,16 @@ diag(pop_dist) <- 0
 GENETIC_sim_matrix <- 1 - pop_dist   # IBS proportion; diagonal = 1 like the cosine matrices
 
 # ── 2. X_geo: terrain-penalized pairwise migration distance ─────────────────
+# Built once by [3]_GENETIC_network_distance.R (all-pairs network routing,
+# ratio-bounded direct-line fallback via R/shared/pairwise_network_distance.R)
+# and read back here instead of rebuilt with a second network-graph pass.
 GENETIC_final <- read.csv(here("data", "GENETIC_final.csv"))
 stopifnot("GENETIC_final.csv population set != mdist" =
             setequal(GENETIC_final$population, rownames(GENETIC_sim_matrix)))
 
-nodes <- read.csv(here("data", "nodes.csv")) |> mutate(id = as.character(id))
-edges <- read.csv(here("data", "edges.csv")) |>
-  mutate(from = as.character(from), to = as.character(to))
-
-world_map <- map_data("world") |> filter(region %in% c("Philippines", "Malaysia"))
-land_sf <- sf_polygon(obj = world_map, polygon_id = "group", x = "long", y = "lat") |>
-  st_union() |>
-  st_sf(geometry = _) |>
-  st_set_crs(4326)
-
-LAND_PENALTY <- 4.44   # matches [3] and the corrected phoneme/grammar [5] scripts
-
-# split_and_penalize() / build_network_edges(): copied from
-# [3]_GENETIC_network_distance.R so the node-to-node network geometry here is
-# built exactly the way [3] built the connector costs this script reuses below.
-split_and_penalize <- function(geom, land_sf, land_penalty) {
-  land_part <- st_intersection(geom, st_geometry(land_sf))
-  sea_part  <- st_difference(geom, st_geometry(land_sf))
-  land_part <- land_part[!st_is_empty(land_part)]
-  sea_part  <- sea_part[!st_is_empty(sea_part)]
-  land_len <- if (length(land_part) > 0) as.numeric(sum(st_length(land_part))) else 0
-  sea_len  <- if (length(sea_part)  > 0) as.numeric(sum(st_length(sea_part)))  else 0
-  list(land_len = land_len, sea_len = sea_len,
-       weighted_cost = land_len * land_penalty + sea_len)
-}
-
-build_network_edges <- function(nodes, edges, land_sf, land_penalty) {
-  edges_bi <- bind_rows(edges, edges |> rename(from = to, to = from)) |> distinct()
-  edges_sf <- edges_bi |>
-    rowwise() |>
-    mutate(geometry = list(st_linestring(matrix(c(
-      nodes$longitude[nodes$id == from], nodes$latitude[nodes$id == from],
-      nodes$longitude[nodes$id == to],   nodes$latitude[nodes$id == to]
-    ), ncol = 2, byrow = TRUE)))) |>
-    ungroup() |>
-    st_as_sf(crs = 4326)
-  edges_sf |>
-    rowwise() |>
-    mutate(.split = list(split_and_penalize(geometry, land_sf, land_penalty)),
-           weighted_cost = .split$weighted_cost) |>
-    ungroup() |>
-    select(-.split) |>
-    st_as_sf()
-}
-
-network_edges <- build_network_edges(nodes, edges, land_sf, LAND_PENALTY)
-
-# All-pairs node-to-node cost on the 39-node waypoint network, one igraph call
-# (the [3] pattern) rather than a per-pair Dijkstra loop.
-g <- igraph::graph_from_data_frame(
-  d = network_edges |> st_drop_geometry() |> select(from, to, weighted_cost),
-  directed = FALSE, vertices = nodes
-)
-node_dist_m <- igraph::distances(g, weights = igraph::E(g)$weighted_cost)
-
-# Per-population connector cost (point -> nearest network node) and node id:
-# already computed by [3] as geodist_H1_span (km) / nearest_node — reused
-# rather than rebuilt, so this script doesn't re-derive [3]'s connector geometry.
-pop_geo <- GENETIC_final |>
-  select(population, nearest_node, connector_km = geodist_H1_span, longitude, latitude) |>
-  mutate(nearest_node = as.character(nearest_node))
-
-# Direct-line cost, split into land/sea exactly like [3]'s connectors and the
-# language [5] scripts' direct option. Degenerate zero-length lines (the 4
-# coordinate sites shared by >1 population) short-circuit to 0.
-direct_penalized_cost <- function(lon1, lat1, lon2, lat2) {
-  if (isTRUE(all.equal(c(lon1, lat1), c(lon2, lat2)))) return(0)
-  geom <- st_sfc(st_linestring(rbind(c(lon1, lat1), c(lon2, lat2))), crs = 4326)
-  split_and_penalize(geom, land_sf, LAND_PENALTY)$weighted_cost
-}
-
-# Unordered pairs only (Y and X are both symmetric) — 6,555 pairs vs. 13,110
-# for the full ordered grid the language scripts use at n ~ 58.
-pop_pairs <- as.data.frame(t(combn(pop_geo$population, 2)), stringsAsFactors = FALSE) |>
-  set_names(c("pop1", "pop2")) |>
-  as_tibble() |>
-  left_join(pop_geo |> select(population, node1 = nearest_node, conn1 = connector_km,
-                              lon1 = longitude, lat1 = latitude),
-            by = c("pop1" = "population")) |>
-  left_join(pop_geo |> select(population, node2 = nearest_node, conn2 = connector_km,
-                              lon2 = longitude, lat2 = latitude),
-            by = c("pop2" = "population"))
-
-pop_pairs <- pop_pairs |>
-  rowwise() |>
-  mutate(
-    node_to_node_km  = node_dist_m[node1, node2] / 1000,
-    via_network_cost = conn1 + node_to_node_km + conn2,
-    direct_cost      = direct_penalized_cost(lon1, lat1, lon2, lat2) / 1000,
-    geodist_H1_span  = pmin(via_network_cost, direct_cost, na.rm = TRUE),
-    used_direct      = !is.na(direct_cost) &
-      (is.na(via_network_cost) | direct_cost < via_network_cost)
-  ) |>
-  ungroup()
-
-message(sprintf(
-  "X_geo routing: %d of %d population pairs (%.0f%%) took the direct line rather than the network.",
-  sum(pop_pairs$used_direct), nrow(pop_pairs), 100 * mean(pop_pairs$used_direct)
-))
-
-pop_order <- rownames(GENETIC_sim_matrix)
-GENETIC_dist_matrix <- matrix(0, nrow = length(pop_order), ncol = length(pop_order),
-                              dimnames = list(pop_order, pop_order))
-GENETIC_dist_matrix[cbind(pop_pairs$pop1, pop_pairs$pop2)] <- pop_pairs$geodist_H1_span
-GENETIC_dist_matrix[cbind(pop_pairs$pop2, pop_pairs$pop1)] <- pop_pairs$geodist_H1_span
+GENETIC_dist_matrix <- read.csv(here("data", "GENETIC_dist_matrix.csv"),
+                                row.names = 1, check.names = FALSE) |>
+  as.matrix()
 
 # ── 3. Alignment + guards ────────────────────────────────────────────────────
 common <- intersect(rownames(GENETIC_sim_matrix), rownames(GENETIC_dist_matrix))
@@ -361,5 +260,6 @@ ggsave(here("figures", "genetic", "mmrr", "genetic_mmrr_pairplot.png"),
        pairplot, width = 6.5, height = 6, units = "in", dpi = 300)
 
 # ── 7. Persist matrices ──────────────────────────────────────────────────────
-write.csv(GENETIC_dist_matrix, file = here("data", "GENETIC_dist_matrix.csv"), row.names = TRUE)
+# GENETIC_dist_matrix.csv is now [3]'s to write (it built the matrix); this
+# script only persists the similarity matrix it computed itself.
 write.csv(GENETIC_sim_matrix, file = here("data", "GENETIC_sim_matrix.csv"), row.names = TRUE)

@@ -7,12 +7,13 @@
 # Run order: requires `Ph_Languages` from PART A of [0]_CREANZA_RUHLENdatabase.R,
 # and produces `Ph_Languages_pruned` for its PART B.
 #
-# Input:   data/mcc.tree
+# Input:   data/mcc.tree, data/subgroup_palette.csv (canonical subgroup -> colour,
+#          from R/shared/subgroup_palette.R — run that first)
 # Outputs: data/PHONEME_phylo_dist_matrix.csv (patristic distances, the
 #          phylogenetic predictor in [5]), data/PHONEME_subgroup_lookup.csv
 #          (language -> subgroup -> colour, consumed by [8]), and
 #          figures/shared/phylogenetic_tree.png.
-# In-env:  tree_pruned, tree_df_matched — consumed by [4]_PHONEME_PGLS.R.
+# In-env:  tree_pruned, tree_df_matched — consumed by [4]_PHONEME_PVR.R.
 # =============================================================================
 
 library(tibble)
@@ -191,16 +192,15 @@ tip_subgroup <- tibble(original = tree_pruned$tip.label) %>%
 # Palette assigned in order of clade size (largest first).
 subgroup_levels <- tip_subgroup %>% count(subgroup, sort = TRUE) %>% pull(subgroup)
 
-# Palette for the level-4 subgroups: Polychrome 36 minus its lightest colours
-# (invisible on white), desaturated, and named by subgroup so the mapping is stable.
-soften <- function(cols, s_mult = 0.55, v_mult = 0.95) {
-  h <- grDevices::rgb2hsv(grDevices::col2rgb(cols))
-  grDevices::hsv(h["h", ], h["s", ] * s_mult, pmin(h["v", ] * v_mult, 1))
-}
-.poly <- grDevices::palette.colors(NULL, "Polychrome 36")
-.lum  <- colSums(grDevices::col2rgb(.poly) * c(0.299, 0.587, 0.114))  # 0..255
-subgroup_pal <- setNames(
-  soften(.poly[.lum < 200])[seq_along(subgroup_levels)], subgroup_levels
+# Colours come from the canonical cross-domain palette (R/shared/subgroup_palette.R),
+# not a locally-derived one, so the same subgroup is the same colour in every
+# domain's figures (phoneme/grammar/cognate/genetic).
+subgroup_pal <- read_csv(here("data", "subgroup_palette.csv"), show_col_types = FALSE) %>%
+  select(subgroup, colour) %>%
+  deframe()
+stopifnot(
+  "Some subgroups are missing from data/subgroup_palette.csv — rerun R/shared/subgroup_palette.R." =
+    all(subgroup_levels %in% names(subgroup_pal))
 )
 
 # Export the subgroup -> colour lookup so [8]'s map points match these tip

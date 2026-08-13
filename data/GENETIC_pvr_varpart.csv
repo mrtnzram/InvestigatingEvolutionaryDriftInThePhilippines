@@ -1,0 +1,5 @@
+"component","meaning","fraction"
+"a","geography only",0.00541027794038462
+"b","shared (geography & population structure)",0.0128703824365956
+"c","population structure only",0.428287305428351
+"d","unexplained",0.553432034194669

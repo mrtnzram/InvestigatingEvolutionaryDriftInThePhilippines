@@ -19,7 +19,9 @@
 #
 # Run order: after [0]_COGNATE_LOANS.R, before [3]_COGNATE_network_distance.R.
 #
-# Input:   data/mcc.tree, data/cognate/COGNATE_loans.csv
+# Input:   data/mcc.tree, data/cognate/COGNATE_loans.csv, data/subgroup_palette.csv
+#          (canonical subgroup -> colour, from R/shared/subgroup_palette.R — run
+#          that first)
 # Outputs: data/cognate/COGNATE_tree_languages.csv (the 94-language analysis set;
 #          [3] restricts to it, so everything below [3] inherits the 94),
 #          data/cognate/COGNATE_phylo_dist_matrix.csv (94x94 patristic distances,
@@ -29,7 +31,7 @@
 #          data/cognate/COGNATE_tip_selection.csv (representative-tip audit),
 #          data/cognate/COGNATE_subgroup_lookup.csv (language -> subgroup -> colour),
 #          figures/shared/cognate_phylogenetic_tree.png.
-# In-env:  tree_pruned, tip_map — consumed by [4]_COGNATE_PGLS.R.
+# In-env:  tree_pruned, tip_map — consumed by [4]_COGNATE_PVR.R.
 # Next:    [3]_COGNATE_network_distance.R
 # =============================================================================
 
@@ -219,14 +221,15 @@ stopifnot(
 # Palette assigned in order of clade size (largest first).
 subgroup_levels <- tip_subgroup %>% count(subgroup, sort = TRUE) %>% pull(subgroup)
 
-soften <- function(cols, s_mult = 0.55, v_mult = 0.95) {
-  h <- grDevices::rgb2hsv(grDevices::col2rgb(cols))
-  grDevices::hsv(h["h", ], h["s", ] * s_mult, pmin(h["v", ] * v_mult, 1))
-}
-.poly <- grDevices::palette.colors(NULL, "Polychrome 36")
-.lum  <- colSums(grDevices::col2rgb(.poly) * c(0.299, 0.587, 0.114))  # 0..255
-subgroup_pal <- setNames(
-  soften(.poly[.lum < 200])[seq_along(subgroup_levels)], subgroup_levels
+# Colours come from the canonical cross-domain palette (R/shared/subgroup_palette.R),
+# not a locally-derived one, so the same subgroup is the same colour in every
+# domain's figures (phoneme/grammar/cognate/genetic).
+subgroup_pal <- read_csv(here("data", "subgroup_palette.csv"), show_col_types = FALSE) %>%
+  select(subgroup, colour) %>%
+  deframe()
+stopifnot(
+  "Some subgroups are missing from data/subgroup_palette.csv — rerun R/shared/subgroup_palette.R." =
+    all(subgroup_levels %in% names(subgroup_pal))
 )
 
 tip_subgroup %>%
