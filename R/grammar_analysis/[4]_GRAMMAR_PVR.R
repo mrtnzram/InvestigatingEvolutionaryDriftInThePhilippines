@@ -5,10 +5,6 @@
 # migration distance while controlling for shared ancestry with phylogenetic
 # eigenvectors.
 #
-# Replaces [4]_GRAMMAR_PGLS.R: phylogeny moves from the error structure into the
-# mean structure, so the geography/ancestry confound is partitioned rather than
-# absorbed — a = geography only, b = shared, c = phylogeny only, d = unexplained.
-#
 # Run order: requires `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
 #
 # Input:   data/GRAMMAR_final.csv (from [3]_GRAMMAR_network_distance.R)

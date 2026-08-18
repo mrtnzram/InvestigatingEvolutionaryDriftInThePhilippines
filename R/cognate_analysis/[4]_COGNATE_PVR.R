@@ -4,10 +4,6 @@
 # Regresses the normalized Spanish loanword count on terrain-penalized migration
 # distance while controlling for shared ancestry with phylogenetic eigenvectors.
 #
-# Replaces [4]_COGNATE_PGLS.R: phylogeny moves from the error structure into the
-# mean structure, so the geography/ancestry confound is partitioned rather than
-# absorbed — a = geography only, b = shared, c = phylogeny only, d = unexplained.
-#
 # Run order: requires `tree_pruned` and `tip_map` from [0]_Phylogenetic_Tree.R.
 #
 # Input:   data/cognate/COGNATE_final.csv (from [3]_COGNATE_network_distance.R)
