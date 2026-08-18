@@ -1,0 +1,4 @@
+"region","n","status","n_evec_phylo","threshold_km","moran_I","moran_perm_p","n_perm","n_mem_selected","mem_selection","mem_r2"
+"Luzon",60,"ok",1,399.395469365615,-0.00655812934604711,0.409,999,2,"p_filter",0.176536207560029
+"Visayas",7,"ok",1,630.871635198086,-0.413774185500245,0.9335,999,1,"fallback_max_cor",0.101540379395645
+"Mindanao",27,"ok",1,456.921280077458,0.0128996776262163,0.322,999,1,"fallback_max_cor",0.107179174487662

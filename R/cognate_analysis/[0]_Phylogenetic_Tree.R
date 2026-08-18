@@ -232,10 +232,134 @@ stopifnot(
     all(subgroup_levels %in% names(subgroup_pal))
 )
 
-tip_subgroup %>%
+# Island group, assigned from each language's COORDINATE (not its ethnonym) so
+# the split matches the geography every spatial step downstream already uses.
+# Keyed by glottocode, not language: cognate's language strings are compound
+# doculect labels ("Tagabili; Tboli (Tagabili)") and unstable as a join key.
+# MIMAROPA (Mindoro, Romblon, Palawan incl. Cuyo/Cagayancillo) -> Luzon;
+# Sulu -> Mindanao.
+# Note: this `region` is the Luzon/Visayas/Mindanao sense, i.e. genetics'
+# `island_group` column — NOT GENETIC_final.csv's `region` (admin regions).
+# Two coordinates that override their names: cebu1242 (8.39, 124.37) is a
+# northern-Mindanao ABVD variety, not Cebu; mama1275 (Mamanwa, 9.45, 125.55)
+# is Surigao, so Mindanao despite a Visayas-range latitude.
+region_lookup <- tribble(
+  ~glottocode,  ~region,
+  "aben1249",   "Luzon",
+  "agut1237",   "Luzon",
+  "alab1246",   "Luzon",
+  "alan1249",   "Luzon",
+  "amba1267",   "Luzon",
+  "amga1235",   "Luzon",
+  "arta1239",   "Luzon",
+  "babu1242",   "Luzon",
+  "bala1310",   "Luzon",
+  "bant1288",   "Luzon",
+  "bata1298",   "Luzon",
+  "bata1301",   "Luzon",
+  "bino1237",   "Luzon",
+  "boli1256",   "Luzon",
+  "boto1242",   "Luzon",
+  "buhi1243",   "Luzon",
+  "buhi1245",   "Luzon",
+  "cala1258",   "Luzon",
+  "cama1250",   "Luzon",
+  "casi1235",   "Luzon",
+  "cent2084",   "Luzon",
+  "cent2087",   "Luzon",
+  "cent2090",   "Luzon",
+  "cent2292",   "Luzon",
+  "cuyo1237",   "Luzon",
+  "dupa1235",   "Luzon",
+  "gadd1244",   "Luzon",
+  "guin1256",   "Luzon",
+  "hanu1241",   "Luzon",
+  "ibal1244",   "Luzon",
+  "iban1267",   "Luzon",
+  "ilok1237",   "Luzon",
+  "ilon1239",   "Luzon",
+  "iray1237",   "Luzon",
+  "irig1242",   "Luzon",
+  "isin1239",   "Luzon",
+  "isna1241",   "Luzon",
+  "itaw1240",   "Luzon",
+  "ivat1242",   "Luzon",
+  "kaga1256",   "Luzon",
+  "kank1243",   "Luzon",
+  "kaya1320",   "Luzon",
+  "kele1259",   "Luzon",
+  "limo1248",   "Luzon",
+  "lowe1412",   "Luzon",
+  "lubu1243",   "Luzon",
+  "maga1263",   "Luzon",
+  "magi1241",   "Luzon",
+  "nort2877",   "Luzon",
+  "pamp1243",   "Luzon",
+  "pamp1244",   "Luzon",
+  "pang1290",   "Luzon",
+  "rata1245",   "Luzon",
+  "remo1247",   "Luzon",
+  "romb1245",   "Luzon",
+  "sout2908",   "Luzon",
+  "tady1237",   "Luzon",
+  "taga1270",   "Luzon",
+  "tina1248",   "Luzon",
+  "yoga1237",   "Luzon",
+  "atam1240",   "Mindanao",
+  "binu1244",   "Mindanao",
+  "butu1244",   "Mindanao",
+  "cebu1242",   "Mindanao",
+  "cent2089",   "Mindanao",
+  "cota1241",   "Mindanao",
+  "diba1242",   "Mindanao",
+  "gian1241",   "Mindanao",
+  "ilia1236",   "Mindanao",
+  "kala1388",   "Mindanao",
+  "kama1363",   "Mindanao",
+  "koro1310",   "Mindanao",
+  "magu1243",   "Mindanao",
+  "mama1275",   "Mindanao",
+  "mans1262",   "Mindanao",
+  "mara1404",   "Mindanao",
+  "mati1250",   "Mindanao",
+  "sang1337",   "Mindanao",
+  "sara1326",   "Mindanao",
+  "sara1327",   "Mindanao",
+  "sout2916",   "Mindanao",
+  "suri1273",   "Mindanao",
+  "taus1251",   "Mindanao",
+  "tbol1240",   "Mindanao",
+  "tiru1241",   "Mindanao",
+  "west2555",   "Mindanao",
+  "west2557",   "Mindanao",
+  "akla1241",   "Visayas",
+  "atii1237",   "Visayas",
+  "capi1239",   "Visayas",
+  "hili1240",   "Visayas",
+  "kina1250",   "Visayas",
+  "masb1238",   "Visayas",
+  "wara1300",   "Visayas"
+)
+
+cognate_lookup_out <- tip_subgroup %>%
   distinct(glottocode, language, subgroup) %>%
   mutate(colour = unname(subgroup_pal[subgroup])) %>%
-  write.csv(here("data", "cognate", "COGNATE_subgroup_lookup.csv"), row.names = FALSE)
+  left_join(region_lookup, by = "glottocode")
+
+# An exact partition — a typo or a newly-added language must fail here rather
+# than silently drop out of [4.3]'s regional split.
+stopifnot(
+  "region_lookup does not cover every study language." =
+    !anyNA(cognate_lookup_out$region),
+  "region_lookup names a glottocode that is not in the study set." =
+    all(region_lookup$glottocode %in% cognate_lookup_out$glottocode)
+)
+message("Regions: ", paste(names(table(cognate_lookup_out$region)),
+                           table(cognate_lookup_out$region),
+                           sep = "=", collapse = ", "))
+
+write.csv(cognate_lookup_out,
+          here("data", "cognate", "COGNATE_subgroup_lookup.csv"), row.names = FALSE)
 
 # Let ape compute the rectangular phylogram layout, then read the tip/node
 # coordinates back out instead of re-deriving them.

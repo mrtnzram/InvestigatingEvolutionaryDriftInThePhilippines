@@ -203,12 +203,97 @@ stopifnot(
     all(subgroup_levels %in% names(subgroup_pal))
 )
 
+# Island group, assigned from each language's COORDINATE (not its ethnonym) so
+# the split matches the geography every spatial step downstream already uses.
+# MIMAROPA (Mindoro, Palawan) and Batanes -> Luzon; Sulu -> Mindanao.
+# Note: this `region` is the Luzon/Visayas/Mindanao sense, i.e. genetics'
+# `island_group` column — NOT GENETIC_final.csv's `region` (admin regions) and
+# NOT RUHLENdf_PH.csv's `region` (macro-continent).
+# Ata sits at (9.72, 122.90) on Negros, so it is Visayas here even though the
+# §lookup tribble derives its tip from Mindanao's "Manobo Ata".
+region_lookup <- tribble(
+  ~language,            ~region,
+  "Agta",               "Luzon",
+  "Atta",               "Luzon",
+  "Balangaw",           "Luzon",
+  "Batak",              "Luzon",
+  "Buhid",              "Luzon",
+  "Casiguran Dumagat",  "Luzon",
+  "Central Bontok",     "Luzon",
+  "Central Ifugao",     "Luzon",
+  "Central Kalinga",    "Luzon",
+  "East Ifugao",        "Luzon",
+  "Gaddang",            "Luzon",
+  "Hanunoo",            "Luzon",
+  "Ibanag",             "Luzon",
+  "Ilokano",            "Luzon",
+  "Ilongot",            "Luzon",
+  "Inibaloi",           "Luzon",
+  "Iraya",              "Luzon",
+  "Isnag",              "Luzon",
+  "Itbayaten",          "Luzon",
+  "Itneg",              "Luzon",
+  "Ivatanen",           "Luzon",
+  "Kalamianen",         "Luzon",
+  "Kapampangan",        "Luzon",
+  "Kuyunon",            "Luzon",
+  "Naga",               "Luzon",
+  "North Kalinga",      "Luzon",
+  "North Kallahan",     "Luzon",
+  "North Kankanay",     "Luzon",
+  "Pangasinan",         "Luzon",
+  "South Kalinga",      "Luzon",
+  "Tagalog",            "Luzon",
+  "Tagbanwa",           "Luzon",
+  "Tina",               "Luzon",
+  "Yogad",              "Luzon",
+  "Ata",                "Visayas",
+  "Cebuano",            "Visayas",
+  "Hiligaynon",         "Visayas",
+  "Waray",              "Visayas",
+  "Binukid",            "Mindanao",
+  "Cotabato Bilaan",    "Mindanao",
+  "Dibabawon",          "Mindanao",
+  "Ilianen",            "Mindanao",
+  "Kalagan",            "Mindanao",
+  "Kalamansig",         "Mindanao",
+  "Magindanao",         "Mindanao",
+  "Mamanwa",            "Mindanao",
+  "Mansakan",           "Mindanao",
+  "Maranao",            "Mindanao",
+  "Sangil",             "Mindanao",
+  "Sarangani Bilaan",   "Mindanao",
+  "Sarangani Manobo",   "Mindanao",
+  "Sindangan",          "Mindanao",
+  "Siocon Subanon",     "Mindanao",
+  "Tausug",             "Mindanao",
+  "Tboli",              "Mindanao",
+  "Tigwa",              "Mindanao",
+  "Tiruray",            "Mindanao",
+  "Western Bukidnon",   "Mindanao"
+)
+
 # Export the subgroup -> colour lookup so [8]'s map points match these tip
 # colours exactly; distinct() collapses tip_subgroup's dialect duplicates.
-tip_subgroup %>%
+phoneme_lookup_out <- tip_subgroup %>%
   distinct(language = ph, subgroup) %>%
   mutate(colour = unname(subgroup_pal[subgroup])) %>%
-  write.csv(here("data", "PHONEME_subgroup_lookup.csv"), row.names = FALSE)
+  left_join(region_lookup, by = "language")
+
+# An exact partition — a typo or a newly-added language must fail here rather
+# than silently drop out of [4.3]'s regional split.
+stopifnot(
+  "region_lookup does not cover every study language." =
+    !anyNA(phoneme_lookup_out$region),
+  "region_lookup names a language that is not in the study set." =
+    all(region_lookup$language %in% phoneme_lookup_out$language)
+)
+message("Regions: ", paste(names(table(phoneme_lookup_out$region)),
+                           table(phoneme_lookup_out$region),
+                           sep = "=", collapse = ", "))
+
+write.csv(phoneme_lookup_out,
+          here("data", "PHONEME_subgroup_lookup.csv"), row.names = FALSE)
 
 # Let ape compute the phylogram layout and read its coordinates back out:
 # plot = FALSE fills .PlotPhyloEnv without drawing, absorbed by the null device.

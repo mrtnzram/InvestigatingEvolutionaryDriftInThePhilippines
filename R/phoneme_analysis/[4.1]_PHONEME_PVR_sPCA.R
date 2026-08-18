@@ -60,7 +60,7 @@ message(N, " tips covering ", n_distinct(df$language), " languages ",
         "(multi-dialect languages contribute one row per tip).")
 
 
-# ── 2. Phylogenetic eigenvectors (same PVR() call as [4], recomputed here) ──
+# ── 2. Phylogenetic eigenvectors ──
 pvr_dec <- PVRdecomp(tree_pruned, scale = TRUE)
 pvr_fit <- PVR(pvr_dec, phy = tree_pruned, trait = y, envVar = x, method = "moran")
 E_sel   <- as.matrix(pvr_fit@Selection$Vectors)
