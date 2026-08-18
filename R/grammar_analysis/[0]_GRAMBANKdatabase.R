@@ -138,7 +138,7 @@ GRAMBANK_query <- grambank.feature(c('gb020','gb021','gb022','gb023','gb028','gb
 # ---- 6. Derive the unrelated control set — mirror phoneme exactly ----
 # The control set must be present in BOTH datasets: take phoneme's unrelated set
 # and keep those with GRAMBANK coverage, bridging Ruhlen ISO to GRAMBANK glottocode.
-RUHLENdf_PH <- read_csv(here("data", "RUHLENdf_PH.csv"), show_col_types = FALSE)
+RUHLENdf_PH <- read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"), show_col_types = FALSE)
 
 ruhlen_unrelated <- RUHLENdf_PH %>%
   filter(Language_type == "Unrelated Language") %>%
@@ -170,7 +170,7 @@ GRAMBANKdf_unrelated <- unrelated_matched %>%
 # ---- 7. Combine Philippine + interest (incl. Spanish) + unrelated sets ----
 GRAMBANKdf_full <- bind_rows(GRAMBANKdf_PH_maximized, GRAMBANKdf_unrelated)
 
-write_csv(GRAMBANKdf_full, here("data", "GRAMBANKdf_full.csv"))
+write_csv(GRAMBANKdf_full, here("data", "grammar", "initial_datasets", "GRAMBANKdf_full.csv"))
 
 message(
   "\nFinal GRAMBANKdf_full: ", nrow(GRAMBANKdf_full), " languages ",
@@ -196,4 +196,4 @@ gramfeature_freq <- GRAMBANK_freq %>%
     IDF = log(1 / freq)
   )
 
-write_csv(gramfeature_freq, here("data", "gramfeature_freq.csv"))
+write_csv(gramfeature_freq, here("data", "grammar", "initial_datasets", "gramfeature_freq.csv"))

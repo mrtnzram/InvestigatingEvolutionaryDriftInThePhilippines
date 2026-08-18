@@ -43,7 +43,7 @@ library(ggplot2)
 library(lingtypology)   # glottolog affiliation -> family subgroup for tip colours
 library(here)
 
-COGNATE_loans <- read.csv(here("data", "cognate", "COGNATE_loans.csv"))
+COGNATE_loans <- read.csv(here("data", "cognate", "initial_datasets", "COGNATE_loans.csv"))
 
 tree <- read.nexus(here("data", "mcc.tree"))
 
@@ -107,7 +107,7 @@ message(
 # the waypoint connectors, so everything downstream of it inherits the 94.
 tip_map %>%
   select(glottocode, language, tip = original) %>%
-  write.csv(here("data", "cognate", "COGNATE_tree_languages.csv"), row.names = FALSE)
+  write.csv(here("data", "cognate", "initial_datasets", "COGNATE_tree_languages.csv"), row.names = FALSE)
 
 
 # ── 3. What the restriction costs the response ──────────────────────────────
@@ -183,7 +183,7 @@ if (nrow(deep_split) > 0) {
 }
 
 write.csv(tip_selection,
-          here("data", "cognate", "COGNATE_tip_selection.csv"), row.names = FALSE)
+          here("data", "cognate", "initial_datasets", "COGNATE_tip_selection.csv"), row.names = FALSE)
 
 
 # ── 5. Coloured phylogram (tips coloured by Glottolog family subgroup) ──────
@@ -359,7 +359,7 @@ message("Regions: ", paste(names(table(cognate_lookup_out$region)),
                            sep = "=", collapse = ", "))
 
 write.csv(cognate_lookup_out,
-          here("data", "cognate", "COGNATE_subgroup_lookup.csv"), row.names = FALSE)
+          here("data", "cognate", "initial_datasets", "COGNATE_subgroup_lookup.csv"), row.names = FALSE)
 
 # Let ape compute the rectangular phylogram layout, then read the tip/node
 # coordinates back out instead of re-deriving them.
@@ -427,5 +427,5 @@ COGNATE_phylo_dist_matrix <- cophenetic.phylo(tree_pruned)
 diag(COGNATE_phylo_dist_matrix) <- 0
 
 write.csv(COGNATE_phylo_dist_matrix,
-          file = here("data", "cognate", "COGNATE_phylo_dist_matrix.csv"),
+          file = here("data", "cognate", "initial_datasets", "COGNATE_phylo_dist_matrix.csv"),
           row.names = TRUE)

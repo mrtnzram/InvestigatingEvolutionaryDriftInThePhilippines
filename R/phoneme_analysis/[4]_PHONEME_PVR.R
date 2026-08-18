@@ -32,7 +32,7 @@ PREDICTOR <- "geodist_H1_span"
 # Fit on Mm; DISPLAY_UNIT_KM rescales reported and plotted slopes only.
 DISPLAY_UNIT_KM <- 100
 
-PHONEME_final <- read.csv(here("data", "PHONEME_final.csv"))
+PHONEME_final <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_final.csv"))
 
 tip_map <- tree_df_matched |> dplyr::select(original, ph)
 
@@ -143,7 +143,7 @@ stopifnot("Variance partition does not sum to 1." =
             isTRUE(all.equal(sum(PHONEME_pvr_varpart$fraction), 1, tolerance = 1e-8)))
 
 write.csv(PHONEME_pvr_varpart,
-          file = here("data", "PHONEME_pvr_varpart.csv"), row.names = FALSE)
+          file = here("data", "phoneme", "PVR", "PHONEME_pvr_varpart.csv"), row.names = FALSE)
 
 
 # ── 6. Collinearity: geographic vs. phylogenetic distance ───────────────────
@@ -176,7 +176,7 @@ PHONEME_pvr_results <- as_tibble(cf, rownames = "term") |>
          geo_phylo_cor = geo_phylo_cor, .before = 1)
 print(PHONEME_pvr_results)
 write.csv(PHONEME_pvr_results,
-          file = here("data", "PHONEME_pvr_results.csv"), row.names = FALSE)
+          file = here("data", "phoneme", "PVR", "PHONEME_pvr_results.csv"), row.names = FALSE)
 
 
 # ── 8. Figures ──────────────────────────────────────────────────────────────

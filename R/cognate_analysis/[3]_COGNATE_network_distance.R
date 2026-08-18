@@ -21,14 +21,14 @@ library(sfheaders)
 library(here)
 
 # ── 0. Load data ─────────────────────────────────────────────────────────────
-PH_cognate <- read.csv(here("data", "cognate", "COGNATE_loans.csv"))
+PH_cognate <- read.csv(here("data", "cognate", "initial_datasets", "COGNATE_loans.csv"))
 
 # The analysis set is the tree-matched subset from [0]_Phylogenetic_Tree.R.
 # Restricting here rather than in each consumer cuts both outputs at once:
 # COGNATE_final.csv and the per-language connectors in the waypoint RDS.
 # Distances are computed per language against a fixed network, so the 94 that
 # remain get exactly the values they would have had in the full run.
-tree_languages <- read.csv(here("data", "cognate", "COGNATE_tree_languages.csv"))
+tree_languages <- read.csv(here("data", "cognate", "initial_datasets", "COGNATE_tree_languages.csv"))
 message("Analysis set: ", sum(PH_cognate$glottocode %in% tree_languages$glottocode),
         " tree-matched languages of ", nrow(PH_cognate), ".")
 PH_cognate <- PH_cognate |> semi_join(tree_languages, by = "glottocode")
@@ -301,7 +301,7 @@ PH_cognate |>
          latitude, longitude,
          number_of_entries, number_of_loans, loans_norm,
          nearest_node, geodist_H1_span, geodist_H2_span, using_network) |>
-  write.csv(file = here("data", "cognate", "COGNATE_final.csv"), row.names = FALSE)
+  write.csv(file = here("data", "cognate", "network_distance", "COGNATE_final.csv"), row.names = FALSE)
 
 
 # ── 6a. Pairwise language x language distance matrix ────────────────────────
@@ -320,7 +320,7 @@ COGNATE_dist_matrix <- build_pairwise_distance_matrix(
 )
 
 write.csv(COGNATE_dist_matrix,
-          file = here("data", "cognate", "COGNATE_dist_matrix.csv"), row.names = TRUE)
+          file = here("data", "cognate", "network_distance", "COGNATE_dist_matrix.csv"), row.names = TRUE)
 
 
 # ── 7. Assemble full_tree_sf (main edges + per-language connectors) ──────────
@@ -434,4 +434,4 @@ arrow_plot <- ggplot() +
   )
 
 print(arrow_plot)
-saveRDS(arrow_plot, file = here("data", "cognate", "cognate_waypoint_plot.rds"))
+saveRDS(arrow_plot, file = here("data", "cognate", "network_distance", "cognate_waypoint_plot.rds"))

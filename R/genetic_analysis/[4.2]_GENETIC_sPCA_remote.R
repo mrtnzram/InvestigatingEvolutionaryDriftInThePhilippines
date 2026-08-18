@@ -28,7 +28,6 @@ suppressPackageStartupMessages({
   library(spdep)
   library(adespatial)
   library(adegenet)
-  library(RSpectra)
   library(dplyr)
   library(tibble)
 })
@@ -185,23 +184,53 @@ if (ncol(E_sel) == 0) {
 }
 
 
-# ── 6. Reduce to <=N-1 PC scores before any multispati/spca call ────────────
+# ── 6. Reduce to R_CAP PC scores before any multispati/spca call ────────────
 # adespatial::multispati() builds a p x p covariance matrix and calls eigen()
 # on it regardless of how many axes are requested — cubic in SNP count
 # (measured: 71s for a single call at p=4542; ~9 days extrapolated at
 # p=100,000). Centering an N-row matrix caps its rank at N-1, so re-expressing
-# R in "sample space" via truncated SVD first is lossless (verified: identical
-# eigenvalues/row-scores up to an arbitrary sign flip) and turns every
-# downstream multispati/spca call into an r x r problem instead (measured:
-# 0.002s at the same p=4542 — 35,000x faster). Loadings come back in
-# score-space and are projected back to per-SNP space via V at the end.
-Rc <- scale(R, center = TRUE, scale = FALSE)
-r  <- min(nrow(Rc) - 1, ncol(Rc))
-sv <- svds(Rc, k = r)
-scores <- sv$u %*% diag(sv$d, r, r)
-V <- sv$v
+# R in "sample space" via a modest number of PC scores turns every downstream
+# multispati/spca call into a cheap r x r problem instead.
+#
+# eigen() on the small n x n Gram matrix Rc %*% t(Rc) is the stable way to SVD
+# a wide (n << p) matrix (its eigenvectors/eigenvalues are exactly U and S^2
+# of Rc's SVD) — used in place of RSpectra::svds(Rc, k = r_max), an iterative
+# (Lanczos/ARPACK) solver whose worst case is being asked for its ENTIRE
+# spectrum: the trailing singular triplets failed to converge and came back
+# NaN on the real 2.24M-SNP data (surfaced downstream as dudi.pca's "na
+# entries in table").
+#
+# r is capped well below the N-1 ceiling (R_CAP, not r_max) for a second,
+# independent reason: adegenet::spca_randtest() reruns a full multispati()
+# eigendecomposition on every permutation and requires every replicate to
+# return the exact same eigenvalue-vector count (its vapply() has no
+# tolerance for a mismatch). Handing it data at — or even a few dimensions
+# below — its own rank ceiling leaves THAT decomposition numerically
+# unstable per permutation, not just this script's own SVD: r_max = 111
+# crashed at the boundary, and trimming only to the Gram matrix's own
+# 1e-8-relative-tolerance rank (107) still crashed one permutation in. A
+# generous fixed margin below r_max avoids the ceiling instead of chasing a
+# tighter tolerance around it — the same principle [4]_GENETIC_PVR.R already
+# applies by using only 10 PLINK population-structure PCs rather than every
+# available dimension.
+R_CAP <- 30
+Rc    <- scale(R, center = TRUE, scale = FALSE)
+r_max <- min(nrow(Rc) - 1, ncol(Rc))
+
+G   <- tcrossprod(Rc)                            # n x n, Rc %*% t(Rc)
+eig <- eigen(G, symmetric = TRUE)
+r   <- min(R_CAP, sum(eig$values[seq_len(r_max)] > 1e-8 * eig$values[1]))
+
+U <- eig$vectors[, seq_len(r), drop = FALSE]
+S <- sqrt(pmax(eig$values[seq_len(r)], 0))       # clamp float noise below 0
+
+scores <- U %*% diag(S, r, r)
+V <- crossprod(Rc, U) %*% diag(1 / S, r, r)      # Rc = U S V^T => V = Rc^T U S^-1
 rownames(scores) <- rownames(R)
-message("Reduced ", ncol(R), " SNPs to ", r, " PC scores (lossless — full rank of the centered residual).")
+
+var_kept <- sum(eig$values[seq_len(r)]) / sum(pmax(eig$values[seq_len(r_max)], 0))
+message(sprintf("Reduced %d SNPs to %d PC scores (of %d possible), capturing %.1f%% of residual variance.",
+                ncol(R), r, r_max, 100 * var_kept))
 
 
 # ── 7. Spatial weight matrix: threshold search, maximizing sPCA eigenvalue ──
@@ -264,8 +293,9 @@ scores_df <- tibble(population = common, longitude = coords$longitude,
                     latitude = coords$latitude, sPC1 = sPC1)
 write.csv(scores_df, file.path(args$out, "GENETIC_sPCA_scores.csv"), row.names = FALSE)
 
-# Per-SNP loading = V %*% (loading in score-space) — exact, not approximate,
-# because `scores = Rc %*% V` is itself lossless (see §6).
+# Per-SNP loading = V %*% (loading in score-space) — exact given the r
+# retained PCs, not approximate: `scores = Rc %*% V` is an identity of the
+# §6 decomposition regardless of r, since V was derived from the same U/S.
 loadings_df <- tibble(snp = colnames(R), loading = as.numeric(V %*% as.matrix(spca_fit$c1)[, 1])) |>
   arrange(desc(abs(loading)))
 write.csv(loadings_df, file.path(args$out, "GENETIC_sPCA_loadings.csv"), row.names = FALSE)

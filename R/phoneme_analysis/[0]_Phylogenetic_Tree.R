@@ -176,7 +176,7 @@ Ph_Languages_pruned <- tree_df_matched %>%
 tip_subgroup <- tibble(original = tree_pruned$tip.label) %>%
   left_join(tip_df, by = "original") %>%
   left_join(
-    read_csv(here("data", "RUHLENdf_PH.csv"), show_col_types = FALSE) %>%
+    read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"), show_col_types = FALSE) %>%
       select(ph = language, iso6393),
     by = "ph"
   ) %>%
@@ -293,7 +293,7 @@ message("Regions: ", paste(names(table(phoneme_lookup_out$region)),
                            sep = "=", collapse = ", "))
 
 write.csv(phoneme_lookup_out,
-          here("data", "PHONEME_subgroup_lookup.csv"), row.names = FALSE)
+          here("data", "phoneme", "initial_datasets", "PHONEME_subgroup_lookup.csv"), row.names = FALSE)
 
 # Let ape compute the phylogram layout and read its coordinates back out:
 # plot = FALSE fills .PlotPhyloEnv without drawing, absorbed by the null device.
@@ -397,5 +397,5 @@ PHONEME_phylo_dist_matrix <- PHONEME_phylo_dist_matrix[, rownames(PHONEME_phylo_
 diag(PHONEME_phylo_dist_matrix) <- 0
 
 write.csv(PHONEME_phylo_dist_matrix,
-          file = here("data", "PHONEME_phylo_dist_matrix.csv"), row.names = TRUE)
+          file = here("data", "phoneme", "initial_datasets", "PHONEME_phylo_dist_matrix.csv"), row.names = TRUE)
 

@@ -18,12 +18,12 @@ git checkout — just the four files below):
 |---|---|---|
 | `genetic_feems.py` | `python/` | ~15 KB |
 | `genetic_feems_env.yml` | `python/` | ~1 KB |
-| `philippine_ethnolinguistic_coords.csv` | `data/` | ~15 KB |
+| `philippine_ethnolinguistic_coords.csv` | `data/genetic/initial_datasets/` | ~15 KB |
 | `countries.geojson` | `data/` | 14.6 MB |
 
 ```bash
 scp python/genetic_feems.py python/genetic_feems_env.yml \
-    data/philippine_ethnolinguistic_coords.csv data/countries.geojson \
+    data/genetic/initial_datasets/philippine_ethnolinguistic_coords.csv data/countries.geojson \
     user@server:/path/to/genetic_feems/
 ```
 
@@ -95,10 +95,10 @@ Useful flags:
 
 ## Files to bring back
 
-Copy `./out/*` back into local `data/`:
+Copy `./out/*` back into local `data/genetic/feems/`:
 
 ```bash
-scp 'user@server:/path/to/genetic_feems/out/*' data/
+scp 'user@server:/path/to/genetic_feems/out/*' data/genetic/feems/
 ```
 
 | File | Consumed by |

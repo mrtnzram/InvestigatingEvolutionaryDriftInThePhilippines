@@ -31,9 +31,9 @@ conflicts_prefer(dplyr::select)
 # ── 1. Y: individual PLINK matrix -> population IBS similarity ──────────────
 # .mdist is a square, headerless, tab-delimited 1-IBS distance matrix over
 # individuals; .id gives each row/col's (FID = population, IID = sample).
-mdist_ids <- read_tsv(here("data", "genetic_dist.mdist.id"),
+mdist_ids <- read_tsv(here("data", "genetic", "MMRR", "genetic_dist.mdist.id"),
                       col_names = c("FID", "IID"), col_types = "cc")
-M <- as.matrix(read_tsv(here("data", "genetic_dist.mdist"),
+M <- as.matrix(read_tsv(here("data", "genetic", "MMRR", "genetic_dist.mdist"),
                         col_names = FALSE, col_types = cols(.default = "d")))
 dimnames(M) <- NULL
 stopifnot("mdist is not square" = nrow(M) == ncol(M),
@@ -72,11 +72,11 @@ GENETIC_sim_matrix <- 1 - pop_dist   # IBS proportion; diagonal = 1 like the cos
 # Built once by [3]_GENETIC_network_distance.R (all-pairs network routing,
 # ratio-bounded direct-line fallback via R/shared/pairwise_network_distance.R)
 # and read back here instead of rebuilt with a second network-graph pass.
-GENETIC_final <- read.csv(here("data", "GENETIC_final.csv"))
+GENETIC_final <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"))
 stopifnot("GENETIC_final.csv population set != mdist" =
             setequal(GENETIC_final$population, rownames(GENETIC_sim_matrix)))
 
-GENETIC_dist_matrix <- read.csv(here("data", "GENETIC_dist_matrix.csv"),
+GENETIC_dist_matrix <- read.csv(here("data", "genetic", "network_distance", "GENETIC_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 
@@ -168,7 +168,7 @@ GENETIC_mmrr_results <- tibble(
 )
 print(GENETIC_mmrr_results)
 write.csv(GENETIC_mmrr_results,
-          file = here("data", "GENETIC_mmrr_results.csv"), row.names = FALSE)
+          file = here("data", "genetic", "MMRR", "GENETIC_mmrr_results.csv"), row.names = FALSE)
 
 # ── 6. Visualization ─────────────────────────────────────────────────────────
 dir.create(here("figures", "genetic", "mmrr"), recursive = TRUE, showWarnings = FALSE)
@@ -262,4 +262,4 @@ ggsave(here("figures", "genetic", "mmrr", "genetic_mmrr_pairplot.png"),
 # ── 7. Persist matrices ──────────────────────────────────────────────────────
 # GENETIC_dist_matrix.csv is now [3]'s to write (it built the matrix); this
 # script only persists the similarity matrix it computed itself.
-write.csv(GENETIC_sim_matrix, file = here("data", "GENETIC_sim_matrix.csv"), row.names = TRUE)
+write.csv(GENETIC_sim_matrix, file = here("data", "genetic", "MMRR", "GENETIC_sim_matrix.csv"), row.names = TRUE)

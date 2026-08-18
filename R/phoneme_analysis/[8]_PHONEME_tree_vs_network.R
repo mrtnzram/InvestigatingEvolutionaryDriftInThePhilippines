@@ -30,7 +30,7 @@ library(here)
 source(here("R", "phoneme_analysis", "[3]_PHONEME_network_distance.R"), echo = FALSE)
 
 # ---- 2. Shared subgroup palette (identical to the tree) ----------------------
-subgroup_lookup <- read_csv(here("data", "PHONEME_subgroup_lookup.csv"),
+subgroup_lookup <- read_csv(here("data", "phoneme", "initial_datasets", "PHONEME_subgroup_lookup.csv"),
                             show_col_types = FALSE)
 pal <- setNames(subgroup_lookup$colour, subgroup_lookup$subgroup)
 

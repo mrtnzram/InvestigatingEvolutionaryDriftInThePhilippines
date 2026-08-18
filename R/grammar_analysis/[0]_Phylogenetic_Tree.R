@@ -147,7 +147,7 @@ stopifnot(
 tip_subgroup %>%
   distinct(language = gram, subgroup) %>%
   mutate(colour = unname(subgroup_pal[subgroup])) %>%
-  write.csv(here("data", "GRAMMAR_subgroup_lookup.csv"), row.names = FALSE)
+  write.csv(here("data", "grammar", "initial_datasets", "GRAMMAR_subgroup_lookup.csv"), row.names = FALSE)
 
 # Let ape compute the rectangular phylogram layout, then read the tip/node
 # coordinates back out instead of re-deriving them.
@@ -232,4 +232,4 @@ GRAMMAR_phylo_dist_matrix <- GRAMMAR_phylo_dist_matrix[, rownames(GRAMMAR_phylo_
 diag(GRAMMAR_phylo_dist_matrix) <- 0
 
 write.csv(GRAMMAR_phylo_dist_matrix,
-          file = here("data", "GRAMMAR_phylo_dist_matrix.csv"), row.names = TRUE)
+          file = here("data", "grammar", "initial_datasets", "GRAMMAR_phylo_dist_matrix.csv"), row.names = TRUE)

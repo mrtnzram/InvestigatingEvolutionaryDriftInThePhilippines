@@ -28,13 +28,13 @@ library(lmerTest)
 # --- Loading data ------------------------------------------------------------
 # Drop read_csv's "...1" index column and any *_influenced / sig_* columns left
 # by a previous run, so the classification joins below stay idempotent.
-PHONEME_cossim <- read_csv(here("data", "PHONEME_cossim.csv")) |>
+PHONEME_cossim <- read_csv(here("data", "phoneme", "cosine_similarity", "PHONEME_cossim.csv")) |>
   dplyr::select(-any_of(c("...1", "span_influenced", "jap_influenced", "eng_influenced",
                    "sig_span", "sig_jap", "sig_eng")))
 
 # Philippine / unrelated language sets (derived locally so [2] is self-contained
 # and does not depend on [1] having been sourced in the same session).
-RUHLENdf <- read_csv(here("data", "RUHLENdf_PH.csv"))
+RUHLENdf <- read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"))
 ph_lang  <- RUHLENdf |> filter(Language_type == "Philippine Language") |> pull(language)
 unr_lang <- RUHLENdf |> filter(Language_type == "Unrelated Language")  |> pull(language)
 
@@ -42,7 +42,7 @@ unr_lang <- RUHLENdf |> filter(Language_type == "Unrelated Language")  |> pull(l
 # individual unrelated controls (each language's null distribution of cosine
 # similarities). Used by the bimodality and individual-level analyses below.
 load_null_matrix <- function(ph_lang, unr_lang) {
-  read.csv(here("data", "PHONEME_cosine_matrix.csv"),
+  read.csv(here("data", "phoneme", "cosine_similarity", "PHONEME_cosine_matrix.csv"),
            row.names = 1, check.names = FALSE) |>
     as.matrix() |>
     (\(m) m[ph_lang, unr_lang, drop = FALSE])()
@@ -818,4 +818,4 @@ PHONEME_cossim_marked <- PHONEME_cossim |>
 
 # =============================================================================
 # =============================================================================
-write.csv(PHONEME_cossim_marked, file = here("data", "PHONEME_cossim_marked.csv"), row.names = FALSE)
+write.csv(PHONEME_cossim_marked, file = here("data", "phoneme", "cosine_distribution", "PHONEME_cossim_marked.csv"), row.names = FALSE)

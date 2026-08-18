@@ -24,13 +24,13 @@ PREDICTOR <- "geodist_H1_span"
 # Fit on Mm; DISPLAY_UNIT_KM rescales reported and plotted slopes only.
 DISPLAY_UNIT_KM <- 100
 
-GENETIC_final <- read.csv(here("data", "GENETIC_final.csv"))
+GENETIC_final <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"))
 
 
 # ── 1. Population-structure eigenvectors ────────────────────────────────────
 # PLINK --pca is per individual; aggregate to per-population means (all 115
 # populations covered, vs. 70/115 for a tree tip).
-eigenvec_raw <- read.table(here("data", "pca_results_phil_only.eigenvec"),
+eigenvec_raw <- read.table(here("data", "genetic", "PVR", "pca_results_phil_only.eigenvec"),
                            header = FALSE, stringsAsFactors = FALSE)
 n_pc <- ncol(eigenvec_raw) - 2
 names(eigenvec_raw) <- c("population", "sample", paste0("PC", seq_len(n_pc)))
@@ -141,7 +141,7 @@ stopifnot("Variance partition does not sum to 1." =
             isTRUE(all.equal(sum(GENETIC_pvr_varpart$fraction), 1, tolerance = 1e-8)))
 
 write.csv(GENETIC_pvr_varpart,
-          file = here("data", "GENETIC_pvr_varpart.csv"), row.names = FALSE)
+          file = here("data", "genetic", "PVR", "GENETIC_pvr_varpart.csv"), row.names = FALSE)
 
 
 # ── 7. Collinearity: geographic vs. population-structure distance ───────────
@@ -172,7 +172,7 @@ GENETIC_pvr_results <- as_tibble(cf, rownames = "term") |>
          geo_phylo_cor = geo_pop_cor, .before = 1)
 print(GENETIC_pvr_results)
 write.csv(GENETIC_pvr_results,
-          file = here("data", "GENETIC_pvr_results.csv"), row.names = FALSE)
+          file = here("data", "genetic", "PVR", "GENETIC_pvr_results.csv"), row.names = FALSE)
 
 
 # ── 9. Figures ──────────────────────────────────────────────────────────────

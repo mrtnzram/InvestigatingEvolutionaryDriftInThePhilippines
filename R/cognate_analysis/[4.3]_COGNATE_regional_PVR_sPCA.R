@@ -43,10 +43,10 @@ N_PERM    <- 999
 MIN_N     <- 7      # moran.mc(nsim = 999) needs N! > 999
 REGIONS   <- c("Luzon", "Visayas", "Mindanao")
 
-COGNATE_final <- read.csv(here("data", "cognate", "COGNATE_final.csv"))
-region_lookup <- read.csv(here("data", "cognate", "COGNATE_subgroup_lookup.csv")) |>
+COGNATE_final <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv"))
+region_lookup <- read.csv(here("data", "cognate", "initial_datasets", "COGNATE_subgroup_lookup.csv")) |>
   dplyr::select(glottocode, region)
-dist_matrix   <- read.csv(here("data", "cognate", "COGNATE_dist_matrix.csv"),
+dist_matrix   <- read.csv(here("data", "cognate", "network_distance", "COGNATE_dist_matrix.csv"),
                           row.names = 1, check.names = FALSE) |> as.matrix()
 
 
@@ -180,11 +180,11 @@ for (rg in REGIONS) {
 COGNATE_regional_results <- bind_rows(results)
 print(COGNATE_regional_results)
 write.csv(COGNATE_regional_results,
-          here("data", "cognate", "COGNATE_regional_pvr_mem_results.csv"), row.names = FALSE)
+          here("data", "cognate", "PVR", "COGNATE_regional_pvr_mem_results.csv"), row.names = FALSE)
 
 scores_all <- bind_rows(scores)
 write.csv(scores_all,
-          here("data", "cognate", "COGNATE_regional_pvr_mem_scores.csv"), row.names = FALSE)
+          here("data", "cognate", "PVR", "COGNATE_regional_pvr_mem_scores.csv"), row.names = FALSE)
 stopifnot("No region produced scores — nothing to plot." = nrow(scores_all) > 0)
 
 

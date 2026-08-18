@@ -22,14 +22,14 @@ library(dplyr)
 library(here)
 library(scales)
 
-gram_surface      <- read.csv(here("data", "grammar_surface_raster.csv"))
-gram_surface_null <- read.csv(here("data", "grammar_surface_raster_null_mean.csv"))
-GRAMMAR_cossim    <- read.csv(here("data", "GRAMMAR_cossim.csv"))
+gram_surface      <- read.csv(here("data", "grammar", "feems", "grammar_surface_raster.csv"))
+gram_surface_null <- read.csv(here("data", "grammar", "feems", "grammar_surface_raster_null_mean.csv"))
+GRAMMAR_cossim    <- read.csv(here("data", "grammar", "cosine_similarity", "GRAMMAR_cossim.csv"))
 
 # Only the subgroup-coloured markers are restricted to the 26 tree-pruned
 # languages, matching [7] and [8]; the raster still comes from all 39, since
 # dropping the southern Bornean samples would leave that area interpolated.
-subgroup_lookup <- read.csv(here("data", "GRAMMAR_subgroup_lookup.csv"))
+subgroup_lookup <- read.csv(here("data", "grammar", "initial_datasets", "GRAMMAR_subgroup_lookup.csv"))
 GRAMMAR_cossim   <- GRAMMAR_cossim[GRAMMAR_cossim$language %in% subgroup_lookup$language, ]
 
 # Shared color scale across the real and null maps (not each normalized to its own
@@ -88,7 +88,7 @@ base_plot <- ggplot() +
         axis.ticks = element_blank())
 
 base_plot
-saveRDS(base_plot, file = here("data", "base_plot_grammar_FEEMS.rds"))
+saveRDS(base_plot, file = here("data", "grammar", "feems", "base_plot_grammar_FEEMS.rds"))
 
 # ---- Null-model base map (same points, same shared color scale) -------------
 # Geographic-shuffle null: average FEEMS surface across 100 permutations that
@@ -123,7 +123,7 @@ base_plot_null <- ggplot() +
         axis.ticks = element_blank())
 
 base_plot_null
-saveRDS(base_plot_null, file = here("data", "base_plot_grammar_FEEMS_null.rds"))
+saveRDS(base_plot_null, file = here("data", "grammar", "feems", "base_plot_grammar_FEEMS_null.rds"))
 
 # ---- Legend strip (identical construction to [8]) ---------------------------
 # Hand-built stacked colour tiles, ordered by mean latitude (north first) so
@@ -149,4 +149,4 @@ legend_strip <- ggplot(legend_df) +
   theme(plot.margin = margin(6, 2, 6, 2))
 
 legend_strip
-saveRDS(legend_strip, file = here("data", "legend_strip_grammar_subgroup.rds"))
+saveRDS(legend_strip, file = here("data", "grammar", "feems", "legend_strip_grammar_subgroup.rds"))

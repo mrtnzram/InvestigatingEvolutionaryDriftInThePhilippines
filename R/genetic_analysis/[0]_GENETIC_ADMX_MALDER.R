@@ -11,8 +11,8 @@
 library(here)
 library(tidyverse)
 
-PH_genetic <- read_tsv(here('data','Phil_admixture.tsv'))
-coords <- read_csv(here('data','philippine_ethnolinguistic_coords.csv'))
+PH_genetic <- read_tsv(here('data', 'genetic', 'initial_datasets', 'Phil_admixture.tsv'))
+coords <- read_csv(here('data', 'genetic', 'initial_datasets', 'philippine_ethnolinguistic_coords.csv'))
 
 # override negative estimates to 0
 PH_genetic <- PH_genetic |>
@@ -86,4 +86,4 @@ for (category in categories) {
 }
 
 
-write.csv(PH_genetic, here("data", "GENETIC_admixture.csv"), row.names = FALSE)
+write.csv(PH_genetic, here("data", "genetic", "initial_datasets", "GENETIC_admixture.csv"), row.names = FALSE)

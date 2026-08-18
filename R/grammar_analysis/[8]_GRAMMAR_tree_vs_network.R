@@ -30,7 +30,7 @@ library(here)
 source(here("R", "grammar_analysis", "[3]_GRAMMAR_network_distance.R"), echo = FALSE)
 
 # ---- 2. Shared subgroup palette (identical to the tree) ----------------------
-subgroup_lookup <- read_csv(here("data", "GRAMMAR_subgroup_lookup.csv"),
+subgroup_lookup <- read_csv(here("data", "grammar", "initial_datasets", "GRAMMAR_subgroup_lookup.csv"),
                             show_col_types = FALSE)
 pal <- setNames(subgroup_lookup$colour, subgroup_lookup$subgroup)
 

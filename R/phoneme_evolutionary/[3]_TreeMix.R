@@ -34,13 +34,13 @@ library(here)
 library(tidyverse)
 library(ape)
 
-RUHLENdf <- read_csv(here("data", "RUHLENdf_PH_evolutionary.csv"), show_col_types = FALSE)
+RUHLENdf <- read_csv(here("data", "phoneme", "evolutionary", "initial_datasets", "RUHLENdf_PH_evolutionary.csv"), show_col_types = FALSE)
 
-RUHLENdf_full <- read_csv(here("data", "RUHLENdf_PH.csv"), show_col_types = FALSE)
+RUHLENdf_full <- read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"), show_col_types = FALSE)
 
-phoneme_freq <- read_csv(here("data", "phoneme_freq_ruhlen_evolutionary.csv"), show_col_types = FALSE)
-tip_mapping <- read_csv(here("data", "phoneme_evolutionary_tip_mapping.csv"), show_col_types = FALSE)
-analysis_objects <- readRDS(here("data", "phoneme_evolutionary_analysis_tree.rds"))
+phoneme_freq <- read_csv(here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_freq_ruhlen_evolutionary.csv"), show_col_types = FALSE)
+tip_mapping <- read_csv(here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_evolutionary_tip_mapping.csv"), show_col_types = FALSE)
+analysis_objects <- readRDS(here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_evolutionary_analysis_tree.rds"))
 evolutionary_tree <- analysis_objects$analysis_tree
 
 stopifnot(inherits(evolutionary_tree, "phylo"))

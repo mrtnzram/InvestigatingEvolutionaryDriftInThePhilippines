@@ -29,13 +29,13 @@ library(lmerTest)
 # --- Loading data ------------------------------------------------------------
 # Drop read_csv's "...1" index column and any *_influenced / sig_* columns left
 # by a previous run, so the classification joins below stay idempotent.
-GRAMMAR_cossim <- read_csv(here("data", "GRAMMAR_cossim.csv")) |>
+GRAMMAR_cossim <- read_csv(here("data", "grammar", "cosine_similarity", "GRAMMAR_cossim.csv")) |>
   dplyr::select(-any_of(c("...1", "span_influenced", "jap_influenced", "eng_influenced",
                    "sig_span", "sig_jap", "sig_eng")))
 
 # Philippine / unrelated language sets (derived locally so [2] is self-contained
 # and does not depend on [1] having been sourced in the same session).
-GRAMBANKdf_PH <- read_csv(here("data", "GRAMBANKdf_full.csv"))
+GRAMBANKdf_PH <- read_csv(here("data", "grammar", "initial_datasets", "GRAMBANKdf_full.csv"))
 ph_lang  <- GRAMBANKdf_PH |> filter(Language_Type == "Philippine Language") |> pull(language)
 unr_lang <- GRAMBANKdf_PH |> filter(Language_Type == "Unrelated Language")  |> pull(language)
 
@@ -43,7 +43,7 @@ unr_lang <- GRAMBANKdf_PH |> filter(Language_Type == "Unrelated Language")  |> p
 # individual unrelated controls (each language's null distribution of cosine
 # similarities). Used by the bimodality and individual-level analyses below.
 load_null_matrix <- function(ph_lang, unr_lang) {
-  read.csv(here("data", "GRAMMAR_cosine_matrix.csv"),
+  read.csv(here("data", "grammar", "cosine_similarity", "GRAMMAR_cosine_matrix.csv"),
            row.names = 1, check.names = FALSE) |>
     as.matrix() |>
     (\(m) m[ph_lang, unr_lang, drop = FALSE])()
@@ -830,4 +830,4 @@ GRAMMAR_cossim_marked <- GRAMMAR_cossim |>
 
 # =============================================================================
 # =============================================================================
-write.csv(GRAMMAR_cossim_marked, file = here("data", "GRAMMAR_cossim_marked.csv"), row.names = FALSE)
+write.csv(GRAMMAR_cossim_marked, file = here("data", "grammar", "cosine_distribution", "GRAMMAR_cossim_marked.csv"), row.names = FALSE)

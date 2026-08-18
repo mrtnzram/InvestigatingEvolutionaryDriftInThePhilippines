@@ -32,7 +32,7 @@ PREDICTOR <- "geodist_H1_span"
 # Fit on Mm; DISPLAY_UNIT_KM rescales reported and plotted slopes only.
 DISPLAY_UNIT_KM <- 100
 
-GRAMMAR_final <- read.csv(here("data", "GRAMMAR_final.csv"))
+GRAMMAR_final <- read.csv(here("data", "grammar", "network_distance", "GRAMMAR_final.csv"))
 
 tip_map <- tree_df_matched |> dplyr::select(original, gram)
 
@@ -143,7 +143,7 @@ stopifnot("Variance partition does not sum to 1." =
             isTRUE(all.equal(sum(GRAMMAR_pvr_varpart$fraction), 1, tolerance = 1e-8)))
 
 write.csv(GRAMMAR_pvr_varpart,
-          file = here("data", "GRAMMAR_pvr_varpart.csv"), row.names = FALSE)
+          file = here("data", "grammar", "PVR", "GRAMMAR_pvr_varpart.csv"), row.names = FALSE)
 
 
 # ── 6. Collinearity: geographic vs. phylogenetic distance ───────────────────
@@ -176,7 +176,7 @@ GRAMMAR_pvr_results <- as_tibble(cf, rownames = "term") |>
          geo_phylo_cor = geo_phylo_cor, .before = 1)
 print(GRAMMAR_pvr_results)
 write.csv(GRAMMAR_pvr_results,
-          file = here("data", "GRAMMAR_pvr_results.csv"), row.names = FALSE)
+          file = here("data", "grammar", "PVR", "GRAMMAR_pvr_results.csv"), row.names = FALSE)
 
 
 # ── 8. Figures ──────────────────────────────────────────────────────────────

@@ -22,9 +22,9 @@ library(dplyr)
 library(here)
 library(scales)
 
-phon_surface      <- read.csv(here("data", "phoneme_surface_raster.csv"))
-phon_surface_null <- read.csv(here("data", "phoneme_surface_raster_null_mean.csv"))
-PHONEME_cossim    <- read.csv(here("data", "PHONEME_cossim.csv"))
+phon_surface      <- read.csv(here("data", "phoneme", "feems", "phoneme_surface_raster.csv"))
+phon_surface_null <- read.csv(here("data", "phoneme", "feems", "phoneme_surface_raster_null_mean.csv"))
+PHONEME_cossim    <- read.csv(here("data", "phoneme", "cosine_similarity", "PHONEME_cossim.csv"))
 
 # Shared color scale across the real and null maps (not each normalized to its own
 # max) — this is what makes a flatter null surface visibly wash out next to the real
@@ -37,7 +37,7 @@ world_map  <- map_data("world")
 map_subset <- world_map %>% filter(region %in% c("Philippines", "Malaysia"))
 
 # ---- Subgroup palette + membership (shared with [8]) ------------------------
-subgroup_lookup <- read.csv(here("data", "PHONEME_subgroup_lookup.csv"))
+subgroup_lookup <- read.csv(here("data", "phoneme", "initial_datasets", "PHONEME_subgroup_lookup.csv"))
 pal <- setNames(subgroup_lookup$colour, subgroup_lookup$subgroup)
 
 points_coloured <- PHONEME_cossim |>
@@ -83,7 +83,7 @@ base_plot <- ggplot() +
         axis.ticks = element_blank())
 
 base_plot
-saveRDS(base_plot, file = here("data", "base_plot_phoneme_FEEMS.rds"))
+saveRDS(base_plot, file = here("data", "phoneme", "feems", "base_plot_phoneme_FEEMS.rds"))
 
 # ---- Null-model base map (same points, same shared color scale) -------------
 # Geographic-shuffle null: average FEEMS surface across 100 permutations that
@@ -118,7 +118,7 @@ base_plot_null <- ggplot() +
         axis.ticks = element_blank())
 
 base_plot_null
-saveRDS(base_plot_null, file = here("data", "base_plot_phoneme_FEEMS_null.rds"))
+saveRDS(base_plot_null, file = here("data", "phoneme", "feems", "base_plot_phoneme_FEEMS_null.rds"))
 
 # ---- Legend strip (identical construction to [8]) ---------------------------
 # Hand-built stacked colour tiles, ordered by mean latitude (north first) so
@@ -144,4 +144,4 @@ legend_strip <- ggplot(legend_df) +
   theme(plot.margin = margin(6, 2, 6, 2))
 
 legend_strip
-saveRDS(legend_strip, file = here("data", "legend_strip_phoneme_subgroup.rds"))
+saveRDS(legend_strip, file = here("data", "phoneme", "feems", "legend_strip_phoneme_subgroup.rds"))

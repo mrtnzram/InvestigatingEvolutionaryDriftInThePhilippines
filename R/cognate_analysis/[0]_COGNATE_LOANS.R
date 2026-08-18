@@ -13,7 +13,7 @@ library(tidyverse)
 
 # read_csv, not read.csv: several gloss headers contain commas and slashes that
 # check.names would mangle.
-PH_cognate <- read_csv(here("data", "cognate", "PH_final.csv"),
+PH_cognate <- read_csv(here("data", "cognate", "initial_datasets", "PH_final.csv"),
                        show_col_types = FALSE)
 
 META_COLS <- c("language_id", "language", "latitude", "longitude",
@@ -72,4 +72,4 @@ PH_cognate |>
 # but it is what an exposure-offset model would need.
 PH_cognate |>
   select(all_of(META_COLS), number_of_loans, loans_norm) |>
-  write.csv(file = here("data", "cognate", "COGNATE_loans.csv"), row.names = FALSE)
+  write.csv(file = here("data", "cognate", "initial_datasets", "COGNATE_loans.csv"), row.names = FALSE)

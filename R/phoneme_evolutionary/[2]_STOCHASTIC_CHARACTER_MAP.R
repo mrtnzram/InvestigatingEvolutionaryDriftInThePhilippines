@@ -29,10 +29,11 @@ STATES         <- c("0", "1")
 ROOT_PRIOR     <- "equal"   # matches the root prior fitMk/fitmultiMk used in [1]
 PH_PLACEHOLDER <- "PH_CLADE"
 
-# Figure geometry. The tree is 172 tips, so it has to be tall and narrow; at
-# actual size this is roughly half a 1512 x 982 pt laptop screen.
-FIG_W   <- 7.5
-FIG_H   <- 10
+# Figure geometry. The tree is 172 tips; laid out as a fan the tips spread
+# around a circle instead of down a column, so the canvas is wide/square
+# rather than tall and narrow.
+FIG_W   <- 9
+FIG_H   <- 8.5
 FIG_DPI <- 300
 FSIZE   <- 0.38   # tip label size, relative to the plotting default
 PIE_CEX <- 0.17   # radius of both the node pies and the observed-state tip circles
@@ -49,21 +50,21 @@ set.seed(SEED)
 # ── 1. Load data ─────────────────────────────────────────────
 
 RUHLENdf <- read_csv(
-  here("data", "RUHLENdf_PH_evolutionary.csv"),
+  here("data", "phoneme", "evolutionary", "initial_datasets", "RUHLENdf_PH_evolutionary.csv"),
   show_col_types = FALSE
 )
 
 tip_mapping <- read_csv(
-  here("data", "phoneme_evolutionary_tip_mapping.csv"),
+  here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_evolutionary_tip_mapping.csv"),
   show_col_types = FALSE
 )
 
 model_selection <- read_csv(
-  here("data", "PHONEME_evolutionary_model_selection.csv"),
+  here("data", "phoneme", "evolutionary", "ML_model", "PHONEME_evolutionary_model_selection.csv"),
   show_col_types = FALSE
 )
 
-tree_bundle     <- readRDS(here("data", "phoneme_evolutionary_analysis_tree.rds"))
+tree_bundle     <- readRDS(here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_evolutionary_analysis_tree.rds"))
 analysis_tree   <- tree_bundle$analysis_tree
 regime_tree     <- tree_bundle$regime_tree
 philippine_tips <- tree_bundle$philippine_tips
@@ -586,11 +587,11 @@ transitions <- bind_rows(lapply(results, function(r) {
          mean, median, q025, q975, total_branch_length, per_unit_time) |>
   arrange(phoneme, regime, direction)
 
-write_csv(node_posteriors, here("data", "PHONEME_evolutionary_simmap_node_posteriors.csv"))
-write_csv(transitions, here("data", "PHONEME_evolutionary_simmap_transitions.csv"))
+write_csv(node_posteriors, here("data", "phoneme", "evolutionary", "stochastic_character_map", "PHONEME_evolutionary_simmap_node_posteriors.csv"))
+write_csv(transitions, here("data", "phoneme", "evolutionary", "stochastic_character_map", "PHONEME_evolutionary_simmap_transitions.csv"))
 saveRDS(
   lapply(results, \(r) r$maps),
-  here("data", "PHONEME_evolutionary_simmap_maps.rds")
+  here("data", "phoneme", "evolutionary", "stochastic_character_map", "PHONEME_evolutionary_simmap_maps.rds")
 )
 
 # ── 9. Figures ───────────────────────────────────────────────
@@ -612,6 +613,7 @@ for (i in seq_len(nrow(targets))) {
 
   plotSimmap(
     regime_tree,
+    type   = "fan",
     colors = REGIME_COLORS,
     fsize  = FSIZE,
     ftype  = "reg",

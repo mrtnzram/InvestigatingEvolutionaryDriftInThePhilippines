@@ -50,7 +50,7 @@ library(tidyr)
 library(here)
 library(lingtypology)
 
-GENETIC_final <- read.csv(here("data", "GENETIC_final.csv"), stringsAsFactors = FALSE)
+GENETIC_final <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"), stringsAsFactors = FALSE)
 pops <- GENETIC_final$population
 
 stopifnot(
@@ -218,7 +218,7 @@ stopifnot(
     !anyNA(GENETIC_subgroup_lookup$colour)
 )
 
-write.csv(GENETIC_subgroup_lookup, here("data", "GENETIC_subgroup_lookup.csv"), row.names = FALSE)
+write.csv(GENETIC_subgroup_lookup, here("data", "genetic", "initial_datasets", "GENETIC_subgroup_lookup.csv"), row.names = FALSE)
 
 # Tally for the run log: expect tiers 1-5 = 36 / 3 / 7 / 61 / 8.
 print(count(GENETIC_subgroup_lookup, match_tier))

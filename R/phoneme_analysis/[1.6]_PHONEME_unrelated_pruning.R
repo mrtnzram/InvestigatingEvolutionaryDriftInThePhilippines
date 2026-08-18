@@ -16,14 +16,14 @@ library(ggplot2)
 library(here)
 
 # --- Loading data -------------------------------------------------------------
-RUHLENdf <- read_csv(here("data", "RUHLENdf_PH.csv"))
+RUHLENdf <- read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"))
 ph_lang  <- RUHLENdf |> filter(Language_type == "Philippine Language") |> pull(language)
 unr_lang <- RUHLENdf |> filter(Language_type == "Unrelated Language")  |> pull(language)
 
 # Per-PH-language null: rows = Philippine languages, cols = unrelated controls
 # (same slice as [2]_PHONEME_cosine_distribution_analysis.R's load_null_matrix).
 load_null_matrix <- function(ph_lang, unr_lang) {
-  read.csv(here("data", "PHONEME_cosine_matrix.csv"),
+  read.csv(here("data", "phoneme", "cosine_similarity", "PHONEME_cosine_matrix.csv"),
            row.names = 1, check.names = FALSE) |>
     as.matrix() |>
     (\(m) m[ph_lang, unr_lang, drop = FALSE])()
@@ -91,4 +91,4 @@ print(skew_candidates, n = Inf)
 
 stopifnot(nrow(skew_candidates) == length(unr_lang))
 
-write.csv(skew_candidates, file = here("data", "PHONEME_unrelated_skew_candidates.csv"), row.names = FALSE)
+write.csv(skew_candidates, file = here("data", "phoneme", "cosine_similarity", "PHONEME_unrelated_skew_candidates.csv"), row.names = FALSE)

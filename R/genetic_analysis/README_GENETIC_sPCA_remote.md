@@ -22,13 +22,14 @@ checkout — just the five files below):
 |---|---|
 | `[4.2]_GENETIC_sPCA_remote.R` | `R/genetic_analysis/` |
 | `select_moran_eigenvectors.R` | `R/shared/` |
-| `pca_results_phil_only.eigenvec` | `data/` |
-| `GENETIC_final.csv` | `data/` |
-| `GENETIC_dist_matrix.csv` | `data/` |
+| `pca_results_phil_only.eigenvec` | `data/genetic/PVR/` |
+| `GENETIC_final.csv` | `data/genetic/network_distance/` |
+| `GENETIC_dist_matrix.csv` | `data/genetic/network_distance/` |
 
 ```bash
 scp R/genetic_analysis/"[4.2]_GENETIC_sPCA_remote.R" R/shared/select_moran_eigenvectors.R \
-    data/pca_results_phil_only.eigenvec data/GENETIC_final.csv data/GENETIC_dist_matrix.csv \
+    data/genetic/PVR/pca_results_phil_only.eigenvec data/genetic/network_distance/GENETIC_final.csv \
+    data/genetic/network_distance/GENETIC_dist_matrix.csv \
     user@server:/path/to/genetic_spca/
 ```
 
@@ -39,7 +40,7 @@ directory.
 ## Server setup
 
 ```bash
-Rscript -e 'install.packages(c("bigsnpr","bigstatsr","spdep","adespatial","adegenet","RSpectra","dplyr","tibble"))'
+Rscript -e 'install.packages(c("bigsnpr","bigstatsr","spdep","adespatial","adegenet","dplyr","tibble"))'
 ```
 
 `bigsnpr`/`bigstatsr` compile C++ (RcppArmadillo, OpenMP) — if the install
@@ -72,7 +73,7 @@ bash ~/miniforge.sh -b -p ~/miniforge3
 source ~/miniforge3/etc/profile.d/conda.sh
 
 mamba create -n genetic-spca -c conda-forge \
-  r-base r-bigsnpr r-bigstatsr r-spdep r-adespatial r-adegenet r-rspectra r-dplyr r-tibble \
+  r-base r-bigsnpr r-bigstatsr r-spdep r-adespatial r-adegenet r-dplyr r-tibble \
   -y
 conda activate genetic-spca
 ```
@@ -121,7 +122,7 @@ no population match (should be 0, or a small number you can chase down with
 ## Files to bring back
 
 ```bash
-scp 'user@server:/path/to/genetic_spca/out/*' data/
+scp 'user@server:/path/to/genetic_spca/out/*' data/genetic/PVR/
 ```
 
 | File | Consumed by |

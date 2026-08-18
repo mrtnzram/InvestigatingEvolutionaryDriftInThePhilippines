@@ -31,7 +31,7 @@ stopifnot(
 PREDICTOR <- "geodist_H1_span"
 N_PERM    <- 999   # + observed arrangement = 1000 draws
 
-PHONEME_final <- read.csv(here("data", "PHONEME_final.csv"))
+PHONEME_final <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_final.csv"))
 tip_map <- tree_df_matched |> dplyr::select(original, ph)
 
 
@@ -75,7 +75,7 @@ resid_y <- resid(lm(y ~ E_sel))
 
 # ── 4. Spatial weight matrix: threshold search ──────────────────────────────
 # Tip-level Dgeo: dialect tips of one language share coordinates, not resid_y.
-PHONEME_dist_matrix <- read.csv(here("data", "PHONEME_dist_matrix.csv"),
+PHONEME_dist_matrix <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 # Dimnamed by df$original (unique) — mat2listw()/mem() need unique names.
@@ -145,7 +145,7 @@ scores_df <- df |>
   mutate(sPC1 = sPC1) |>
   summarise(sPC1 = mean(sPC1), .by = c(language, longitude, latitude))
 
-write.csv(scores_df, file = here("data", "PHONEME_spca_scores.csv"), row.names = FALSE)
+write.csv(scores_df, file = here("data", "phoneme", "PVR", "PHONEME_spca_scores.csv"), row.names = FALSE)
 
 
 # ── 7. Results table ─────────────────────────────────────────────────────────
@@ -156,7 +156,7 @@ PHONEME_pvr_spca_results <- tibble(
 )
 print(PHONEME_pvr_spca_results)
 write.csv(PHONEME_pvr_spca_results,
-          file = here("data", "PHONEME_pvr_spca_results.csv"), row.names = FALSE)
+          file = here("data", "phoneme", "PVR", "PHONEME_pvr_spca_results.csv"), row.names = FALSE)
 
 
 # ── 8. Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ───────────
@@ -204,4 +204,4 @@ print(p_surface)
 
 ggsave(here("figures", "phoneme", "regression", "phoneme_pvr_spca_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
-saveRDS(p_surface, file = here("data", "base_plot_phoneme_PVR_sPCA.rds"))
+saveRDS(p_surface, file = here("data", "phoneme", "PVR", "base_plot_phoneme_PVR_sPCA.rds"))

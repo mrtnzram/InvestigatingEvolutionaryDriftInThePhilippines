@@ -19,8 +19,8 @@ library(ggplot2)
 library(dplyr)
 library(here)
 
-PH_genetic <- read.csv(here("data", "GENETIC_final.csv"))
-arrows     <- readRDS(here("data", "genetic_waypoint_plot.rds"))
+PH_genetic <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"))
+arrows     <- readRDS(here("data", "genetic", "network_distance", "genetic_waypoint_plot.rds"))
 
 points_df <- PH_genetic |> filter(!is.na(span_admx), !is.na(span_w))
 
@@ -98,7 +98,7 @@ ggsave(here("figures", "genetic", "mst_waypoints", "GENETIC_span_admx_weighted.p
        final_plot_admx, width = 7, height = 9, units = "in", dpi = 300)
 
 # ---- Figure B: FEEMS surface + routes ----------------------------------------
-base_plot_feems  <- readRDS(here("data", "base_plot_genetic_FEEMS.rds"))
+base_plot_feems  <- readRDS(here("data", "genetic", "feems", "base_plot_genetic_FEEMS.rds"))
 final_plot_feems <- add_routes_and_capital(base_plot_feems)
 
 print(final_plot_feems)
@@ -109,7 +109,7 @@ ggsave(here("figures", "genetic", "mst_waypoints", "GENETIC_weight_mst_feems.png
 # ---- Figure C: FEEMS null-model surface + routes ------------------------------
 # Geographic-shuffle null (100 permutations, from genetic_feems.py --permute), on
 # the same color scale as Figure B (set jointly in [6]) so the two are comparable.
-base_plot_feems_null  <- readRDS(here("data", "base_plot_genetic_FEEMS_null.rds"))
+base_plot_feems_null  <- readRDS(here("data", "genetic", "feems", "base_plot_genetic_FEEMS_null.rds"))
 final_plot_feems_null <- add_routes_and_capital(base_plot_feems_null)
 
 print(final_plot_feems_null)

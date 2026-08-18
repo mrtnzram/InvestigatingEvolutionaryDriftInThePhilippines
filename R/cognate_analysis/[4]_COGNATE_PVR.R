@@ -31,7 +31,7 @@ PREDICTOR <- "geodist_H1_span"
 # Fit on Mm; DISPLAY_UNIT_KM rescales reported and plotted slopes only.
 DISPLAY_UNIT_KM <- 100
 
-COGNATE_final <- read.csv(here("data", "cognate", "COGNATE_final.csv"))
+COGNATE_final <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv"))
 
 
 # ── 1. Analysis frame, ordered to tip.label ─────────────────────────────────
@@ -138,7 +138,7 @@ stopifnot("Variance partition does not sum to 1." =
             isTRUE(all.equal(sum(COGNATE_pvr_varpart$fraction), 1, tolerance = 1e-8)))
 
 write.csv(COGNATE_pvr_varpart,
-          file = here("data", "cognate", "COGNATE_pvr_varpart.csv"), row.names = FALSE)
+          file = here("data", "cognate", "PVR", "COGNATE_pvr_varpart.csv"), row.names = FALSE)
 
 
 # ── 6. Collinearity: geographic vs. phylogenetic distance ───────────────────
@@ -171,7 +171,7 @@ COGNATE_pvr_results <- as_tibble(cf, rownames = "term") |>
          geo_phylo_cor = geo_phylo_cor, .before = 1)
 print(COGNATE_pvr_results)
 write.csv(COGNATE_pvr_results,
-          file = here("data", "cognate", "COGNATE_pvr_results.csv"), row.names = FALSE)
+          file = here("data", "cognate", "PVR", "COGNATE_pvr_results.csv"), row.names = FALSE)
 
 
 # ── 8. Figures ──────────────────────────────────────────────────────────────

@@ -30,11 +30,11 @@ source(here("R", "shared", "select_moran_eigenvectors.R"))
 PREDICTOR <- "geodist_H1_span"
 N_PERM    <- 999   # + observed arrangement = 1000 draws
 
-GENETIC_final <- read.csv(here("data", "GENETIC_final.csv"))
+GENETIC_final <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"))
 
 
 # ── 1. Population-structure eigenvectors (same construction as [4]) ─────────
-eigenvec_raw <- read.table(here("data", "pca_results_phil_only.eigenvec"),
+eigenvec_raw <- read.table(here("data", "genetic", "PVR", "pca_results_phil_only.eigenvec"),
                            header = FALSE, stringsAsFactors = FALSE)
 n_pc <- ncol(eigenvec_raw) - 2
 names(eigenvec_raw) <- c("population", "sample", paste0("PC", seq_len(n_pc)))
@@ -87,7 +87,7 @@ resid_y <- resid(fit_e_only(y, E_sel))
 
 
 # ── 5. Spatial weight matrix: threshold search ──────────────────────────────
-GENETIC_dist_matrix <- read.csv(here("data", "GENETIC_dist_matrix.csv"),
+GENETIC_dist_matrix <- read.csv(here("data", "genetic", "network_distance", "GENETIC_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 Dgeo <- GENETIC_dist_matrix[df$population, df$population]
@@ -155,7 +155,7 @@ scores_df <- df |>
   mutate(sPC1 = sPC1) |>
   summarise(sPC1 = mean(sPC1), .by = c(population, longitude, latitude))
 
-write.csv(scores_df, file = here("data", "GENETIC_spca_scores.csv"), row.names = FALSE)
+write.csv(scores_df, file = here("data", "genetic", "PVR", "GENETIC_spca_scores.csv"), row.names = FALSE)
 
 
 # ── 8. Results table ─────────────────────────────────────────────────────────
@@ -166,7 +166,7 @@ GENETIC_pvr_spca_results <- tibble(
 )
 print(GENETIC_pvr_spca_results)
 write.csv(GENETIC_pvr_spca_results,
-          file = here("data", "GENETIC_pvr_spca_results.csv"), row.names = FALSE)
+          file = here("data", "genetic", "PVR", "GENETIC_pvr_spca_results.csv"), row.names = FALSE)
 
 
 # ── 9. Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ───────────
@@ -214,4 +214,4 @@ print(p_surface)
 
 ggsave(here("figures", "genetic", "regression", "genetic_pvr_spca_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
-saveRDS(p_surface, file = here("data", "base_plot_genetic_PVR_sPCA.rds"))
+saveRDS(p_surface, file = here("data", "genetic", "PVR", "base_plot_genetic_PVR_sPCA.rds"))

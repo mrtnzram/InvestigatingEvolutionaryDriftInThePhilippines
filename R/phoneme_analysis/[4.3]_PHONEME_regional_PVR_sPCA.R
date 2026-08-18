@@ -40,11 +40,11 @@ N_PERM    <- 999
 MIN_N     <- 7      # moran.mc(nsim = 999) needs N! > 999
 REGIONS   <- c("Luzon", "Visayas", "Mindanao")
 
-PHONEME_final  <- read.csv(here("data", "PHONEME_final.csv"))
-region_lookup  <- read.csv(here("data", "PHONEME_subgroup_lookup.csv")) |>
+PHONEME_final  <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_final.csv"))
+region_lookup  <- read.csv(here("data", "phoneme", "initial_datasets", "PHONEME_subgroup_lookup.csv")) |>
   dplyr::select(language, region)
 tip_map        <- tree_df_matched |> dplyr::select(original, ph)
-dist_matrix    <- read.csv(here("data", "PHONEME_dist_matrix.csv"),
+dist_matrix    <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_dist_matrix.csv"),
                            row.names = 1, check.names = FALSE) |> as.matrix()
 
 
@@ -183,11 +183,11 @@ for (rg in REGIONS) {
 PHONEME_regional_results <- bind_rows(results)
 print(PHONEME_regional_results)
 write.csv(PHONEME_regional_results,
-          here("data", "PHONEME_regional_pvr_mem_results.csv"), row.names = FALSE)
+          here("data", "phoneme", "PVR", "PHONEME_regional_pvr_mem_results.csv"), row.names = FALSE)
 
 scores_all <- bind_rows(scores)
 write.csv(scores_all,
-          here("data", "PHONEME_regional_pvr_mem_scores.csv"), row.names = FALSE)
+          here("data", "phoneme", "PVR", "PHONEME_regional_pvr_mem_scores.csv"), row.names = FALSE)
 stopifnot("No region produced scores — nothing to plot." = nrow(scores_all) > 0)
 
 

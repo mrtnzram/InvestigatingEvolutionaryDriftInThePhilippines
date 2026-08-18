@@ -14,8 +14,8 @@ library(maps)
 library(sf)
 library(here)
 
-PH_cognate <- read.csv(here("data", "cognate", "COGNATE_final.csv"))
-arrows     <- readRDS(here("data", "cognate", "cognate_waypoint_plot.rds"))
+PH_cognate <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv"))
+arrows     <- readRDS(here("data", "cognate", "network_distance", "cognate_waypoint_plot.rds"))
 
 points_df <- PH_cognate |> filter(!is.na(loans_norm))
 

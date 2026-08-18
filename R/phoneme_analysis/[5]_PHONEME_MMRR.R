@@ -41,14 +41,14 @@ conflicts_prefer(dplyr::summarise)
 conflicts_prefer(tidyr::extract)
 
 # ---- 0. Load data -----------------------------------------------------------
-RUHLENdf <- read_csv(here("data", "RUHLENdf_PH.csv"))
+RUHLENdf <- read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"))
 
 ph_lang <- RUHLENdf |>
   filter(Language_type == "Philippine Language") |>
   pull(language)
 
 # Cosine-similarity matrix written by [1]_PHONEME_cosine_similarity.R
-cosine_matrix <- read.csv(here("data", "PHONEME_cosine_matrix.csv"),
+cosine_matrix <- read.csv(here("data", "phoneme", "cosine_similarity", "PHONEME_cosine_matrix.csv"),
                           row.names = 1, check.names = FALSE) |>
   as.matrix()
 
@@ -60,7 +60,7 @@ PHONEME_sim_matrix <- cosine_matrix_phil
 # Built once by [3]_PHONEME_network_distance.R (all-pairs network routing,
 # ratio-bounded direct-line fallback via R/shared/pairwise_network_distance.R)
 # and read back here instead of rebuilt with a second hand-rolled Dijkstra.
-PHONEME_dist_matrix <- read.csv(here("data", "PHONEME_dist_matrix.csv"),
+PHONEME_dist_matrix <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 PHONEME_dist_matrix <- PHONEME_dist_matrix[ph_lang, ph_lang]
@@ -69,7 +69,7 @@ PHONEME_dist_matrix <- PHONEME_dist_matrix[ph_lang, ph_lang]
 # check.names = FALSE preserves names-with-spaces so the labels still match the
 # cosine/dist matrices exactly.
 PHONEME_phylo_dist_matrix <- read.csv(
-  here("data", "PHONEME_phylo_dist_matrix.csv"),
+  here("data", "phoneme", "initial_datasets", "PHONEME_phylo_dist_matrix.csv"),
   row.names = 1, check.names = FALSE
 ) |>
   as.matrix()
@@ -269,7 +269,7 @@ PHONEME_mmrr_single <- bind_rows(
 )
 print(PHONEME_mmrr_single)
 write.csv(PHONEME_mmrr_single,
-          file = here("data", "PHONEME_mmrr_single_results.csv"), row.names = FALSE)
+          file = here("data", "phoneme", "MMRR", "PHONEME_mmrr_single_results.csv"), row.names = FALSE)
 
 
 # ---- 9b. Joint two-predictor MMRR -------------------------------------------
@@ -289,7 +289,7 @@ PHONEME_mmrr_results <- tibble(
 )
 print(PHONEME_mmrr_results)
 write.csv(PHONEME_mmrr_results,
-          file = here("data", "PHONEME_mmrr_results.csv"), row.names = FALSE)
+          file = here("data", "phoneme", "MMRR", "PHONEME_mmrr_results.csv"), row.names = FALSE)
 
 # ---- 11. Visualization ------------------------------------------------------
 # Both figures are built on the standardized unfolded lower triangles, so they
@@ -416,4 +416,4 @@ ggsave(here("figures", "phoneme", "mmrr", "phoneme_mmrr_partial_regression.png")
 # ---- 12. Persist matrices ---------------------------------------------------
 # PHONEME_dist_matrix.csv is now [3]'s to write (it built the matrix); this
 # script only persists the similarity matrix it computed itself.
-write.csv(PHONEME_sim_matrix, file = here("data", "PHONEME_sim_matrix.csv"), row.names = TRUE)
+write.csv(PHONEME_sim_matrix, file = here("data", "phoneme", "MMRR", "PHONEME_sim_matrix.csv"), row.names = TRUE)
