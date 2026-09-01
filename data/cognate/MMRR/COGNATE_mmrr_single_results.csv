@@ -1,0 +1,4 @@
+"model","beta","p_value","r_squared"
+"Cognate similarity vs Geographic distance",-0.427052167352186,1e-04,0.182373553640198
+"Cognate similarity vs Phylogenetic distance",-0.711344513924941,1e-04,0.50601101749117
+"Geographic distance vs Phylogenetic distance",0.573584849048531,1e-04,0.328999579058067

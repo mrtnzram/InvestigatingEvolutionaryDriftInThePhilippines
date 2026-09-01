@@ -2,18 +2,17 @@
 # [4.1] Genetic Analysis — PVR-sPCA: population-structure-scrubbed spatial
 #       structure
 #
-# Second-stage companion to [4]_GENETIC_PVR.R. Regresses population-structure-
-# scrubbed Spanish admixture on Moran eigenvector maps to recover its dominant
-# spatial component (sPC1), plotted as sPCA point symbols. Uses population-
-# structure PCA eigenvectors (data/pca_results_phil_only.eigenvec) in place of
-# phylogenetic eigenvectors — see [4]_GENETIC_PVR.R's header for why.
+# Regresses population-structure-scrubbed Spanish admixture on Moran
+# eigenvector maps to recover its dominant spatial component (sPC1), plotted
+# as sPCA point symbols — genetics has no tree, so population-structure PCA
+# eigenvectors (data/Phil_2.24M_pca_results.eigenvec) substitute for the
+# phylogenetic ones the other three domains use.
 #
-# Run order: no [0]_Phylogenetic_Tree.R dependency (unlike phoneme/grammar/
-#            cognate) — reads data/pca_results_phil_only.eigenvec directly,
-#            same as [4]_GENETIC_PVR.R.
+# Run order: no [0]_Phylogenetic_Tree.R dependency — reads
+#            data/Phil_2.24M_pca_results.eigenvec directly.
 #
-# Input:   data/GENETIC_final.csv, data/GENETIC_dist_matrix.csv (both from [3]),
-#          data/pca_results_phil_only.eigenvec
+# Input:   data/genetic/network_distance/GENETIC_final.csv, GENETIC_dist_matrix.csv (both from [3]),
+#          data/Phil_2.24M_pca_results.eigenvec
 # Outputs: data/GENETIC_pvr_spca_results.csv, data/GENETIC_spca_scores.csv,
 #          figures/genetic/regression/genetic_pvr_spca_surface.png,
 #          data/base_plot_genetic_PVR_sPCA.rds
@@ -34,7 +33,7 @@ GENETIC_final <- read.csv(here("data", "genetic", "network_distance", "GENETIC_f
 
 
 # ── 1. Population-structure eigenvectors (same construction as [4]) ─────────
-eigenvec_raw <- read.table(here("data", "genetic", "PVR", "pca_results_phil_only.eigenvec"),
+eigenvec_raw <- read.table(here("data", "Phil_2.24M_pca_results.eigenvec"),
                            header = FALSE, stringsAsFactors = FALSE)
 n_pc <- ncol(eigenvec_raw) - 2
 names(eigenvec_raw) <- c("population", "sample", paste0("PC", seq_len(n_pc)))
@@ -207,9 +206,8 @@ p_surface <- ggplot() +
         axis.text  = element_blank(),
         axis.title = element_blank(),
         axis.ticks = element_blank()) +
-  labs(title = "Genetic PVR-sPCA: population-structure-scrubbed spatial structure",
-       subtitle = sprintf("Moran's I permutation p = %.3f (%d permutations) | eigenvector R^2 = %.3f",
-                          best$perm_p, N_PERM + 1, summary(spca_fit)$r.squared))
+  labs(title = "Genetic PVR-sPCA",
+       subtitle = sprintf("p = %.3f, r^2 = %.3f", best$perm_p, summary(spca_fit)$r.squared))
 print(p_surface)
 
 ggsave(here("figures", "genetic", "regression", "genetic_pvr_spca_surface.png"),

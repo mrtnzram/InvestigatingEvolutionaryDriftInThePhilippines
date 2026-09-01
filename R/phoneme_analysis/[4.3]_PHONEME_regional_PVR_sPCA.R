@@ -6,9 +6,6 @@
 # is not. Everything is re-derived per region — the tree is re-pruned and the
 # phylogenetic eigenvectors recomputed on it, not sliced from the global fit.
 #
-# Regions below MIN_N are skipped, not run with a reduced permutation count:
-# spdep::moran.mc(nsim = 999) errors when 999 > N!, i.e. below N = 7.
-#
 # Run order: requires `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
 #
 # Input:   data/PHONEME_final.csv, data/PHONEME_dist_matrix.csv (both from [3]),

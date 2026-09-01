@@ -3,13 +3,11 @@
 # [4.2] Genetic Analysis — true multivariate sPCA (REMOTE — run on the server
 # where phil_only_pruned lives; see README_GENETIC_sPCA_remote.md)
 #
-# Genetic analogue of [4.2]_PHONEME_sPCA.R/[4.2]_GRAMMAR_sPCA.R: residualizes
-# a genotype matrix (aggregated to population allele frequency via bigsnpr/
-# bigstatsr's file-backed matrix) against the same population-structure PCs
-# [4]_GENETIC_PVR.R uses, then runs real adegenet::spca(). Population is read
-# from the .fam FID directly (matches pca_results_phil_only.eigenvec's
-# convention, NOT genetic_feems.py's PHIL_<population>_<code> scheme) —
-# --id-prefix/--alias are a fallback if phil_only_pruned differs.
+# Aggregates genotypes to population allele frequency (via bigsnpr/bigstatsr's
+# file-backed matrix), residualizes against population-structure PCs, and runs
+# real adegenet::spca() to recover the dominant spatial component. Population
+# is read from the .fam FID directly (--id-prefix/--alias are a fallback if
+# phil_only_pruned's naming differs from pca_results_phil_only.eigenvec's).
 #
 # Usage:
 #   Rscript "[4.2]_GENETIC_sPCA_remote.R" --bfile /path/to/phil_only_pruned \
@@ -185,34 +183,10 @@ if (ncol(E_sel) == 0) {
 
 
 # ── 6. Reduce to R_CAP PC scores before any multispati/spca call ────────────
-# adespatial::multispati() builds a p x p covariance matrix and calls eigen()
-# on it regardless of how many axes are requested — cubic in SNP count
-# (measured: 71s for a single call at p=4542; ~9 days extrapolated at
-# p=100,000). Centering an N-row matrix caps its rank at N-1, so re-expressing
-# R in "sample space" via a modest number of PC scores turns every downstream
-# multispati/spca call into a cheap r x r problem instead.
-#
-# eigen() on the small n x n Gram matrix Rc %*% t(Rc) is the stable way to SVD
-# a wide (n << p) matrix (its eigenvectors/eigenvalues are exactly U and S^2
-# of Rc's SVD) — used in place of RSpectra::svds(Rc, k = r_max), an iterative
-# (Lanczos/ARPACK) solver whose worst case is being asked for its ENTIRE
-# spectrum: the trailing singular triplets failed to converge and came back
-# NaN on the real 2.24M-SNP data (surfaced downstream as dudi.pca's "na
-# entries in table").
-#
-# r is capped well below the N-1 ceiling (R_CAP, not r_max) for a second,
-# independent reason: adegenet::spca_randtest() reruns a full multispati()
-# eigendecomposition on every permutation and requires every replicate to
-# return the exact same eigenvalue-vector count (its vapply() has no
-# tolerance for a mismatch). Handing it data at — or even a few dimensions
-# below — its own rank ceiling leaves THAT decomposition numerically
-# unstable per permutation, not just this script's own SVD: r_max = 111
-# crashed at the boundary, and trimming only to the Gram matrix's own
-# 1e-8-relative-tolerance rank (107) still crashed one permutation in. A
-# generous fixed margin below r_max avoids the ceiling instead of chasing a
-# tighter tolerance around it — the same principle [4]_GENETIC_PVR.R already
-# applies by using only 10 PLINK population-structure PCs rather than every
-# available dimension.
+# multispati()'s eigendecomposition is cubic in column count, and both it and
+# spca_randtest()'s permutations are numerically unstable right at a matrix's
+# rank ceiling — eigen() on the small Gram matrix Rc %*% t(Rc) gives a stable
+# SVD, and R_CAP keeps real margin below N-1 rather than chasing that ceiling.
 R_CAP <- 30
 Rc    <- scale(R, center = TRUE, scale = FALSE)
 r_max <- min(nrow(Rc) - 1, ncol(Rc))
@@ -301,7 +275,8 @@ loadings_df <- tibble(snp = colnames(R), loading = as.numeric(V %*% as.matrix(sp
 write.csv(loadings_df, file.path(args$out, "GENETIC_sPCA_loadings.csv"), row.names = FALSE)
 
 results_df <- tibble(
-  n = N, n_evec_popstruct = k, n_snps_retained = ncol(R), n_pc_scores = r,
+  n = N, n_evec_popstruct = k, n_snps_retained = ncol(R),
+  n_pc_scores = r, n_pc_scores_max = r_max, pc_var_captured = var_kept,
   threshold_km = best$threshold, eigenvalue = best$eig1,
   variance_explained = var_explained, perm_p = perm_p, n_perm = N_PERM
 )

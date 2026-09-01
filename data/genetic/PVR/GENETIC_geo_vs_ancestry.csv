@@ -1,0 +1,3 @@
+"model","predictor","n","n_zeros_removed","n_evec","estimate","std.error","statistic","p.value","r.squared","df.residual"
+"A_geography","geodist_H1_span (per 100 km)",42,70,0,-0.0130937591992597,0.0125363312916061,-1.04446499495645,0.302541552608823,0.0265486260099464,40
+"B_ancestry_given_geography","PC eigenvectors ⊥ migration distance",42,70,2,NA,NA,29.1428535254194,2.12918639191724e-08,0.589270239067393,38

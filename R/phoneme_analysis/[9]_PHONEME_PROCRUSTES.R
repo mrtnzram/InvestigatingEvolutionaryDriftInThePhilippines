@@ -1,8 +1,7 @@
 # =============================================================================
 # [9] Phoneme Analysis — Procrustes: PCA vs. geography
 #
-# Runs PCA (adegenet::dudi.pca) on the IDF-weighted phoneme feature matrix (the
-# matrix behind [1]'s cosine similarity, not the cosine matrix) for the 58
+# Runs PCA (adegenet::dudi.pca) on the IDF-weighted phoneme feature matrix for the 58
 # Philippine languages, then fits a Procrustes rotation (ade4::procuste, via
 # adegenet) of PC1/PC2 onto true longitude/latitude, reporting the fit's sum of
 # squares and correlation.
@@ -18,7 +17,7 @@
 #          figures/phoneme/pca/PHONEME_procrustes.png
 # =============================================================================
 
-library(adegenet)   # loads ade4 (dudi.pca, procuste, procuste.randtest)
+library(adegenet)   
 library(tidyverse)
 library(here)
 library(ggpubr)

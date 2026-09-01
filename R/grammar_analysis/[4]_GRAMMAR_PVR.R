@@ -5,13 +5,21 @@
 # migration distance while controlling for shared ancestry with phylogenetic
 # eigenvectors.
 #
+# §7B additionally splits geography and phylogeny into two comparable regressions
+# — y ~ migration distance (uncontrolled) and y ~ phylogenetic eigenvectors with
+# geography scrubbed out of the eigenvectors — since the variance partition is
+# too collinear to separate the two.
+#
 # Run order: requires `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
 #
-# Input:   data/GRAMMAR_final.csv (from [3]_GRAMMAR_network_distance.R)
-# Outputs: data/GRAMMAR_pvr_results.csv  (coefficients + model summary)
-#          data/GRAMMAR_pvr_varpart.csv  (variance partition a/b/c/d)
+# Input:   data/grammar/network_distance/GRAMMAR_final.csv (from [3]_GRAMMAR_network_distance.R)
+# Outputs: data/grammar/PVR/GRAMMAR_pvr_results.csv      (coefficients + model summary)
+#          data/grammar/PVR/GRAMMAR_pvr_varpart.csv      (variance partition a/b/c/d)
+#          data/grammar/PVR/GRAMMAR_geo_vs_ancestry.csv  (§7B regressions A and B)
 #          figures/grammar/regression/grammar_pvr_varpart.png
 #          figures/grammar/regression/grammar_pvr_partial_residuals.png
+#          figures/grammar/regression/grammar_regression_geography.png
+#          figures/grammar/regression/grammar_regression_ancestry.png
 # =============================================================================
 
 library(PVR)
@@ -60,6 +68,10 @@ stopifnot(
 y <- df$y
 x <- df$x_km / 1000
 N <- nrow(df)
+
+# Cosine similarity is strictly positive — no zero spike to drop here (see the
+# cognate/genetic [4] scripts, which do filter). Carried for the §7B CSV.
+n_zeros_removed <- 0L
 
 message(N, " tips covering ", n_distinct(df$language), " languages ",
         "(multi-dialect languages contribute one row per tip).")
@@ -179,6 +191,65 @@ write.csv(GRAMMAR_pvr_results,
           file = here("data", "grammar", "PVR", "GRAMMAR_pvr_results.csv"), row.names = FALSE)
 
 
+# ── 7B. Geography vs. ancestry — two comparable regressions ─────────────────
+# The §5 partition leaves geography and phylogeny too collinear to separate.
+# These two regressions split the overlap by design:
+#   A  y ~ migration distance, uncontrolled — modern geography, credited with
+#      everything it shares with phylogeny.
+#   B  y ~ phylogenetic eigenvectors residualized on migration distance (y left
+#      untouched). E_perp is orthogonal to x, so B's R^2 is the semipartial
+#      (phylogeny-only) share and geo_r2 + anc_r2 reproduces the full model R^2.
+
+# A — modern geography
+m_geo  <- lm(y ~ x)
+geo_cf <- summary(m_geo)$coefficients["x", ]
+geo_r2 <- summary(m_geo)$r.squared
+
+# B — ancestry, geography scrubbed out of the eigenvectors
+if (k == 0) {
+  m_anc  <- lm(y ~ 1)
+  anc_r2 <- 0
+  anc_F  <- NA_real_
+  anc_p  <- NA_real_
+} else {
+  E_perp <- apply(E_sel, 2, \(col) resid(lm(col ~ x)))
+  m_anc  <- lm(y ~ E_perp)
+  anc_r2 <- summary(m_anc)$r.squared
+  inc    <- anova(m_geo, m_full)   # incremental F: phylogeny added on top of geography
+  anc_F  <- inc[["F"]][2]
+  anc_p  <- inc[["Pr(>F)"]][2]
+  stopifnot(
+    "Scrubbed-eigenvector coefficients drift from the full PVR fit." =
+      isTRUE(all.equal(unname(coef(m_anc)[-1]),
+                       unname(coef(m_full)[2:(k + 1)]), tolerance = 1e-8)),
+    "geo_r2 + anc_r2 != full-model R^2 — E_perp is not orthogonal to x." =
+      isTRUE(all.equal(geo_r2 + anc_r2, summary(m_full)$r.squared, tolerance = 1e-6))
+  )
+}
+
+message(sprintf(
+  "R^2 geography (A) = %.3f | semipartial R^2 phylogeny|geography (B) = %.3f | A+B = %.3f (full model R^2 = %.3f)",
+  geo_r2, anc_r2, geo_r2 + anc_r2, summary(m_full)$r.squared))
+
+GRAMMAR_geo_vs_ancestry <- tibble(
+  model     = c("A_geography", "B_ancestry_given_geography"),
+  predictor = c(paste0(PREDICTOR, " (per ", DISPLAY_UNIT_KM, " km)"),
+                "phylo eigenvectors ⊥ migration distance"),
+  n = N, n_zeros_removed = n_zeros_removed,
+  n_evec      = c(0L, k),
+  estimate    = c(unname(geo_cf["Estimate"])   * scl, NA_real_),
+  std.error   = c(unname(geo_cf["Std. Error"]) * scl, NA_real_),
+  statistic   = c(unname(geo_cf["t value"]), anc_F),
+  p.value     = c(unname(geo_cf["Pr(>|t|)"]), anc_p),
+  r.squared   = c(geo_r2, anc_r2),
+  df.residual = c(df.residual(m_geo), df.residual(m_full))
+)
+print(GRAMMAR_geo_vs_ancestry)
+write.csv(GRAMMAR_geo_vs_ancestry,
+          file = here("data", "grammar", "PVR", "GRAMMAR_geo_vs_ancestry.csv"),
+          row.names = FALSE)
+
+
 # ── 8. Figures ──────────────────────────────────────────────────────────────
 dir.create(here("figures", "grammar", "regression"),
            recursive = TRUE, showWarnings = FALSE)
@@ -219,3 +290,44 @@ print(p_av)
 
 ggsave(here("figures", "grammar", "regression", "grammar_pvr_partial_residuals.png"),
        p_av, width = 7, height = 4.5, units = "in", dpi = 300)
+
+
+# §7B regression A: raw metric vs. migration distance, no phylogeny control.
+geo_df <- data.frame(x_disp = df$x_km / DISPLAY_UNIT_KM, y = y)
+p_geo <- ggplot(geo_df, aes(x_disp, y)) +
+  geom_point(size = 2, alpha = 0.5) +
+  geom_smooth(method = "lm", formula = y ~ x,
+              color = "steelblue", fill = "steelblue", alpha = 0.25, linewidth = 1.2) +
+  theme_bw() +
+  labs(title = "Spanish grammar similarity vs. migration distance (uncontrolled)",
+       subtitle = sprintf("slope = %.4f per %d km (p = %.3g), R^2 = %.3f, n = %d (%d zeros removed)",
+                          unname(geo_cf["Estimate"]) * scl, DISPLAY_UNIT_KM,
+                          unname(geo_cf["Pr(>|t|)"]), geo_r2, N, n_zeros_removed),
+       x = sprintf("Migration distance (%d km)", DISPLAY_UNIT_KM),
+       y = "Normalized Spanish grammar similarity")
+print(p_geo)
+ggsave(here("figures", "grammar", "regression", "grammar_regression_geography.png"),
+       p_geo, width = 7, height = 4.5, units = "in", dpi = 300)
+
+# §7B regression B: metric vs. the geography-free phylogenetic prediction. The
+# fit line is the identity by construction; the scatter is the semipartial R^2.
+if (k == 0) {
+  p_anc <- ggplot() + theme_void() +
+    annotate("text", x = 0, y = 0,
+             label = "No phylogenetic eigenvector cleared Moran selection (k = 0).")
+} else {
+  anc_df <- data.frame(fit = fitted(m_anc), y = y)
+  p_anc <- ggplot(anc_df, aes(fit, y)) +
+    geom_point(size = 2, alpha = 0.5) +
+    geom_smooth(method = "lm", formula = y ~ x,
+                color = "steelblue", fill = "steelblue", alpha = 0.25, linewidth = 1.2) +
+    theme_bw() +
+    labs(title = "Spanish grammar similarity vs. ancestry, geography scrubbed out",
+         subtitle = sprintf("semipartial R^2 = %.3f, F p = %.3g, %d eigenvector%s",
+                            anc_r2, anc_p, k, if (k == 1) "" else "s"),
+         x = "Geography-free phylogenetic prediction of similarity",
+         y = "Normalized Spanish grammar similarity")
+}
+print(p_anc)
+ggsave(here("figures", "grammar", "regression", "grammar_regression_ancestry.png"),
+       p_anc, width = 7, height = 4.5, units = "in", dpi = 300)

@@ -5,12 +5,8 @@
 # test whether localized spatial structure is significant where the global fit
 # is not. Everything is re-derived per region — the tree is re-pruned and the
 # phylogenetic eigenvectors recomputed on it, not sliced from the global fit.
-#
-# Regions below MIN_N are skipped, not run with a reduced permutation count:
-# spdep::moran.mc(nsim = 999) errors when 999 > N!, i.e. below N = 7.
-#
-# Keyed by glottocode throughout — [0] relabelled tips to glottocode, one per
-# language, so there is no dialect duplication to collapse (unlike phoneme).
+# Keyed by glottocode throughout, since [0] already reduces to one tip per
+# language, unlike phoneme's dialect-tip duplication.
 #
 # Run order: requires `tree_pruned` and `tip_map` from [0]_Phylogenetic_Tree.R.
 #

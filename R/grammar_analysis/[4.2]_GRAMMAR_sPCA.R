@@ -1,18 +1,13 @@
 # =============================================================================
 # [4.2] Grammar Analysis — true multivariate sPCA
 #
-# [4.1]'s companion: instead of a single phylogeny-scrubbed trait fed through
-# Moran Eigenvector Maps (a univariate-safe stand-in), this residualizes the
-# full 50-column binary Grambank matrix against the same phylogenetic
-# eigenvectors and runs real adegenet::spca() on the resulting continuous
-# residual matrix — spca() needs >=2 variables to rotate, which a single
-# trait never satisfied.
-#
-# Runs at language grain (26), not tip grain: the raw binary matrix is one
-# row per language, and duplicating rows per dialect tip (as [4]/[4.1] do for
-# PVR's positional matching) creates near-duplicate rows that destabilize
-# spca_randtest()'s permutation rank. E_sel is computed at tip grain (PVR
-# requires the tree) and then averaged down to one row per language.
+# Residualizes the full 50-column binary Grambank matrix against phylogenetic
+# eigenvectors and runs real adegenet::spca() on the result, recovering a true
+# multivariate spatial component rather than a single-trait MEM approximation.
+# Runs at language grain (26, not tip grain): E_sel is computed at tip grain
+# (PVR requires the tree) then averaged down to one row per language, since
+# duplicating rows per dialect tip would destabilize spca_randtest()'s
+# permutation rank.
 #
 # Run order: requires `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
 #
@@ -226,9 +221,8 @@ p_surface <- ggplot() +
         axis.text  = element_blank(),
         axis.title = element_blank(),
         axis.ticks = element_blank()) +
-  labs(title = "Grammar sPCA: phylogeny-scrubbed multivariate spatial structure",
-       subtitle = sprintf("permutation p = %.3f (%d permutations) | variance explained = %.3f",
-                          perm_p, N_PERM + 1, var_explained))
+  labs(title = "Grammar sPCA",
+       subtitle = sprintf("p = %.3f, r^2 = %.3f", perm_p, var_explained))
 print(p_surface)
 
 ggsave(here("figures", "grammar", "regression", "grammar_sPCA_surface.png"),

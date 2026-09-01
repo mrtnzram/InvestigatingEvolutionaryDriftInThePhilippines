@@ -1,9 +1,9 @@
 # =============================================================================
 # [4.1] Grammar Analysis — PVR-sPCA: phylogeny-scrubbed spatial structure
 #
-# Second-stage companion to [4]_GRAMMAR_PVR.R. Regresses phylogeny-scrubbed
-# Spanish grammatical similarity on Moran eigenvector maps to recover its
-# dominant spatial component (sPC1), plotted as sPCA point symbols.
+# Regresses phylogeny-scrubbed Spanish grammatical similarity on Moran
+# eigenvector maps to recover its dominant spatial component (sPC1), plotted
+# as sPCA point symbols.
 #
 # Run order: requires `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
 #
@@ -197,9 +197,8 @@ p_surface <- ggplot() +
         axis.text  = element_blank(),
         axis.title = element_blank(),
         axis.ticks = element_blank()) +
-  labs(title = "Grammar PVR-sPCA: phylogeny-scrubbed spatial structure",
-       subtitle = sprintf("Moran's I permutation p = %.3f (%d permutations) | eigenvector R^2 = %.3f",
-                          best$perm_p, N_PERM + 1, summary(spca_fit)$r.squared))
+  labs(title = "Grammar PVR-sPCA",
+       subtitle = sprintf("p = %.3f, r^2 = %.3f", best$perm_p, summary(spca_fit)$r.squared))
 print(p_surface)
 
 ggsave(here("figures", "grammar", "regression", "grammar_pvr_spca_surface.png"),

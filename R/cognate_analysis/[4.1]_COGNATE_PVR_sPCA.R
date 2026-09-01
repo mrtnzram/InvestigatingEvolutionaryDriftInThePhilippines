@@ -1,12 +1,10 @@
 # =============================================================================
 # [4.1] Cognate Analysis — PVR-sPCA: phylogeny-scrubbed spatial structure
 #
-# Second-stage companion to [4]_COGNATE_PVR.R. Regresses phylogeny-scrubbed
-# normalized Spanish loanword count on Moran eigenvector maps to recover its
-# dominant spatial component (sPC1), plotted as sPCA point symbols.
-#
-# [0] relabelled tree tips to glottocode, one per language — no dialect-tip
-# duplication here, unlike phoneme/grammar.
+# Regresses phylogeny-scrubbed normalized Spanish loanword count on Moran
+# eigenvector maps to recover its dominant spatial component (sPC1), plotted
+# as sPCA point symbols. [0] relabelled tree tips to glottocode, one per
+# language, so there is no dialect-tip duplication here unlike phoneme/grammar.
 #
 # Run order: requires `tree_pruned` and `tip_map` from [0]_Phylogenetic_Tree.R.
 #
@@ -196,9 +194,8 @@ p_surface <- ggplot() +
         axis.text  = element_blank(),
         axis.title = element_blank(),
         axis.ticks = element_blank()) +
-  labs(title = "Cognate PVR-sPCA: phylogeny-scrubbed spatial structure",
-       subtitle = sprintf("Moran's I permutation p = %.3f (%d permutations) | eigenvector R^2 = %.3f",
-                          best$perm_p, N_PERM + 1, summary(spca_fit)$r.squared))
+  labs(title = "Cognate PVR-sPCA",
+       subtitle = sprintf("p = %.3f, r^2 = %.3f", best$perm_p, summary(spca_fit)$r.squared))
 print(p_surface)
 
 ggsave(here("figures", "cognate", "regression", "cognate_pvr_spca_surface.png"),

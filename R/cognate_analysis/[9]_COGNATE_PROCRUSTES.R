@@ -1,22 +1,22 @@
 # =============================================================================
 # [9] Cognate Analysis — Procrustes: PCA vs. geography
 #
-# Runs PCA (adegenet::dudi.pca) on a one-hot (gloss, wordform) presence/absence
-# matrix built from the raw ABVD wordlists, restricted to the 94-language
-# analysis set, then fits a Procrustes rotation (ade4::procuste, via adegenet)
-# of PC1/PC2 onto true longitude/latitude, reporting the fit's sum of squares
-# and correlation.
+# Runs PCA (adegenet::dudi.pca) on the binary cognate-coding matrix extracted
+# from the ABVD NEXUS file in [0]_COGNATE_LOANS.R, restricted to the
+# 94-language analysis set, then fits a Procrustes rotation (ade4::procuste,
+# via adegenet) of PC1/PC2 onto true longitude/latitude, reporting the fit's
+# sum of squares and correlation.
 #
-# The one-hot matrix construction (split/trim/casefold each cell, one binary
-# feature per distinct (gloss, wordform) pair, drop pairs attested in fewer
-# than MIN_LANGS languages) matches [4.2]_COGNATE_sPCA.R's §2, minus that
-# script's phylogenetic residualization step — this PCA is unconstrained.
+# Run order: needs [0]_COGNATE_LOANS.R to have been run
+# (data/cognate/initial_datasets/COGNATE_NEXUS_matrix.csv).
 #
-# Input:   data/cognate/PH_df.csv (raw per-gloss wordforms),
-#          data/cognate/COGNATE_final.csv (analysis-set glottocodes),
-#          data/cognate/COGNATE_subgroup_lookup.csv
-# Outputs: data/cognate/COGNATE_procrustes_results.csv,
-#          data/cognate/COGNATE_procrustes_scores.csv,
+# Input:   data/cognate/initial_datasets/COGNATE_NEXUS_matrix.csv,
+#          data/cognate/network_distance/COGNATE_final.csv (analysis-set
+#          glottocodes + coordinates),
+#          data/cognate/initial_datasets/COGNATE_subgroup_lookup.csv
+# Outputs: data/cognate/procrustes/COGNATE_procrustes_results.csv,
+#          data/cognate/procrustes/COGNATE_procrustes_scores.csv,
+#          figures/cognate/pca/COGNATE_pca.png,
 #          figures/cognate/pca/COGNATE_procrustes.png
 # =============================================================================
 
@@ -28,55 +28,19 @@ library(maps)
 
 dir.create(here("figures", "cognate", "pca"), recursive = TRUE, showWarnings = FALSE)
 
-N_PERM    <- 999   # + observed arrangement = 1000 draws
-MIN_LANGS <- 2      # drop (gloss, wordform) pairs attested in fewer languages
+N_PERM <- 999   # + observed arrangement = 1000 draws
 
 COGNATE_final <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv"))
 analysis_glottocodes <- COGNATE_final$glottocode
 
-# ── 1. One-hot (gloss, wordform) matrix at language grain ───────────────────
-META_COLS <- c("language_id", "language", "latitude", "longitude",
-               "glottocode", "author", "number_of_entries", "source_url")
-PH_df <- read.csv(here("data", "cognate", "initial_datasets", "PH_df.csv"))
-gloss_cols <- setdiff(names(PH_df), META_COLS)
+# ── 1. NEXUS cognate-coding matrix, restricted to the analysis set ──────────
+nexus_mat <- read.csv(here("data", "cognate", "initial_datasets", "COGNATE_NEXUS_matrix.csv"),
+                      row.names = "glottocode", check.names = FALSE)
+nexus_mat <- nexus_mat[rownames(nexus_mat) %in% analysis_glottocodes, , drop = FALSE]
 
-ph_sub <- PH_df |>
-  dplyr::select(glottocode, language, longitude, latitude, all_of(gloss_cols)) |>
-  filter(glottocode %in% analysis_glottocodes)
-
-long <- ph_sub |>
-  dplyr::select(glottocode, all_of(gloss_cols)) |>
-  pivot_longer(-glottocode, names_to = "gloss", values_to = "cell") |>
-  filter(!is.na(cell), cell != "") |>
-  separate_longer_delim(cell, "; ") |>
-  mutate(form = str_trim(tolower(cell))) |>
-  filter(form != "") |>
-  distinct(glottocode, gloss, form)
-
-pair_counts <- long |> count(gloss, form, name = "n_langs")
-kept_pairs  <- pair_counts |> filter(n_langs >= MIN_LANGS)
-long <- long |> semi_join(kept_pairs, by = c("gloss", "form"))
-
-feature_wide <- long |>
-  mutate(feature = paste(gloss, form, sep = "::"), present = 1L) |>
-  distinct(glottocode, feature, present) |>
-  pivot_wider(names_from = feature, values_from = present, values_fill = 0L)
-feature_cols <- setdiff(names(feature_wide), "glottocode")
-
-df <- ph_sub |>
-  dplyr::select(glottocode, language, longitude, latitude) |>
-  left_join(feature_wide, by = "glottocode") |>
-  mutate(across(all_of(feature_cols), \(x) replace_na(x, 0L))) |>
-  arrange(glottocode) |>
-  as.data.frame()
-
-X <- as.matrix(df[, feature_cols])
+X <- as.matrix(nexus_mat)
 X <- X[, apply(X, 2, var) > 0, drop = FALSE]
-# Distinct-presence-pattern duplicates add no new direction to the column
-# space (see [4.2]'s note) — one representative per pattern is kept.
-X <- X[, !duplicated(t(X)), drop = FALSE]
-rownames(X) <- df$glottocode
-message(nrow(df), " languages, ", ncol(X), " (gloss, wordform) features retained.")
+message(nrow(X), " languages, ", ncol(X), " cognate-coding characters retained.")
 
 # ── 2. PCA (adegenet/ade4) ───────────────────────────────────────────────────
 pca_fit <- dudi.pca(as.data.frame(X), center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
@@ -86,7 +50,7 @@ scores_df <- tibble(glottocode = rownames(X), PC1 = pca_fit$li[, 1], PC2 = pca_f
 subgroup_lookup <- read_csv(here("data", "cognate", "initial_datasets", "COGNATE_subgroup_lookup.csv"), show_col_types = FALSE)
 
 analysis_df <- scores_df %>%
-  left_join(df %>% dplyr::select(glottocode, language, longitude, latitude), by = "glottocode") %>%
+  left_join(COGNATE_final %>% dplyr::select(glottocode, language, longitude, latitude), by = "glottocode") %>%
   left_join(subgroup_lookup %>% dplyr::select(glottocode, subgroup, colour), by = "glottocode") %>%
   arrange(glottocode)
 

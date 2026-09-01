@@ -1,30 +1,11 @@
 # =============================================================================
 # [4.2] Cognate Analysis — true multivariate sPCA
 #
-# [4.1]'s companion: instead of a single phylogeny-scrubbed trait (loans_norm)
-# fed through Moran Eigenvector Maps (a univariate-safe stand-in), this
-# residualizes a full binary (language x wordform) matrix against the same
-# phylogenetic eigenvectors and runs real adegenet::spca() on the resulting
-# continuous residual matrix — spca() needs >=2 variables to rotate, which
-# loans_norm (one trait) never satisfied.
-#
-# "One-hot encode the wordlist columns": unlike PH_final.csv (already binary —
-# a per-gloss Spanish-loan flag; that is [0]_COGNATE_LOANS.R's y variable, not
-# this script's input), PH_df.csv holds the raw transcribed ABVD wordform per
-# (language, gloss) cell, ";"-joined when a language has several attested forms
-# for a gloss. Each cell is split on ";", trimmed and casefolded (matching the
-# scrape notebook's own loanword-matching normalization), and every distinct
-# (gloss, wordform) pair becomes one binary feature: 1 if that language has
-# that form for that gloss, 0 otherwise. A wordform attested in only one
-# language can't carry any spatial signal — spca looks for variables that
-# covary between geographic neighbors — so those singletons (87% of all
-# observed pairs on this study set) are dropped before the matrix is even
-# built, not left for the invariant-column filter below to catch (a column
-# that is 1 for exactly one row is not constant, so var() > 0 keeps it).
-#
-# Runs at language grain (94, matching [4.1]): [0]_Phylogenetic_Tree.R already
-# reduces the tree to one tip per language (glottocode), unlike phoneme/grammar,
-# so there is no dialect-tip collapsing step here.
+# Builds a one-hot (language x gloss-wordform) presence matrix from the raw
+# ABVD wordforms in PH_df.csv, residualizes it against phylogenetic
+# eigenvectors, and runs real adegenet::spca() on the result. Runs at language
+# grain (94): [0]_Phylogenetic_Tree.R already reduces to one tip per language,
+# so there is no dialect-tip collapsing step here unlike phoneme/grammar.
 #
 # Run order: requires `tree_pruned` and `tip_map` from [0]_Phylogenetic_Tree.R.
 #
@@ -95,6 +76,7 @@ ph_sub <- PH_df |>
   dplyr::select(glottocode, language, longitude, latitude, all_of(gloss_cols)) |>
   filter(glottocode %in% rownames(E_sel))
 
+# Cells are ";"-joined wordform variants; split, trim, casefold.
 long <- ph_sub |>
   dplyr::select(glottocode, all_of(gloss_cols)) |>
   pivot_longer(-glottocode, names_to = "gloss", values_to = "cell") |>
@@ -104,6 +86,8 @@ long <- ph_sub |>
   filter(form != "") |>
   distinct(glottocode, gloss, form)
 
+# A wordform attested by only one language can't carry spatial signal, so
+# singletons are dropped before the matrix is built.
 pair_counts <- long |> count(gloss, form, name = "n_langs")
 kept_pairs  <- pair_counts |> filter(n_langs >= MIN_LANGS)
 long <- long |> semi_join(kept_pairs, by = c("gloss", "form"))
@@ -136,18 +120,10 @@ message(N, " languages, ", length(feature_cols), " (gloss, wordform) features.")
 X <- as.matrix(df[, feature_cols])
 X <- X[, apply(X, 2, var) > 0]   # defensive: drop any column constant on this N
 
-# Many (gloss, wordform) pairs are attested by the exact same subset of
-# languages (sister languages in one subgroup, or a shared loan), so their
-# presence columns are byte-identical — 1134 of 2526 on this study set.
-# Keeping every copy inflates the column count without adding a new direction
-# to the column space, and the resulting near-total collinearity pushes the
-# residual matrix's numerical rank right up against ade4's zero-eigenvalue
-# threshold: spca_randtest()'s permutations then round some replicates' rank
-# up and some down, returning eigenvalue vectors of different lengths and
-# crashing (`values must be length 93, but FUN(X[[1]]) result is length 91`).
-# One representative per distinct presence pattern removes the redundancy —
-# confirmed by SVD to leave a clean rank-(N-1) cutoff with no near-zero
-# singular values left to be ambiguous about.
+# Duplicate presence columns (sister languages sharing a subgroup or a loan)
+# push the residual matrix's rank to ade4's zero-eigenvalue threshold and
+# crash spca_randtest()'s permutations with mismatched eigenvalue-vector
+# lengths; one representative per pattern removes the ambiguity.
 X <- X[, !duplicated(t(X)), drop = FALSE]
 
 R <- if (ncol(E_sel) == 0) X else apply(X, 2, \(col) resid(lm(col ~ E_sel)))
@@ -280,9 +256,8 @@ p_surface <- ggplot() +
         axis.text  = element_blank(),
         axis.title = element_blank(),
         axis.ticks = element_blank()) +
-  labs(title = "Cognate sPCA: phylogeny-scrubbed multivariate spatial structure",
-       subtitle = sprintf("permutation p = %.3f (%d permutations) | variance explained = %.3f",
-                          perm_p, N_PERM + 1, var_explained))
+  labs(title = "Cognate sPCA",
+       subtitle = sprintf("p = %.3f, r^2 = %.3f", perm_p, var_explained))
 print(p_surface)
 
 ggsave(here("figures", "cognate", "regression", "cognate_sPCA_surface.png"),

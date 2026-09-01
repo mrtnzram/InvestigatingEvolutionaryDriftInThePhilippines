@@ -1,0 +1,13 @@
+{
+  "grid_res": "grid_100.shp",
+  "habitat_source": "Natural Earth coastline (countries.geojson, name='Philippines')",
+  "coast_buf": 0.8,
+  "n_nodes": 97,
+  "n_edges": 232,
+  "n_observed_nodes": 45,
+  "scale_snps": true,
+  "use_idf": false,
+  "optimize_q": null,
+  "lamb_cv": 496.1947603002898,
+  "n_features_retained": 4648
+}
