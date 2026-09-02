@@ -1,25 +1,24 @@
 # =============================================================================
-# [4] Phoneme Analysis — Phylogenetic eigenvector regression (PVR)
+# [4] Phoneme Analysis — geography vs. ancestry
 #
-# Regresses normalized Spanish-phoneme cosine similarity on terrain-penalized
-# migration distance while controlling for shared ancestry with phylogenetic
-# eigenvectors.
+# Two models for normalized Spanish-phoneme cosine similarity (y):
+#   1. Geography — y ~ terrain-penalized migration distance, uncontrolled.
+#   2. Phylogeny-scrubbed geography ("pure ancestry") — y ~ phylogenetic
+#      eigenvectors (full block) after migration distance is residualised out of
+#      each. The scrubbed block is orthogonal to distance, so its R^2 is the
+#      semipartial (ancestry-only) share and geography R^2 + ancestry R^2
+#      reproduces R^2(y ~ E_sel + distance).
 #
-# §7B additionally splits geography and phylogeny into two comparable regressions
-# — y ~ migration distance (uncontrolled) and y ~ phylogenetic eigenvectors with
-# geography scrubbed out of the eigenvectors — since the variance partition is
-# too collinear to separate the two.
+# B has no single interpretable slope, so the two are compared as predictors:
+# RMSE (and leave-one-out RMSE) of actual vs. predicted y. `cor_with_distance`
+# carries the directional read — see §4.
 #
 # Run order: requires `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
 #
 # Input:   data/phoneme/network_distance/PHONEME_final.csv (from [3]_PHONEME_network_distance.R)
-# Outputs: data/phoneme/PVR/PHONEME_pvr_results.csv      (coefficients + model summary)
-#          data/phoneme/PVR/PHONEME_pvr_varpart.csv      (variance partition a/b/c/d)
-#          data/phoneme/PVR/PHONEME_geo_vs_ancestry.csv  (§7B regressions A and B)
-#          figures/phoneme/regression/phoneme_pvr_varpart.png
-#          figures/phoneme/regression/phoneme_pvr_partial_residuals.png
-#          figures/phoneme/regression/phoneme_regression_geography.png
-#          figures/phoneme/regression/phoneme_regression_ancestry.png
+# Outputs: data/phoneme/PVR/PHONEME_geo_vs_ancestry.csv                       (§4 results table)
+#          figures/phoneme/regression/phoneme_regression_geography.png          (y vs. distance)
+#          figures/phoneme/regression/phoneme_regression_actual_vs_predicted.png (A | B calibration)
 # =============================================================================
 
 library(PVR)
@@ -35,27 +34,21 @@ stopifnot(
 )
 
 # H1 = penalized cost onto the nearest network node; H2 = cost to Manila.
-PREDICTOR <- "geodist_H1_span"
+PREDICTOR       <- "geodist_H1_span"
+DISPLAY_UNIT_KM <- 100                 # slopes are reported per this many km
 
-# Fit on Mm; DISPLAY_UNIT_KM rescales reported and plotted slopes only.
-DISPLAY_UNIT_KM <- 100
 
-PHONEME_final <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_final.csv"))
-
+# ── Setup: analysis frame + phylogenetic eigenvectors ──────────────────────
+# PVR matches trait to eigenvector rows by POSITION — row i is
+# tree_pruned$tip.label[i]. Reorder and assert; a mis-sort fits silently.
+# tip_map duplicates multi-tip languages: one row per tip, values repeated.
 tip_map <- tree_df_matched |> dplyr::select(original, ph)
 
-
-# ── 1. Analysis frame, ordered to tip.label ─────────────────────────────────
-# PVR matches trait and envVar to eigenvector rows by POSITION — row i is
-# tree_pruned$tip.label[i]. Reorder and assert; a mis-sort fits silently.
-#
-# tip_map duplicates multi-tip languages: one row per tip, values repeated.
-df <- PHONEME_final |>
+df <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_final.csv")) |>
   dplyr::select(language, y = cossim_span_norm, x_km = all_of(PREDICTOR)) |>
   left_join(tip_map, by = c("language" = "ph")) |>
   filter(!is.na(original), !is.na(y), !is.na(x_km)) |>
   as.data.frame()
-
 df <- df[match(tree_pruned$tip.label, df$original), ]
 
 stopifnot(
@@ -65,269 +58,144 @@ stopifnot(
     !anyNA(df$original) && identical(df$original, tree_pruned$tip.label)
 )
 
-y <- df$y
-x <- df$x_km / 1000
-N <- nrow(df)
-
-# Cosine similarity is strictly positive — no zero spike to drop here (see the
-# cognate/genetic [4] scripts, which do filter). Carried for the §7B CSV.
-n_zeros_removed <- 0L
+y   <- df$y
+x   <- df$x_km / 1000                  # fit on Mm
+N   <- nrow(df)
+scl <- DISPLAY_UNIT_KM / 1000          # Mm -> display units
+# Cosine similarity is strictly positive — no zero spike to drop (cognate/genetic do).
+n_zeros <- 0L
 
 message(N, " tips covering ", n_distinct(df$language), " languages ",
         "(multi-dialect languages contribute one row per tip).")
 
-
-# ── 2. Eigendecomposition + PVR fit ─────────────────────────────────────────
-# scale = TRUE rescales eigenvalues only; eigenvectors are unchanged.
-pvr_dec <- PVRdecomp(tree_pruned, scale = TRUE)
-
-# "moran" adds eigenvectors until residual autocorrelation is n.s. (sig.t = 0.05);
-# connectivity matrix left at the package default.
-pvr_fit <- PVR(pvr_dec, phy = tree_pruned, trait = y, envVar = x, method = "moran")
-
+# Phylogenetic eigenvectors: "moran" adds vectors until residual autocorrelation
+# on the tree is n.s. (sig.t = 0.05); connectivity left at the package default.
+pvr_fit <- PVR(PVRdecomp(tree_pruned, scale = TRUE), phy = tree_pruned,
+               trait = y, envVar = x, method = "moran")
 E_sel <- as.matrix(pvr_fit@Selection$Vectors)
 k     <- ncol(E_sel)
+m_full <- if (k == 0) lm(y ~ x) else lm(y ~ E_sel + x)   # reference for the §2 checks
 
-
-# ── 3. Explicit refit — source of the reported coefficients ─────────────
-# PVR exposes only R2 and residuals, and @PVR$p is the FIRST EIGENVECTOR's
-# p-value, not the predictor's. Refit the same design for the coefficient
-# table; the checks below confirm it is the same fit.
-m_full <- lm(y ~ E_sel + x)
-
-stopifnot(
-  "Refit residuals differ from PVR's — check the tip ordering or E_sel." =
-    isTRUE(all.equal(unname(resid(m_full)), unname(pvr_fit@PVR$Residuals),
-                     tolerance = 1e-8)),
-  "Refit R2 differs from PVR's." =
-    isTRUE(all.equal(summary(m_full)$r.squared, pvr_fit@PVR$R2, tolerance = 1e-8))
-)
-
-message("N = ", N, " tips | ", k, " eigenvectors selected (",
-        paste(pvr_fit@Selection$Id$Vectors, collapse = ", "), ") | residual df = ",
-        df.residual(m_full))
-if (df.residual(m_full) < 10) {
-  warning("Only ", df.residual(m_full), " residual df — the eigenvector set is ",
-          "consuming most of the sample; treat the p-value with caution.")
+# Leave-one-out RMSE via the OLS PRESS shortcut — lets A (1 predictor) and B (k)
+# be compared on the same footing.
+perf <- function(m) {
+  r <- residuals(m); h <- hatvalues(m)
+  c(rmse = sqrt(mean(r^2)), rmse_loocv = sqrt(mean((r / (1 - h))^2)))
 }
 
-cf   <- summary(m_full)$coefficients
-b_mm <- unname(cf["x", "Estimate"])                 # per Mm, the fitting scale
-scl  <- DISPLAY_UNIT_KM / 1000                      # Mm -> display units
 
-print(round(cf[c("(Intercept)", "x"), ], 5))
-cat(sprintf("\nslope = %.5f per %d km   (t = %.3f, p = %.4g)\n",
-            b_mm * scl, DISPLAY_UNIT_KM,
-            cf["x", "t value"], cf["x", "Pr(>|t|)"]))
-
-
-# ── 4. Partial residuals (Frisch–Waugh–Lovell) ──────────────────────────────
-# lm(res_y ~ res_x) reproduces the full model's x coefficient. Asserted so
-# §8's scatter cannot drift from the reported effect.
-res_y <- resid(lm(y ~ E_sel))
-res_x <- resid(lm(x ~ E_sel))
-m_av  <- lm(res_y ~ res_x)
-
-stopifnot(
-  "AV-plot slope does not match the PVR fit's distance coefficient." =
-    isTRUE(all.equal(unname(coef(m_av)["res_x"]), b_mm, tolerance = 1e-8))
-)
-
-partial_r <- cor(res_y, res_x)
-raw_r     <- cor(y, df$x_km)
-cat(sprintf("raw cor(similarity, distance) = %.4f | partial cor given phylogeny = %.4f\n",
-            raw_r, partial_r))
+# ── 1. Geography ──────────────────────────────────────────────────────────
+m_geo    <- lm(y ~ x)
+geo_cf   <- summary(m_geo)$coefficients["x", ]
+geo_r2   <- summary(m_geo)$r.squared
+geo_perf <- perf(m_geo)
+geo_dir  <- cor(y, x)                  # signed effect direction (magnitude = sqrt(geo_r2))
 
 
-# ── 5. Variance partition ───────────────────────────────────────────────────
-# PVR's lettering reverses Desdevises et al.: a = geography, c = phylogeny.
-# b is a difference of R^2, not a variance, and goes negative under suppression;
-# only the sum is constrained.
-vp <- pvr_fit@VarPart
-PHONEME_pvr_varpart <- tibble(
-  component = c("a", "b", "c", "d"),
-  meaning   = c("geography only", "shared (geography & phylogeny)",
-                "phylogeny only", "unexplained"),
-  fraction  = c(vp$a, vp$b, vp$c, vp$d)
-)
-print(PHONEME_pvr_varpart)
-stopifnot("Variance partition does not sum to 1." =
-            isTRUE(all.equal(sum(PHONEME_pvr_varpart$fraction), 1, tolerance = 1e-8)))
-
-write.csv(PHONEME_pvr_varpart,
-          file = here("data", "phoneme", "PVR", "PHONEME_pvr_varpart.csv"), row.names = FALSE)
-
-
-# ── 6. Collinearity: geographic vs. phylogenetic distance ───────────────────
-# Collinearity of the predictor as fitted (|x_i - x_j|) with patristic distance.
-# Runs below the pairwise-matrix r ~ 0.68 in [5]_PHONEME_MMRR.R.
-Dgeo   <- as.matrix(dist(df$x_km))
-Dphylo <- cophenetic.phylo(tree_pruned)
-
-geo_phylo_cor <- cor(Dgeo[lower.tri(Dgeo)], Dphylo[lower.tri(Dphylo)])
-message("cor(geographic distance, phylogenetic distance) = ", round(geo_phylo_cor, 3))
-
-
-# ── 7. Results table ────────────────────────────────────────────────────────
-# Slope on the display scale; intercept is scale-free. n_evec / df_residual
-# carried so a thin fit shows in the CSV.
-PHONEME_pvr_results <- as_tibble(cf, rownames = "term") |>
-  rename(estimate = Estimate, std.error = `Std. Error`,
-         statistic = `t value`, p.value = `Pr(>|t|)`) |>
-  filter(term %in% c("(Intercept)", "x")) |>
-  mutate(term = if_else(term == "x", PREDICTOR, term),
-         estimate  = if_else(term == PREDICTOR, estimate * scl, estimate),
-         std.error = if_else(term == PREDICTOR, std.error * scl, std.error),
-         unit = if_else(term == PREDICTOR, paste0("per ", DISPLAY_UNIT_KM, " km"), NA_character_),
-         method = pvr_fit@Selection$Method,
-         n = N, n_evec = k, df_residual = df.residual(m_full),
-         r.squared = summary(m_full)$r.squared,
-         adj.r.squared = summary(m_full)$adj.r.squared,
-         aic = AIC(m_full),
-         raw_cor = raw_r, partial_cor = partial_r,
-         geo_phylo_cor = geo_phylo_cor, .before = 1)
-print(PHONEME_pvr_results)
-write.csv(PHONEME_pvr_results,
-          file = here("data", "phoneme", "PVR", "PHONEME_pvr_results.csv"), row.names = FALSE)
-
-
-# ── 7B. Geography vs. ancestry — two comparable regressions ─────────────────
-# The §5 partition leaves geography and phylogeny too collinear to separate.
-# These two regressions split the overlap by design:
-#   A  y ~ migration distance, uncontrolled — modern geography, credited with
-#      everything it shares with phylogeny.
-#   B  y ~ phylogenetic eigenvectors residualized on migration distance (y left
-#      untouched). E_perp is orthogonal to x, so B's R^2 is the semipartial
-#      (phylogeny-only) share and geo_r2 + anc_r2 reproduces the full model R^2.
-
-# A — modern geography
-m_geo  <- lm(y ~ x)
-geo_cf <- summary(m_geo)$coefficients["x", ]
-geo_r2 <- summary(m_geo)$r.squared
-
-# B — ancestry, geography scrubbed out of the eigenvectors
+# ── 2. Phylogeny-scrubbed geography (pure ancestry) ───────────────────────
 if (k == 0) {
-  m_anc  <- lm(y ~ 1)
-  anc_r2 <- 0
-  anc_F  <- NA_real_
-  anc_p  <- NA_real_
+  m_anc <- lm(y ~ 1); anc_r2 <- 0; anc_F <- NA_real_; anc_p <- NA_real_; anc_dir <- NA_real_
 } else {
-  E_perp <- apply(E_sel, 2, \(col) resid(lm(col ~ x)))
+  E_perp <- apply(E_sel, 2, \(col) resid(lm(col ~ x)))   # distance scrubbed from each
   m_anc  <- lm(y ~ E_perp)
-  anc_r2 <- summary(m_anc)$r.squared
-  inc    <- anova(m_geo, m_full)   # incremental F: phylogeny added on top of geography
+  anc_r2 <- summary(m_anc)$r.squared                     # semipartial (ancestry-only) R^2
+  inc    <- anova(m_geo, m_full)                         # incremental F: ancestry on top of geography
   anc_F  <- inc[["F"]][2]
   anc_p  <- inc[["Pr(>F)"]][2]
+  # Direction: correlate ancestry's UN-scrubbed predicted metric with distance.
+  # Sign says whether the phylogenetic signal, on its own, runs with (-) or
+  # against (+) the geographic gradient. After scrubbing it is ~0 by construction.
+  anc_dir <- cor(fitted(lm(y ~ E_sel)), x)
   stopifnot(
-    "Scrubbed-eigenvector coefficients drift from the full PVR fit." =
+    "Scrubbed-eigenvector coefficients drift from the reference PVR fit." =
       isTRUE(all.equal(unname(coef(m_anc)[-1]),
                        unname(coef(m_full)[2:(k + 1)]), tolerance = 1e-8)),
-    "geo_r2 + anc_r2 != full-model R^2 — E_perp is not orthogonal to x." =
+    "geography R^2 + ancestry R^2 != R^2(y ~ E_sel + x)." =
       isTRUE(all.equal(geo_r2 + anc_r2, summary(m_full)$r.squared, tolerance = 1e-6))
   )
 }
+anc_perf <- perf(m_anc)
 
-message(sprintf(
-  "R^2 geography (A) = %.3f | semipartial R^2 phylogeny|geography (B) = %.3f | A+B = %.3f (full model R^2 = %.3f)",
-  geo_r2, anc_r2, geo_r2 + anc_r2, summary(m_full)$r.squared))
-
-PHONEME_geo_vs_ancestry <- tibble(
-  model     = c("A_geography", "B_ancestry_given_geography"),
-  predictor = c(paste0(PREDICTOR, " (per ", DISPLAY_UNIT_KM, " km)"),
-                "phylo eigenvectors ⊥ migration distance"),
-  n = N, n_zeros_removed = n_zeros_removed,
-  n_evec      = c(0L, k),
-  estimate    = c(unname(geo_cf["Estimate"])   * scl, NA_real_),
-  std.error   = c(unname(geo_cf["Std. Error"]) * scl, NA_real_),
-  statistic   = c(unname(geo_cf["t value"]), anc_F),
-  p.value     = c(unname(geo_cf["Pr(>|t|)"]), anc_p),
-  r.squared   = c(geo_r2, anc_r2),
-  df.residual = c(df.residual(m_geo), df.residual(m_full))
-)
-print(PHONEME_geo_vs_ancestry)
-write.csv(PHONEME_geo_vs_ancestry,
-          file = here("data", "phoneme", "PVR", "PHONEME_geo_vs_ancestry.csv"),
-          row.names = FALSE)
+message(sprintf("R^2  geography = %.3f | ancestry|geography (semipartial) = %.3f | sum = %.3f",
+                geo_r2, anc_r2, geo_r2 + anc_r2))
+message(sprintf("RMSE geography = %.4f (LOO %.4f) | ancestry = %.4f (LOO %.4f)",
+                geo_perf["rmse"], geo_perf["rmse_loocv"], anc_perf["rmse"], anc_perf["rmse_loocv"]))
+message(sprintf("cor with migration distance:  metric = %+.3f | raw ancestry prediction = %+.3f",
+                geo_dir, anc_dir))
 
 
-# ── 8. Figures ──────────────────────────────────────────────────────────────
-dir.create(here("figures", "phoneme", "regression"),
-           recursive = TRUE, showWarnings = FALSE)
+# ── 3. Plots ──────────────────────────────────────────────────────────────
+dir.create(here("figures", "phoneme", "regression"), recursive = TRUE, showWarnings = FALSE)
 
-# VarPartplot is base graphics and draws an unlabelled bar: png() device, and
-# the subtitle carries the key.
-png(here("figures", "phoneme", "regression", "phoneme_pvr_varpart.png"),
-    width = 7, height = 4.5, units = "in", res = 300)
-VarPartplot(pvr_fit)
-title(main = "Spanish phoneme similarity: variance partition",
-      sub = "a = geography | b = shared | c = phylogeny | d = unexplained")
-dev.off()
-
-# Added-variable scatter: both axes residualized on E_sel. Line is m_av
-# (§4 asserts it carries the full model's slope); ribbon is its 95% CI.
-av_df <- data.frame(res_x = res_x / scl, res_y = res_y)
-band  <- predict(lm(res_y ~ res_x, data = av_df),
-                 newdata = data.frame(res_x = seq(min(av_df$res_x), max(av_df$res_x),
-                                                  length.out = 100)),
-                 interval = "confidence") |>
-  as.data.frame() |>
-  mutate(res_x = seq(min(av_df$res_x), max(av_df$res_x), length.out = 100))
-
-p_av <- ggplot() +
-  geom_point(data = av_df, aes(x = res_x, y = res_y), size = 2, alpha = 0.5) +
-  geom_ribbon(data = band, aes(x = res_x, ymin = lwr, ymax = upr),
-              fill = "steelblue", alpha = 0.25) +
-  geom_line(data = band, aes(x = res_x, y = fit),
-            color = "steelblue", linewidth = 1.2) +
-  theme_bw() +
-  labs(title = "Spanish phoneme similarity vs. migration distance, phylogeny removed",
-       subtitle = sprintf("slope = %.4f per %d km (p = %.3g), partial r = %.3f, %d eigenvector%s",
-                          b_mm * scl, DISPLAY_UNIT_KM, cf["x", "Pr(>|t|)"], partial_r, k,
-                          if (k == 1) "" else "s"),
-       x = sprintf("Migration distance residual (%d km)", DISPLAY_UNIT_KM),
-       y = "Normalized Spanish similarity residual")
-print(p_av)
-
-ggsave(here("figures", "phoneme", "regression", "phoneme_pvr_partial_residuals.png"),
-       p_av, width = 7, height = 4.5, units = "in", dpi = 300)
-
-
-# §7B regression A: raw metric vs. migration distance, no phylogeny control.
-geo_df <- data.frame(x_disp = df$x_km / DISPLAY_UNIT_KM, y = y)
-p_geo <- ggplot(geo_df, aes(x_disp, y)) +
+# 3a. Geography: raw metric vs. migration distance.
+p_geo <- ggplot(data.frame(x_disp = df$x_km / DISPLAY_UNIT_KM, y = y), aes(x_disp, y)) +
   geom_point(size = 2, alpha = 0.5) +
   geom_smooth(method = "lm", formula = y ~ x,
               color = "steelblue", fill = "steelblue", alpha = 0.25, linewidth = 1.2) +
   theme_bw() +
   labs(title = "Spanish phoneme similarity vs. migration distance (uncontrolled)",
-       subtitle = sprintf("slope = %.4f per %d km (p = %.3g), R^2 = %.3f, n = %d (%d zeros removed)",
+       subtitle = sprintf("slope = %.4f per %d km (p = %.3g), R^2 = %.3f, RMSE = %.4f, n = %d",
                           unname(geo_cf["Estimate"]) * scl, DISPLAY_UNIT_KM,
-                          unname(geo_cf["Pr(>|t|)"]), geo_r2, N, n_zeros_removed),
+                          unname(geo_cf["Pr(>|t|)"]), geo_r2, geo_perf["rmse"], N),
        x = sprintf("Migration distance (%d km)", DISPLAY_UNIT_KM),
        y = "Normalized Spanish phoneme similarity")
-print(p_geo)
 ggsave(here("figures", "phoneme", "regression", "phoneme_regression_geography.png"),
        p_geo, width = 7, height = 4.5, units = "in", dpi = 300)
 
-# §7B regression B: metric vs. the geography-free phylogenetic prediction. The
-# fit line is the identity by construction; the scatter is the semipartial R^2.
-if (k == 0) {
-  p_anc <- ggplot() + theme_void() +
-    annotate("text", x = 0, y = 0,
-             label = "No phylogenetic eigenvector cleared Moran selection (k = 0).")
-} else {
-  anc_df <- data.frame(fit = fitted(m_anc), y = y)
-  p_anc <- ggplot(anc_df, aes(fit, y)) +
-    geom_point(size = 2, alpha = 0.5) +
-    geom_smooth(method = "lm", formula = y ~ x,
-                color = "steelblue", fill = "steelblue", alpha = 0.25, linewidth = 1.2) +
-    theme_bw() +
-    labs(title = "Spanish phoneme similarity vs. ancestry, geography scrubbed out",
-         subtitle = sprintf("semipartial R^2 = %.3f, F p = %.3g, %d eigenvector%s",
-                            anc_r2, anc_p, k, if (k == 1) "" else "s"),
-         x = "Geography-free phylogenetic prediction of similarity",
-         y = "Normalized Spanish phoneme similarity")
-}
-print(p_anc)
-ggsave(here("figures", "phoneme", "regression", "phoneme_regression_ancestry.png"),
-       p_anc, width = 7, height = 4.5, units = "in", dpi = 300)
+# 3b. Actual vs. predicted for both models, shared square axes, dashed y = x.
+# B has no predictor axis, so the models are compared by how tightly each
+# prediction tracks the metric (the RMSE printed in each panel).
+avp_df <- bind_rows(
+  tibble(panel = "geography (A)",               pred = fitted(m_geo), y = y),
+  tibble(panel = "ancestry, geography-free (B)", pred = fitted(m_anc), y = y)
+) |>
+  mutate(panel = factor(panel, c("geography (A)", "ancestry, geography-free (B)")))
+avp_lab <- tibble(
+  panel = factor(c("geography (A)", "ancestry, geography-free (B)"),
+                 c("geography (A)", "ancestry, geography-free (B)")),
+  lab   = c(sprintf("RMSE %.4f (LOO %.4f)\nR^2 %.3f",
+                    geo_perf["rmse"], geo_perf["rmse_loocv"], geo_r2),
+            sprintf("RMSE %.4f (LOO %.4f)\nsemipartial R^2 %.3f",
+                    anc_perf["rmse"], anc_perf["rmse_loocv"], anc_r2))
+)
+lim <- range(c(avp_df$pred, avp_df$y))
+p_avp <- ggplot(avp_df, aes(pred, y)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey40") +
+  geom_point(size = 2, alpha = 0.5) +
+  geom_text(data = avp_lab, aes(x = -Inf, y = Inf, label = lab),
+            hjust = -0.05, vjust = 1.15, size = 3, lineheight = 0.95, inherit.aes = FALSE) +
+  facet_wrap(~ panel) +
+  coord_fixed(xlim = lim, ylim = lim) +
+  theme_bw() +
+  labs(title = "Predicting Spanish phoneme similarity: geography vs. geography-free ancestry",
+       subtitle = "actual vs. model-predicted; dashed line is y = x",
+       x = "Predicted normalized similarity", y = "Actual normalized similarity")
+ggsave(here("figures", "phoneme", "regression", "phoneme_regression_actual_vs_predicted.png"),
+       p_avp, width = 9, height = 4.8, units = "in", dpi = 300)
+
+
+# ── 4. Results table ──────────────────────────────────────────────────────
+# One row per model. slope: A only (B is a k-vector block). statistic/p.value:
+# A = t on the distance coefficient, B = incremental F of the ancestry block on
+# top of geography. r.squared: A = R^2, B = semipartial (ancestry-only).
+# cor_with_distance: A = raw cor(metric, distance); B = cor(un-scrubbed ancestry
+# prediction, distance) — sign shows whether ancestry runs with (-) or against
+# (+) the geographic gradient.
+PHONEME_geo_vs_ancestry <- tibble(
+  model      = c("A_geography", "B_ancestry_given_geography"),
+  predictor  = c(paste0(PREDICTOR, " (per ", DISPLAY_UNIT_KM, " km)"),
+                 "phylo eigenvectors, migration distance scrubbed"),
+  n = N, n_zeros = n_zeros, n_evec = c(0L, k),
+  slope             = c(unname(geo_cf["Estimate"])   * scl, NA_real_),
+  slope_se          = c(unname(geo_cf["Std. Error"]) * scl, NA_real_),
+  statistic         = c(unname(geo_cf["t value"]), anc_F),
+  p.value           = c(unname(geo_cf["Pr(>|t|)"]), anc_p),
+  r.squared         = c(geo_r2, anc_r2),
+  cor_with_distance = c(geo_dir, anc_dir),
+  rmse              = c(unname(geo_perf["rmse"]),       unname(anc_perf["rmse"])),
+  rmse_loocv        = c(unname(geo_perf["rmse_loocv"]), unname(anc_perf["rmse_loocv"]))
+)
+print(PHONEME_geo_vs_ancestry)
+write.csv(PHONEME_geo_vs_ancestry,
+          file = here("data", "phoneme", "PVR", "PHONEME_geo_vs_ancestry.csv"),
+          row.names = FALSE)

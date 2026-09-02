@@ -1,28 +1,28 @@
 # =============================================================================
-# [4] Cognate Analysis — Phylogenetic eigenvector regression (PVR)
+# [4] Cognate Analysis — geography vs. ancestry
 #
-# Regresses the normalized Spanish loanword count on terrain-penalized migration
-# distance while controlling for shared ancestry with phylogenetic eigenvectors.
+# Two models for the normalized Spanish loanword count (y):
+#   1. Geography — y ~ terrain-penalized migration distance, uncontrolled.
+#   2. Phylogeny-scrubbed geography ("pure ancestry") — y ~ phylogenetic
+#      eigenvectors (full block) after migration distance is residualised out of
+#      each. The scrubbed block is orthogonal to distance, so its R^2 is the
+#      semipartial (ancestry-only) share and geography R^2 + ancestry R^2
+#      reproduces R^2(y ~ E_sel + distance).
 #
-# §7B additionally splits geography and phylogeny into two comparable regressions
-# — y ~ migration distance (uncontrolled) and y ~ phylogenetic eigenvectors with
-# geography scrubbed out of the eigenvectors — since the variance partition is
-# too collinear to separate the two. Zero-loan languages are dropped first (the
-# spike at 0 dominates the slope), so this whole script runs on the non-zero set;
-# §7C refits with the zeros restored so the slope/p difference is on record.
+# B has no single interpretable slope, so the two are compared as predictors:
+# RMSE (and leave-one-out RMSE) of actual vs. predicted y. `cor_with_distance`
+# carries the directional read — see §4.
+#
+# Most languages have zero confirmed Spanish loans; that spike at 0 dominates
+# the slope. Both models are fit twice — with the zero-loan languages removed
+# (primary) and kept — and both conditions are in the results table.
 #
 # Run order: requires `tree_pruned` and `tip_map` from [0]_Phylogenetic_Tree.R.
 #
 # Input:   data/cognate/network_distance/COGNATE_final.csv (from [3]_COGNATE_network_distance.R)
-# Outputs: data/cognate/PVR/COGNATE_pvr_results.csv                  (coefficients + model summary)
-#          data/cognate/PVR/COGNATE_pvr_varpart.csv                  (variance partition a/b/c/d)
-#          data/cognate/PVR/COGNATE_geo_vs_ancestry.csv              (§7B regressions A and B)
-#          data/cognate/PVR/COGNATE_geo_vs_ancestry_sensitivity.csv  (§7C zeros kept vs. removed)
-#          figures/cognate/regression/cognate_pvr_varpart.png
-#          figures/cognate/regression/cognate_pvr_partial_residuals.png
-#          figures/cognate/regression/cognate_regression_geography.png
-#          figures/cognate/regression/cognate_regression_ancestry.png
-#          figures/cognate/regression/cognate_regression_geography_zeros.png
+# Outputs: data/cognate/PVR/COGNATE_geo_vs_ancestry.csv                                (§4 results table)
+#          figures/cognate/regression/cognate_regression_geography[_zeros_kept].png          (y vs. distance)
+#          figures/cognate/regression/cognate_regression_actual_vs_predicted[_zeros_kept].png (A | B calibration)
 # =============================================================================
 
 library(PVR)
@@ -31,378 +31,168 @@ library(tidyverse)
 library(here)
 
 stopifnot(
-  "Run [0]_Phylogenetic_Tree.R first: `tree_pruned` is not defined." =
-    exists("tree_pruned"),
-  "Run [0]_Phylogenetic_Tree.R first: `tip_map` is not defined." =
-    exists("tip_map")
+  "Run [0]_Phylogenetic_Tree.R first: `tree_pruned` is not defined." = exists("tree_pruned"),
+  "Run [0]_Phylogenetic_Tree.R first: `tip_map` is not defined."     = exists("tip_map")
 )
 
 # H1 = penalized cost onto the nearest network node; H2 = cost to Manila.
-PREDICTOR <- "geodist_H1_span"
-
-# Fit on Mm; DISPLAY_UNIT_KM rescales reported and plotted slopes only.
-DISPLAY_UNIT_KM <- 100
-
-COGNATE_final <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv"))
+PREDICTOR       <- "geodist_H1_span"
+DISPLAY_UNIT_KM <- 100                 # slopes are reported per this many km
+scl             <- DISPLAY_UNIT_KM / 1000
 
 
-# ── 1. Analysis frame, ordered to tip.label ─────────────────────────────────
-# PVR matches trait and envVar to eigenvector rows by POSITION — row i is
-# tree_a$tip.label[i] (tree_a = tree_pruned with the zero-loan tips dropped,
-# built just below). Reorder and assert; a mis-sort fits silently.
-#
+# ── Setup: analysis frames, trees, and the geo/ancestry fitter ─────────────
 # [0] relabelled tips to glottocodes, one per language — no duplication here.
-# semi_join is redundant against [3]'s output but guards a regenerated file.
-df_full <- COGNATE_final |>
+df_full <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv")) |>
   dplyr::select(glottocode, language, y = loans_norm, x_km = all_of(PREDICTOR)) |>
   semi_join(tip_map, by = "glottocode") |>
   filter(!is.na(y), !is.na(x_km)) |>
   as.data.frame()
 
-# Most languages have zero confirmed Spanish loans; the spike at 0 dominates the
-# slope. The primary analysis drops them and prunes the tree to match — every
-# model below, the §5 variance partition included, runs on the non-zero set.
-# §7C refits with the zeros restored so the effect on the slope and p is visible.
-# df_full / tree_full keep the full set; tree_a / df are the non-zero primary
-# set. All trees are local so [4.1]/[4.2]/[4.3] still see the full tree_pruned.
-n_zeros_removed <- sum(df_full$y == 0)
-df        <- df_full[df_full$y > 0, , drop = FALSE]
-tree_a    <- ape::drop.tip(tree_pruned, setdiff(tree_pruned$tip.label, df$glottocode))
-tree_full <- ape::drop.tip(tree_pruned, setdiff(tree_pruned$tip.label, df_full$glottocode))
+df        <- df_full[df_full$y > 0, , drop = FALSE]          # primary: non-zero set
+tree_a    <- drop.tip(tree_pruned, setdiff(tree_pruned$tip.label, df$glottocode))
+tree_full <- drop.tip(tree_pruned, setdiff(tree_pruned$tip.label, df_full$glottocode))
+message(sum(df_full$y == 0), " zero-loan languages | ", nrow(df), " retained for the primary fit.")
 
-df <- df[match(tree_a$tip.label, df$glottocode), ]
-
-stopifnot(
-  "Analysis frame and pruned tree disagree on the language set." =
-    nrow(df) == length(tree_a$tip.label),
-  "Analysis frame is not in tip.label order — PVR matches by position." =
-    !anyNA(df$glottocode) && identical(df$glottocode, tree_a$tip.label)
-)
-
-message(n_zeros_removed, " zero-loan languages dropped | ", nrow(df), " retained.")
-
-y <- df$y
-x <- df$x_km / 1000
-N <- nrow(df)
-
-
-# ── 2. Eigendecomposition + PVR fit ─────────────────────────────────────────
-# scale = TRUE rescales eigenvalues only; eigenvectors are unchanged.
-pvr_dec <- PVRdecomp(tree_a, scale = TRUE)
-
-# "moran" adds eigenvectors until residual autocorrelation is n.s. (sig.t = 0.05);
-# connectivity matrix left at the package default.
-pvr_fit <- PVR(pvr_dec, phy = tree_a, trait = y, envVar = x, method = "moran")
-
-E_sel <- as.matrix(pvr_fit@Selection$Vectors)
-k     <- ncol(E_sel)
-
-
-# ── 3. Explicit refit — source of the reported coefficients ─────────────
-# PVR exposes only R2 and residuals, and @PVR$p is the FIRST EIGENVECTOR's
-# p-value, not the predictor's. Refit the same design for the coefficient
-# table; the checks below confirm it is the same fit.
-m_full <- lm(y ~ E_sel + x)
-
-stopifnot(
-  "Refit residuals differ from PVR's — check the tip ordering or E_sel." =
-    isTRUE(all.equal(unname(resid(m_full)), unname(pvr_fit@PVR$Residuals),
-                     tolerance = 1e-8)),
-  "Refit R2 differs from PVR's." =
-    isTRUE(all.equal(summary(m_full)$r.squared, pvr_fit@PVR$R2, tolerance = 1e-8))
-)
-
-message("N = ", N, " languages | ", k, " eigenvectors selected (",
-        paste(pvr_fit@Selection$Id$Vectors, collapse = ", "), ") | residual df = ",
-        df.residual(m_full))
-if (df.residual(m_full) < 10) {
-  warning("Only ", df.residual(m_full), " residual df — the eigenvector set is ",
-          "consuming most of the sample; treat the p-value with caution.")
+# Leave-one-out RMSE via the OLS PRESS shortcut — lets A (1 predictor) and B (k)
+# be compared on the same footing.
+perf <- function(m) {
+  r <- residuals(m); h <- hatvalues(m)
+  c(rmse = sqrt(mean(r^2)), rmse_loocv = sqrt(mean((r / (1 - h))^2)))
 }
 
-cf   <- summary(m_full)$coefficients
-b_mm <- unname(cf["x", "Estimate"])                 # per Mm, the fitting scale
-scl  <- DISPLAY_UNIT_KM / 1000                      # Mm -> display units
-
-print(round(cf[c("(Intercept)", "x"), ], 5))
-cat(sprintf("\nslope = %.5f per %d km   (t = %.3f, p = %.4g)\n",
-            b_mm * scl, DISPLAY_UNIT_KM,
-            cf["x", "t value"], cf["x", "Pr(>|t|)"]))
-
-
-# ── 4. Partial residuals (Frisch–Waugh–Lovell) ──────────────────────────────
-# lm(res_y ~ res_x) reproduces the full model's x coefficient. Asserted so
-# §8's scatter cannot drift from the reported effect.
-res_y <- resid(lm(y ~ E_sel))
-res_x <- resid(lm(x ~ E_sel))
-m_av  <- lm(res_y ~ res_x)
-
-stopifnot(
-  "AV-plot slope does not match the PVR fit's distance coefficient." =
-    isTRUE(all.equal(unname(coef(m_av)["res_x"]), b_mm, tolerance = 1e-8))
-)
-
-partial_r <- cor(res_y, res_x)
-raw_r     <- cor(y, df$x_km)
-cat(sprintf("raw cor(loans, distance) = %.4f | partial cor given phylogeny = %.4f\n",
-            raw_r, partial_r))
-
-
-# ── 5. Variance partition ───────────────────────────────────────────────────
-# PVR's lettering reverses Desdevises et al.: a = geography, c = phylogeny.
-# b is a difference of R^2, not a variance, and goes negative under suppression;
-# only the sum is constrained.
-vp <- pvr_fit@VarPart
-COGNATE_pvr_varpart <- tibble(
-  component = c("a", "b", "c", "d"),
-  meaning   = c("geography only", "shared (geography & phylogeny)",
-                "phylogeny only", "unexplained"),
-  fraction  = c(vp$a, vp$b, vp$c, vp$d)
-)
-print(COGNATE_pvr_varpart)
-stopifnot("Variance partition does not sum to 1." =
-            isTRUE(all.equal(sum(COGNATE_pvr_varpart$fraction), 1, tolerance = 1e-8)))
-
-write.csv(COGNATE_pvr_varpart,
-          file = here("data", "cognate", "PVR", "COGNATE_pvr_varpart.csv"), row.names = FALSE)
-
-
-# ── 6. Collinearity: geographic vs. phylogenetic distance ───────────────────
-# Collinearity of the predictor as fitted (|x_i - x_j|) with patristic distance.
-# Runs below the pairwise-matrix r ~ 0.7 the phoneme/grammar MMRR scripts report.
-Dgeo   <- as.matrix(dist(df$x_km))
-Dphylo <- cophenetic.phylo(tree_a)
-
-geo_phylo_cor <- cor(Dgeo[lower.tri(Dgeo)], Dphylo[lower.tri(Dphylo)])
-message("cor(geographic distance, phylogenetic distance) = ", round(geo_phylo_cor, 3))
-
-
-# ── 7. Results table ────────────────────────────────────────────────────────
-# Slope on the display scale; intercept is scale-free. n_evec / df_residual
-# carried so a thin fit shows in the CSV.
-COGNATE_pvr_results <- as_tibble(cf, rownames = "term") |>
-  rename(estimate = Estimate, std.error = `Std. Error`,
-         statistic = `t value`, p.value = `Pr(>|t|)`) |>
-  filter(term %in% c("(Intercept)", "x")) |>
-  mutate(term = if_else(term == "x", PREDICTOR, term),
-         estimate  = if_else(term == PREDICTOR, estimate * scl, estimate),
-         std.error = if_else(term == PREDICTOR, std.error * scl, std.error),
-         unit = if_else(term == PREDICTOR, paste0("per ", DISPLAY_UNIT_KM, " km"), NA_character_),
-         method = pvr_fit@Selection$Method,
-         n = N, n_evec = k, df_residual = df.residual(m_full),
-         r.squared = summary(m_full)$r.squared,
-         adj.r.squared = summary(m_full)$adj.r.squared,
-         aic = AIC(m_full),
-         raw_cor = raw_r, partial_cor = partial_r,
-         geo_phylo_cor = geo_phylo_cor, .before = 1)
-print(COGNATE_pvr_results)
-write.csv(COGNATE_pvr_results,
-          file = here("data", "cognate", "PVR", "COGNATE_pvr_results.csv"), row.names = FALSE)
-
-
-# ── 7B. Geography vs. ancestry — two comparable regressions ─────────────────
-# The §5 partition leaves geography and phylogeny too collinear to separate.
-# These two regressions split the overlap by design (zeros already dropped in §1):
-#   A  y ~ migration distance, uncontrolled — modern geography, credited with
-#      everything it shares with phylogeny.
-#   B  y ~ phylogenetic eigenvectors residualized on migration distance (y left
-#      untouched). E_perp is orthogonal to x, so B's R^2 is the semipartial
-#      (phylogeny-only) share and geo_r2 + anc_r2 reproduces the full model R^2.
-
-# A — modern geography
-m_geo  <- lm(y ~ x)
-geo_cf <- summary(m_geo)$coefficients["x", ]
-geo_r2 <- summary(m_geo)$r.squared
-
-# B — ancestry, geography scrubbed out of the eigenvectors
-if (k == 0) {
-  m_anc  <- lm(y ~ 1)
-  anc_r2 <- 0
-  anc_F  <- NA_real_
-  anc_p  <- NA_real_
-} else {
-  E_perp <- apply(E_sel, 2, \(col) resid(lm(col ~ x)))
-  m_anc  <- lm(y ~ E_perp)
-  anc_r2 <- summary(m_anc)$r.squared
-  inc    <- anova(m_geo, m_full)   # incremental F: phylogeny added on top of geography
-  anc_F  <- inc[["F"]][2]
-  anc_p  <- inc[["Pr(>F)"]][2]
-  stopifnot(
-    "Scrubbed-eigenvector coefficients drift from the full PVR fit." =
-      isTRUE(all.equal(unname(coef(m_anc)[-1]),
-                       unname(coef(m_full)[2:(k + 1)]), tolerance = 1e-8)),
-    "geo_r2 + anc_r2 != full-model R^2 — E_perp is not orthogonal to x." =
-      isTRUE(all.equal(geo_r2 + anc_r2, summary(m_full)$r.squared, tolerance = 1e-6))
-  )
-}
-
-message(sprintf(
-  "R^2 geography (A) = %.3f | semipartial R^2 phylogeny|geography (B) = %.3f | A+B = %.3f (full model R^2 = %.3f)",
-  geo_r2, anc_r2, geo_r2 + anc_r2, summary(m_full)$r.squared))
-
-COGNATE_geo_vs_ancestry <- tibble(
-  model     = c("A_geography", "B_ancestry_given_geography"),
-  predictor = c(paste0(PREDICTOR, " (per ", DISPLAY_UNIT_KM, " km)"),
-                "phylo eigenvectors ⊥ migration distance"),
-  n = N, n_zeros_removed = n_zeros_removed,
-  n_evec      = c(0L, k),
-  estimate    = c(unname(geo_cf["Estimate"])   * scl, NA_real_),
-  std.error   = c(unname(geo_cf["Std. Error"]) * scl, NA_real_),
-  statistic   = c(unname(geo_cf["t value"]), anc_F),
-  p.value     = c(unname(geo_cf["Pr(>|t|)"]), anc_p),
-  r.squared   = c(geo_r2, anc_r2),
-  df.residual = c(df.residual(m_geo), df.residual(m_full))
-)
-print(COGNATE_geo_vs_ancestry)
-write.csv(COGNATE_geo_vs_ancestry,
-          file = here("data", "cognate", "PVR", "COGNATE_geo_vs_ancestry.csv"),
-          row.names = FALSE)
-
-
-# ── 7C. Zeros-in sensitivity ───────────────────────────────────────────────
-# Refit A and B with the zero-loan languages restored (tree pruned to match) so
-# the migration-distance slope and its p-value can be read off with and without
-# them. PVR is re-selected on each set — the eigenvector count can differ.
-geo_anc_fit <- function(frame, tree_sub) {
+# geo_anc_fit(): steps 1 & 2 for one analysis frame + its pruned tree.
+#   1. Geography — y ~ migration distance, uncontrolled.
+#   2. Phylogeny-scrubbed geography — y ~ phylogenetic eigenvectors with
+#      migration distance residualised out of each ("moran" selection). The
+#      block is orthogonal to distance, so its R^2 is the semipartial share.
+geo_anc_fit <- function(frame, tree_sub, zeros_label) {
   frame <- frame[match(tree_sub$tip.label, frame$glottocode), ]
-  yy  <- frame$y
-  xx  <- frame$x_km / 1000
-  mg  <- lm(yy ~ xx)
-  gcf <- summary(mg)$coefficients["xx", ]
-  gr2 <- summary(mg)$r.squared
+  stopifnot(!anyNA(frame$glottocode), identical(frame$glottocode, tree_sub$tip.label))
+  yy <- frame$y
+  xx <- frame$x_km / 1000
+
+  m_geo  <- lm(yy ~ xx)
+  gcf    <- summary(m_geo)$coefficients["xx", ]
+  geo_r2 <- summary(m_geo)$r.squared
+
   pf  <- PVR(PVRdecomp(tree_sub, scale = TRUE), phy = tree_sub,
              trait = yy, envVar = xx, method = "moran")
   Es  <- as.matrix(pf@Selection$Vectors)
   kk  <- ncol(Es)
-  mf  <- if (kk == 0) lm(yy ~ xx) else lm(yy ~ Es + xx)
-  tibble(
-    n = nrow(frame), n_evec = kk,
-    geo_slope     = unname(gcf["Estimate"])   * scl,
-    geo_std_error = unname(gcf["Std. Error"]) * scl,
-    geo_t         = unname(gcf["t value"]),
-    geo_p         = unname(gcf["Pr(>|t|)"]),
-    geo_r2        = gr2,
-    anc_semipartial_r2 = if (kk == 0) 0 else summary(mf)$r.squared - gr2,
-    anc_F_p            = if (kk == 0) NA_real_ else anova(mg, mf)[["Pr(>F)"]][2]
+  m_full <- if (kk == 0) m_geo else lm(yy ~ Es + xx)
+  if (kk == 0) {
+    m_anc <- lm(yy ~ 1); anc_r2 <- 0; anc_F <- NA_real_; anc_p <- NA_real_; anc_dir <- NA_real_
+  } else {
+    Ep     <- apply(Es, 2, \(col) resid(lm(col ~ xx)))
+    m_anc  <- lm(yy ~ Ep)
+    anc_r2 <- summary(m_anc)$r.squared
+    inc    <- anova(m_geo, m_full)                 # incremental F: ancestry on top of geography
+    anc_F  <- inc[["F"]][2]; anc_p <- inc[["Pr(>F)"]][2]
+    anc_dir <- cor(fitted(lm(yy ~ Es)), xx)        # un-scrubbed ancestry prediction vs distance
+    stopifnot(
+      "geography R^2 + ancestry R^2 != R^2(y ~ E_sel + x)." =
+        isTRUE(all.equal(geo_r2 + anc_r2, summary(m_full)$r.squared, tolerance = 1e-6))
+    )
+  }
+  gp <- perf(m_geo); ap <- perf(m_anc)
+  list(
+    frame = frame, m_geo = m_geo, m_anc = m_anc, zeros = zeros_label,
+    rows = tibble(
+      model      = c("A_geography", "B_ancestry_given_geography"),
+      predictor  = c(paste0(PREDICTOR, " (per ", DISPLAY_UNIT_KM, " km)"),
+                     "phylo eigenvectors, migration distance scrubbed"),
+      zeros = zeros_label, n = nrow(frame), n_zeros = sum(frame$y == 0), n_evec = c(0L, kk),
+      slope             = c(unname(gcf["Estimate"])   * scl, NA_real_),
+      slope_se          = c(unname(gcf["Std. Error"]) * scl, NA_real_),
+      statistic         = c(unname(gcf["t value"]), anc_F),
+      p.value           = c(unname(gcf["Pr(>|t|)"]), anc_p),
+      r.squared         = c(geo_r2, anc_r2),
+      cor_with_distance = c(cor(yy, xx), anc_dir),
+      rmse              = c(unname(gp["rmse"]),       unname(ap["rmse"])),
+      rmse_loocv        = c(unname(gp["rmse_loocv"]), unname(ap["rmse_loocv"]))
+    )
   )
 }
 
-COGNATE_geo_vs_ancestry_sensitivity <- bind_rows(
-  tibble(zeros = "removed") |> bind_cols(geo_anc_fit(df,      tree_a)),
-  tibble(zeros = "kept")    |> bind_cols(geo_anc_fit(df_full, tree_full))
-)
-stopifnot(
-  "§7C 'removed' refit disagrees with the §7B primary fit." =
-    isTRUE(all.equal(COGNATE_geo_vs_ancestry_sensitivity$geo_r2[1], geo_r2, tolerance = 1e-8)) &&
-    isTRUE(all.equal(COGNATE_geo_vs_ancestry_sensitivity$anc_semipartial_r2[1], anc_r2, tolerance = 1e-6))
-)
-print(COGNATE_geo_vs_ancestry_sensitivity)
-write.csv(COGNATE_geo_vs_ancestry_sensitivity,
-          file = here("data", "cognate", "PVR", "COGNATE_geo_vs_ancestry_sensitivity.csv"),
-          row.names = FALSE)
+
+# ── 1 & 2. Geography and phylogeny-scrubbed geography ─────────────────────
+removed <- geo_anc_fit(df,      tree_a,    "removed")
+kept    <- geo_anc_fit(df_full, tree_full, "kept")
+
+for (r in list(removed, kept)) {
+  rr <- r$rows
+  message(sprintf(
+    "[zeros %s] n=%d | R^2 geo = %.3f (RMSE %.4f/LOO %.4f) | ancestry semipartial R^2 = %.3f (RMSE %.4f/LOO %.4f) | cor(distance): metric %+.3f, ancestry %+.3f",
+    rr$zeros[1], rr$n[1], rr$r.squared[1], rr$rmse[1], rr$rmse_loocv[1],
+    rr$r.squared[2], rr$rmse[2], rr$rmse_loocv[2],
+    rr$cor_with_distance[1], rr$cor_with_distance[2]))
+}
 
 
-# ── 8. Figures ──────────────────────────────────────────────────────────────
-dir.create(here("figures", "cognate", "regression"),
-           recursive = TRUE, showWarnings = FALSE)
+# ── 3. Plots ──────────────────────────────────────────────────────────────
+dir.create(here("figures", "cognate", "regression"), recursive = TRUE, showWarnings = FALSE)
 
-# VarPartplot is base graphics and draws an unlabelled bar: png() device, and
-# the subtitle carries the key.
-png(here("figures", "cognate", "regression", "cognate_pvr_varpart.png"),
-    width = 7, height = 4.5, units = "in", res = 300)
-VarPartplot(pvr_fit)
-title(main = "Spanish loanwords: variance partition",
-      sub = "a = geography | b = shared | c = phylogeny | d = unexplained")
-dev.off()
-
-# Added-variable scatter: both axes residualized on E_sel. Line is m_av
-# (§4 asserts it carries the full model's slope); ribbon is its 95% CI.
-av_df <- data.frame(res_x = res_x / scl, res_y = res_y)
-band  <- predict(lm(res_y ~ res_x, data = av_df),
-                 newdata = data.frame(res_x = seq(min(av_df$res_x), max(av_df$res_x),
-                                                  length.out = 100)),
-                 interval = "confidence") |>
-  as.data.frame() |>
-  mutate(res_x = seq(min(av_df$res_x), max(av_df$res_x), length.out = 100))
-
-p_av <- ggplot() +
-  geom_point(data = av_df, aes(x = res_x, y = res_y), size = 2, alpha = 0.5) +
-  geom_ribbon(data = band, aes(x = res_x, ymin = lwr, ymax = upr),
-              fill = "steelblue", alpha = 0.25) +
-  geom_line(data = band, aes(x = res_x, y = fit),
-            color = "steelblue", linewidth = 1.2) +
-  theme_bw() +
-  labs(title = "Spanish loanwords vs. migration distance, phylogeny removed",
-       subtitle = sprintf("slope = %.4f per %d km (p = %.3g), partial r = %.3f, %d eigenvector%s",
-                          b_mm * scl, DISPLAY_UNIT_KM, cf["x", "Pr(>|t|)"], partial_r, k,
-                          if (k == 1) "" else "s"),
-       x = sprintf("Migration distance residual (%d km)", DISPLAY_UNIT_KM),
-       y = "Normalized Spanish loanword count residual")
-print(p_av)
-
-ggsave(here("figures", "cognate", "regression", "cognate_pvr_partial_residuals.png"),
-       p_av, width = 7, height = 4.5, units = "in", dpi = 300)
-
-
-# §7B regression A: raw loan count vs. migration distance, no phylogeny control.
-geo_df <- data.frame(x_disp = df$x_km / DISPLAY_UNIT_KM, y = y)
-p_geo <- ggplot(geo_df, aes(x_disp, y)) +
-  geom_point(size = 2, alpha = 0.5) +
-  geom_smooth(method = "lm", formula = y ~ x,
-              color = "steelblue", fill = "steelblue", alpha = 0.25, linewidth = 1.2) +
-  theme_bw() +
-  labs(title = "Spanish loanwords vs. migration distance (uncontrolled, zeros removed)",
-       subtitle = sprintf("slope = %.4f per %d km (p = %.3g), R^2 = %.3f, n = %d (%d zeros removed)",
-                          unname(geo_cf["Estimate"]) * scl, DISPLAY_UNIT_KM,
-                          unname(geo_cf["Pr(>|t|)"]), geo_r2, N, n_zeros_removed),
-       x = sprintf("Migration distance (%d km)", DISPLAY_UNIT_KM),
-       y = "Normalized Spanish loanword count")
-print(p_geo)
-ggsave(here("figures", "cognate", "regression", "cognate_regression_geography.png"),
-       p_geo, width = 7, height = 4.5, units = "in", dpi = 300)
-
-# §7B regression B: loan count vs. the geography-free phylogenetic prediction.
-# The fit line is the identity by construction; the scatter is the semipartial R^2.
-if (k == 0) {
-  p_anc <- ggplot() + theme_void() +
-    annotate("text", x = 0, y = 0,
-             label = "No phylogenetic eigenvector cleared Moran selection (k = 0).")
-} else {
-  anc_df <- data.frame(fit = fitted(m_anc), y = y)
-  p_anc <- ggplot(anc_df, aes(fit, y)) +
+mk_geo_plot <- function(r, tag) {
+  rg <- r$rows[r$rows$model == "A_geography", ]
+  ggplot(r$frame |> mutate(x_disp = x_km / DISPLAY_UNIT_KM), aes(x_disp, y)) +
     geom_point(size = 2, alpha = 0.5) +
     geom_smooth(method = "lm", formula = y ~ x,
                 color = "steelblue", fill = "steelblue", alpha = 0.25, linewidth = 1.2) +
     theme_bw() +
-    labs(title = "Spanish loanwords vs. ancestry, geography scrubbed out",
-         subtitle = sprintf("semipartial R^2 = %.3f, F p = %.3g, %d eigenvector%s",
-                            anc_r2, anc_p, k, if (k == 1) "" else "s"),
-         x = "Geography-free phylogenetic prediction of loan count",
+    labs(title = sprintf("Spanish loanwords vs. migration distance (uncontrolled, zeros %s)", tag),
+         subtitle = sprintf("slope = %.4f per %d km (p = %.3g), R^2 = %.3f, RMSE = %.4f, n = %d",
+                            rg$slope, DISPLAY_UNIT_KM, rg$p.value, rg$r.squared, rg$rmse, rg$n),
+         x = sprintf("Migration distance (%d km)", DISPLAY_UNIT_KM),
          y = "Normalized Spanish loanword count")
 }
-print(p_anc)
-ggsave(here("figures", "cognate", "regression", "cognate_regression_ancestry.png"),
-       p_anc, width = 7, height = 4.5, units = "in", dpi = 300)
 
-# §7C: regression A side by side, zero-loan languages kept vs. removed.
-s <- COGNATE_geo_vs_ancestry_sensitivity
-zc_df <- bind_rows(
-  df_full |> mutate(zeros = "kept",    x_disp = x_km / DISPLAY_UNIT_KM),
-  df      |> mutate(zeros = "removed", x_disp = x_km / DISPLAY_UNIT_KM)
-)
-p_zc <- ggplot(zc_df, aes(x_disp, y)) +
-  geom_point(size = 2, alpha = 0.5) +
-  geom_smooth(method = "lm", formula = y ~ x,
-              color = "steelblue", fill = "steelblue", alpha = 0.25, linewidth = 1.1) +
-  facet_wrap(~ factor(zeros, c("kept", "removed"))) +
-  theme_bw() +
-  labs(title = "Spanish loanwords vs. migration distance: zero-loan languages kept vs. removed",
-       subtitle = sprintf(
-         "kept: slope %.4f/%dkm, p = %.3g, n = %d   |   removed: slope %.4f/%dkm, p = %.3g, n = %d",
-         s$geo_slope[s$zeros == "kept"],    DISPLAY_UNIT_KM, s$geo_p[s$zeros == "kept"],    s$n[s$zeros == "kept"],
-         s$geo_slope[s$zeros == "removed"], DISPLAY_UNIT_KM, s$geo_p[s$zeros == "removed"], s$n[s$zeros == "removed"]),
-       x = sprintf("Migration distance (%d km)", DISPLAY_UNIT_KM),
-       y = "Normalized Spanish loanword count")
-print(p_zc)
-ggsave(here("figures", "cognate", "regression", "cognate_regression_geography_zeros.png"),
-       p_zc, width = 9, height = 4.5, units = "in", dpi = 300)
+mk_avp_plot <- function(r, tag) {
+  rg <- r$rows[r$rows$model == "A_geography", ]
+  ra <- r$rows[r$rows$model == "B_ancestry_given_geography", ]
+  d  <- bind_rows(
+    tibble(panel = "geography (A)",               pred = fitted(r$m_geo), y = r$frame$y),
+    tibble(panel = "ancestry, geography-free (B)", pred = fitted(r$m_anc), y = r$frame$y)
+  ) |> mutate(panel = factor(panel, c("geography (A)", "ancestry, geography-free (B)")))
+  lab <- tibble(
+    panel = factor(c("geography (A)", "ancestry, geography-free (B)"),
+                   c("geography (A)", "ancestry, geography-free (B)")),
+    lab = c(sprintf("RMSE %.4f (LOO %.4f)\nR^2 %.3f", rg$rmse, rg$rmse_loocv, rg$r.squared),
+            sprintf("RMSE %.4f (LOO %.4f)\nsemipartial R^2 %.3f", ra$rmse, ra$rmse_loocv, ra$r.squared))
+  )
+  lim <- range(c(d$pred, d$y))
+  ggplot(d, aes(pred, y)) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey40") +
+    geom_point(size = 2, alpha = 0.5) +
+    geom_text(data = lab, aes(x = -Inf, y = Inf, label = lab), hjust = -0.05, vjust = 1.15,
+              size = 3, lineheight = 0.95, inherit.aes = FALSE) +
+    facet_wrap(~ panel) +
+    coord_fixed(xlim = lim, ylim = lim) +
+    theme_bw() +
+    labs(title = sprintf("Predicting Spanish loanwords: geography vs. geography-free ancestry (zeros %s)", tag),
+         subtitle = "actual vs. model-predicted; dashed line is y = x",
+         x = "Predicted normalized loanword count", y = "Actual normalized loanword count")
+}
+
+ggsave(here("figures", "cognate", "regression", "cognate_regression_geography.png"),
+       mk_geo_plot(removed, "removed"), width = 7, height = 4.5, units = "in", dpi = 300)
+ggsave(here("figures", "cognate", "regression", "cognate_regression_actual_vs_predicted.png"),
+       mk_avp_plot(removed, "removed"), width = 9, height = 4.8, units = "in", dpi = 300)
+ggsave(here("figures", "cognate", "regression", "cognate_regression_geography_zeros_kept.png"),
+       mk_geo_plot(kept, "kept"), width = 7, height = 4.5, units = "in", dpi = 300)
+ggsave(here("figures", "cognate", "regression", "cognate_regression_actual_vs_predicted_zeros_kept.png"),
+       mk_avp_plot(kept, "kept"), width = 9, height = 4.8, units = "in", dpi = 300)
+
+
+# ── 4. Results table ──────────────────────────────────────────────────────
+# Rows: model x zero-handling condition. slope: A only (B is a k-vector block).
+# statistic/p.value: A = t on the distance coefficient, B = incremental F of the
+# ancestry block on top of geography. r.squared: A = R^2, B = semipartial.
+# cor_with_distance: A = raw cor(metric, distance); B = cor(un-scrubbed ancestry
+# prediction, distance) — sign shows whether ancestry runs with (-) or against
+# (+) the geographic gradient.
+COGNATE_geo_vs_ancestry <- bind_rows(removed$rows, kept$rows)
+print(COGNATE_geo_vs_ancestry)
+write.csv(COGNATE_geo_vs_ancestry,
+          file = here("data", "cognate", "PVR", "COGNATE_geo_vs_ancestry.csv"),
+          row.names = FALSE)

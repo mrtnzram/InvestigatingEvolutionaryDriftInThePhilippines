@@ -1,3 +1,5 @@
-"model","predictor","n","n_zeros_removed","n_evec","estimate","std.error","statistic","p.value","r.squared","df.residual"
-"A_geography","geodist_H1_span (per 100 km)",51,43,0,-0.00752727422582657,0.00880943630130292,-0.854455832175468,0.397010828165825,0.0146811457433971,49
-"B_ancestry_given_geography","phylo eigenvectors ⊥ migration distance",51,43,1,NA,NA,3.17195839493091,0.0812411024621391,0.0610762321684478,48
+"model","predictor","zeros","n","n_zeros","n_evec","slope","slope_se","statistic","p.value","r.squared","cor_with_distance","rmse","rmse_loocv"
+"A_geography","geodist_H1_span (per 100 km)","removed",51,0,0,-0.00752727422582657,0.00880943630130292,-0.854455832175468,0.397010828165825,0.0146811457433971,-0.121165777938315,0.183635452958478,0.188639676088893
+"B_ancestry_given_geography","phylo eigenvectors, migration distance scrubbed","removed",51,0,1,NA,NA,3.17195839493091,0.0812411024621391,0.0610762321684478,-0.0984579970509449,0.179259962161525,0.186856510632045
+"A_geography","geodist_H1_span (per 100 km)","kept",94,43,0,-0.010234393645017,0.00513256369821602,-1.9940120077953,0.0491114622100912,0.0414278612565978,-0.20353835328163,0.16720537441592,0.169715346569725
+"B_ancestry_given_geography","phylo eigenvectors, migration distance scrubbed","kept",94,43,2,NA,NA,10.15783587813,0.000105253924552118,0.176530103251644,-0.29478178161196,0.15497501799913,0.160278529146661
