@@ -15,7 +15,7 @@
 #          (y/x for eigenvector selection only), data/GRAMMAR_dist_matrix.csv
 # Outputs: data/GRAMMAR_sPCA_results.csv, data/GRAMMAR_sPCA_scores.csv,
 #          data/GRAMMAR_sPCA_loadings.csv,
-#          figures/grammar/regression/grammar_sPCA_surface.png,
+#          figures/regression/grammar_sPCA_surface.png,
 #          data/base_plot_grammar_sPCA.rds
 # =============================================================================
 
@@ -42,7 +42,7 @@ tip_map <- tree_df_matched |> dplyr::select(original, gram)
 
 
 # ── 1. Phylogenetic eigenvectors at tip grain — same PVR() call as [4]/[4.1] ─
-GRAMMAR_final <- read.csv(here("data", "grammar", "network_distance", "GRAMMAR_final.csv"))
+GRAMMAR_final <- read.csv(here("data", "network_distance", "GRAMMAR_final.csv"))
 
 tip_df <- GRAMMAR_final |>
   dplyr::select(language, y = cossim_span_norm, x_km = all_of(PREDICTOR)) |>
@@ -75,9 +75,9 @@ E_sel <- as.data.frame(E_sel_tip) |>
 
 
 # ── 2. Analysis frame: full binary matrix at language grain ─────────────────
-gb_cols <- grep("^GB", names(read.csv(here("data", "grammar", "initial_datasets", "GRAMBANKdf_full.csv"), nrows = 1)),
+gb_cols <- grep("^GB", names(read.csv(here("data", "grammar", "GRAMBANKdf_full.csv"), nrows = 1)),
                 value = TRUE)
-df <- read.csv(here("data", "grammar", "initial_datasets", "GRAMBANKdf_full.csv")) |>
+df <- read.csv(here("data", "grammar", "GRAMBANKdf_full.csv")) |>
   filter(Language_Type == "Philippine Language") |>
   dplyr::select(language, longitude = Longitude, latitude = Latitude, all_of(gb_cols)) |>
   filter(language %in% rownames(E_sel)) |>
@@ -101,7 +101,7 @@ message(ncol(X), " of ", length(gb_cols), " Grambank columns retained (non-invar
 
 
 # ── 4. Spatial weight matrix: threshold search, maximizing sPCA eigenvalue ──
-GRAMMAR_dist_matrix <- read.csv(here("data", "grammar", "network_distance", "GRAMMAR_dist_matrix.csv"),
+GRAMMAR_dist_matrix <- read.csv(here("data", "network_distance", "GRAMMAR_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 Dgeo <- GRAMMAR_dist_matrix[df$language, df$language]
@@ -167,11 +167,11 @@ message(sprintf("sPCA: variance explained (axis 1) = %.3f, permutation p = %.4f.
 # ── 6. Per-language scores + per-feature loadings ────────────────────────────
 scores_df <- tibble(language = df$language, longitude = df$longitude,
                     latitude = df$latitude, sPC1 = sPC1)
-write.csv(scores_df, file = here("data", "grammar", "PVR", "GRAMMAR_sPCA_scores.csv"), row.names = FALSE)
+write.csv(scores_df, file = here("data", "pvr", "GRAMMAR_sPCA_scores.csv"), row.names = FALSE)
 
 loadings_df <- tibble(feature = colnames(R), loading = spca_fit$c1[, 1]) |>
   arrange(desc(abs(loading)))
-write.csv(loadings_df, file = here("data", "grammar", "PVR", "GRAMMAR_sPCA_loadings.csv"), row.names = FALSE)
+write.csv(loadings_df, file = here("data", "pvr", "GRAMMAR_sPCA_loadings.csv"), row.names = FALSE)
 
 
 # ── 7. Results table ─────────────────────────────────────────────────────────
@@ -181,11 +181,11 @@ GRAMMAR_sPCA_results <- tibble(
   variance_explained = var_explained, perm_p = perm_p, n_perm = N_PERM
 )
 print(GRAMMAR_sPCA_results)
-write.csv(GRAMMAR_sPCA_results, file = here("data", "grammar", "PVR", "GRAMMAR_sPCA_results.csv"), row.names = FALSE)
+write.csv(GRAMMAR_sPCA_results, file = here("data", "pvr", "GRAMMAR_sPCA_results.csv"), row.names = FALSE)
 
 
 # ── 8. Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ───────────
-dir.create(here("figures", "grammar", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
 
 world_map  <- map_data("world")
 map_subset <- world_map |> filter(region %in% c("Philippines", "Malaysia"))
@@ -225,6 +225,6 @@ p_surface <- ggplot() +
        subtitle = sprintf("p = %.3f, r^2 = %.3f", perm_p, var_explained))
 print(p_surface)
 
-ggsave(here("figures", "grammar", "regression", "grammar_sPCA_surface.png"),
+ggsave(here("figures", "regression", "grammar_sPCA_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
-saveRDS(p_surface, file = here("data", "grammar", "PVR", "base_plot_grammar_sPCA.rds"))
+saveRDS(p_surface, file = here("data", "pvr", "base_plot_grammar_sPCA.rds"))

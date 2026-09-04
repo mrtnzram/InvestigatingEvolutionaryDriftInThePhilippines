@@ -1,6 +1,6 @@
 # ── [3]_GENETIC_network_distance.R ───────────────────────────────────────────
 # Graph network creation + per-population distance calculation.
-# Input:   data/GENETIC_admixture.csv (from [0]), data/nodes.csv, data/edges.csv
+# Input:   data/GENETIC_admixture.csv (from [0]), data/nodes.csv, data/shared/edges.csv
 # Outputs: data/GENETIC_final.csv (admixture + geodist_H1_span/H2_span, the final
 #          per-population table), data/genetic_waypoint_plot.rds (overview arrow plot)
 # Note:    nodes/edges are the shared Philippine waypoint network, the same
@@ -15,10 +15,10 @@ library(sfheaders)
 library(here)
 
 # ── 0. Load data ─────────────────────────────────────────────────────────────
-PH_genetic <- read.csv(here("data", "genetic", "initial_datasets", "GENETIC_admixture.csv"))
+PH_genetic <- read.csv(here("data", "genetic", "GENETIC_admixture.csv"))
 
-nodes <- read.csv(here("data", "nodes.csv")) |> mutate(id = as.character(id))
-edges <- read.csv(here("data", "edges.csv")) |>
+nodes <- read.csv(here("data", "shared", "nodes.csv")) |> mutate(id = as.character(id))
+edges <- read.csv(here("data", "shared", "edges.csv")) |>
   mutate(from = as.character(from), to = as.character(to))
 
 
@@ -292,7 +292,7 @@ GENETIC_dist_matrix <- build_pairwise_distance_matrix(
   land_penalty  = 4.44
 )
 
-write.csv(GENETIC_dist_matrix, file = here("data", "genetic", "network_distance", "GENETIC_dist_matrix.csv"), row.names = TRUE)
+write.csv(GENETIC_dist_matrix, file = here("data", "network_distance", "GENETIC_dist_matrix.csv"), row.names = TRUE)
 
 
 # ── 6b. Inverse-variance weights for span_admx ──────────────────────────────
@@ -325,7 +325,7 @@ PH_genetic |>
          starts_with("malder_"),
          span_se_capped, span_w, span_w_capped,
          nearest_node, geodist_H1_span, geodist_H2_span, using_network) |>
-  write.csv(file = here("data", "genetic", "network_distance", "GENETIC_final.csv"), row.names = FALSE)
+  write.csv(file = here("data", "network_distance", "GENETIC_final.csv"), row.names = FALSE)
 
 
 # ── 7. Assemble full_tree_sf (main edges + per-population connectors) ────────
@@ -439,4 +439,4 @@ arrow_plot <- ggplot() +
   )
 
 print(arrow_plot)
-saveRDS(arrow_plot, file = here("data", "genetic", "network_distance", "genetic_waypoint_plot.rds"))
+saveRDS(arrow_plot, file = here("data", "network_distance", "genetic_waypoint_plot.rds"))

@@ -12,13 +12,13 @@
 # there is no local genotype matrix to run it on.
 #
 # Input:   data/Phil_2.24M_pca_results.eigenvec,
-#          data/genetic/network_distance/GENETIC_final.csv,
-#          data/genetic/initial_datasets/GENETIC_subgroup_lookup.csv
-# Outputs: data/genetic/procrustes/GENETIC_procrustes_results.csv,
-#          data/genetic/procrustes/GENETIC_procrustes_scores.csv,
-#          data/genetic/procrustes/GENETIC_procrustes_individual_scores.csv,
-#          figures/genetic/pca/GENETIC_pca.png,
-#          figures/genetic/pca/GENETIC_procrustes.png
+#          data/network_distance/GENETIC_final.csv,
+#          data/genetic/GENETIC_subgroup_lookup.csv
+# Outputs: data/procrustes/GENETIC_procrustes_results.csv,
+#          data/procrustes/GENETIC_procrustes_scores.csv,
+#          data/procrustes/GENETIC_procrustes_individual_scores.csv,
+#          figures/procrustes/GENETIC_pca.png,
+#          figures/procrustes/GENETIC_procrustes.png
 # =============================================================================
 
 library(adegenet)   # loads ade4 (procuste, procuste.randtest)
@@ -27,14 +27,14 @@ library(here)
 library(ggpubr)
 library(maps)
 
-dir.create(here("figures", "genetic", "pca"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "procrustes"), recursive = TRUE, showWarnings = FALSE)
 
 N_PERM <- 999   # + observed arrangement = 1000 draws
 
-GENETIC_final <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"))
+GENETIC_final <- read.csv(here("data", "network_distance", "GENETIC_final.csv"))
 
 # ── 1. Population-structure PCA: individual grain + population means ────────
-eigenvec_raw <- read.table(here("data", "Phil_2.24M_pca_results.eigenvec"),
+eigenvec_raw <- read.table(here("data", "genetic", "Phil_2.24M_pca_results.eigenvec"),
                            header = FALSE, stringsAsFactors = FALSE)
 n_pc <- ncol(eigenvec_raw) - 2
 names(eigenvec_raw) <- c("population", "sample", paste0("PC", seq_len(n_pc)))
@@ -51,7 +51,7 @@ scores_df <- eigenvec_pop %>%
   dplyr::select(population, PC1, PC2)
 
 # ── 2. Join coordinates + subgroup colour (population grain, for the fit) ───
-subgroup_lookup <- read_csv(here("data", "genetic", "initial_datasets", "GENETIC_subgroup_lookup.csv"), show_col_types = FALSE)
+subgroup_lookup <- read_csv(here("data", "genetic", "GENETIC_subgroup_lookup.csv"), show_col_types = FALSE)
 
 analysis_df <- scores_df %>%
   left_join(GENETIC_final %>% dplyr::select(population, longitude, latitude), by = "population") %>%
@@ -136,9 +136,9 @@ indiv_df$rotLatitude  <- indiv_rot_geo[, 2]
 results_df <- tibble(domain = "genetic", n = N, n_individual = N_indiv, ss_gower = ss,
                       correlation = correlation, p_value = p_value, n_perm = N_PERM)
 print(results_df)
-write_csv(results_df, here("data", "genetic", "procrustes", "GENETIC_procrustes_results.csv"))
-write_csv(analysis_df, here("data", "genetic", "procrustes", "GENETIC_procrustes_scores.csv"))
-write_csv(indiv_df, here("data", "genetic", "procrustes", "GENETIC_procrustes_individual_scores.csv"))
+write_csv(results_df, here("data", "procrustes", "GENETIC_procrustes_results.csv"))
+write_csv(analysis_df, here("data", "procrustes", "GENETIC_procrustes_scores.csv"))
+write_csv(indiv_df, here("data", "procrustes", "GENETIC_procrustes_individual_scores.csv"))
 
 # ── 5. PCA figure (own file, individual grain) ───────────────────────────────
 subgroup_pal <- analysis_df %>% distinct(subgroup, colour) %>% deframe()
@@ -151,7 +151,7 @@ p_pca <- ggplot(indiv_df, aes(PC1, PC2, colour = subgroup)) +
   theme_bw() +
   labs(title = "PCA")
 print(p_pca)
-ggsave(here("figures", "genetic", "pca", "GENETIC_pca.png"), p_pca,
+ggsave(here("figures", "procrustes", "GENETIC_pca.png"), p_pca,
        width = 8, height = 7, units = "in", dpi = 300, bg = "white")
 
 # ── 6. Procrustes-fit vs. actual-coordinates figure (own file) ──────────────
@@ -199,5 +199,5 @@ p_coords <- p_coords + theme(legend.position = "none")
 maps_row <- ggarrange(p_proc, p_coords, ncol = 2, nrow = 1, labels = c("A", "B"))
 p_maps   <- ggarrange(maps_row, as_ggplot(shared_legend), ncol = 2, nrow = 1, widths = c(4, 1.3))
 print(p_maps)
-ggsave(here("figures", "genetic", "pca", "GENETIC_procrustes.png"), p_maps,
+ggsave(here("figures", "procrustes", "GENETIC_procrustes.png"), p_maps,
        width = 12, height = 7, units = "in", dpi = 300, bg = "white")

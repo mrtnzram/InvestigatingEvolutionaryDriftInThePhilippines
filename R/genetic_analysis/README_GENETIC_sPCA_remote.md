@@ -22,14 +22,14 @@ checkout — just the five files below):
 |---|---|
 | `[4.2]_GENETIC_sPCA_remote.R` | `R/genetic_analysis/` |
 | `select_moran_eigenvectors.R` | `R/shared/` |
-| `pca_results_phil_only.eigenvec` | `data/genetic/PVR/` |
-| `GENETIC_final.csv` | `data/genetic/network_distance/` |
-| `GENETIC_dist_matrix.csv` | `data/genetic/network_distance/` |
+| `pca_results_phil_only.eigenvec` | `data/pvr/` |
+| `GENETIC_final.csv` | `data/network_distance/` |
+| `GENETIC_dist_matrix.csv` | `data/network_distance/` |
 
 ```bash
 scp R/genetic_analysis/"[4.2]_GENETIC_sPCA_remote.R" R/shared/select_moran_eigenvectors.R \
-    data/genetic/PVR/pca_results_phil_only.eigenvec data/genetic/network_distance/GENETIC_final.csv \
-    data/genetic/network_distance/GENETIC_dist_matrix.csv \
+    data/pvr/pca_results_phil_only.eigenvec data/network_distance/GENETIC_final.csv \
+    data/network_distance/GENETIC_dist_matrix.csv \
     user@server:/path/to/genetic_spca/
 ```
 
@@ -122,7 +122,7 @@ no population match (should be 0, or a small number you can chase down with
 ## Files to bring back
 
 ```bash
-scp 'user@server:/path/to/genetic_spca/out/*' data/genetic/PVR/
+scp 'user@server:/path/to/genetic_spca/out/*' data/pvr/
 ```
 
 | File | Consumed by |

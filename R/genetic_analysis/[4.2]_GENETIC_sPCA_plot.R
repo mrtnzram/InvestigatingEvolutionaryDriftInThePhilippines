@@ -6,22 +6,22 @@
 # this reads them back and builds the same point-symbol map the other three
 # domains' [4.2] scripts produce inline, since a map needs no server access.
 #
-# Input:   data/genetic/PVR/GENETIC_sPCA_scores.csv, GENETIC_sPCA_results.csv
+# Input:   data/pvr/GENETIC_sPCA_scores.csv, GENETIC_sPCA_results.csv
 #          (both scp'd back from the remote run)
-# Outputs: figures/genetic/regression/genetic_sPCA_surface.png,
-#          data/genetic/PVR/base_plot_genetic_sPCA.rds
+# Outputs: figures/regression/genetic_sPCA_surface.png,
+#          data/pvr/base_plot_genetic_sPCA.rds
 # =============================================================================
 
 library(tidyverse)
 library(here)
 library(maps)
 
-scores_df <- read.csv(here("data", "genetic", "PVR", "GENETIC_sPCA_scores.csv"))
-results   <- read.csv(here("data", "genetic", "PVR", "GENETIC_sPCA_results.csv"))
+scores_df <- read.csv(here("data", "pvr", "GENETIC_sPCA_scores.csv"))
+results   <- read.csv(here("data", "pvr", "GENETIC_sPCA_results.csv"))
 
 
 # ── Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ──────────────
-dir.create(here("figures", "genetic", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
 
 world_map  <- map_data("world")
 map_subset <- world_map |> filter(region %in% c("Philippines", "Malaysia"))
@@ -61,6 +61,6 @@ p_surface <- ggplot() +
        subtitle = sprintf("p = %.3f, r^2 = %.3f", results$perm_p, results$variance_explained))
 print(p_surface)
 
-ggsave(here("figures", "genetic", "regression", "genetic_sPCA_surface.png"),
+ggsave(here("figures", "regression", "genetic_sPCA_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
-saveRDS(p_surface, file = here("data", "genetic", "PVR", "base_plot_genetic_sPCA.rds"))
+saveRDS(p_surface, file = here("data", "pvr", "base_plot_genetic_sPCA.rds"))

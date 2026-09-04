@@ -20,26 +20,26 @@
 # re-derives its own matrices rather than reading COGNATE_NEXUS_matrix.csv, so
 # all four variants go through an identical code path for a fair comparison.
 #
-# Input:   data/cognate/initial_datasets/abvd_philippines*.nex (all four),
-#          data/cognate/initial_datasets/PH_df.csv,
-#          data/cognate/network_distance/COGNATE_final.csv
-# Outputs: data/cognate/procrustes/COGNATE_NEXUS_sensitivity.csv,
-#          figures/cognate/pca/COGNATE_NEXUS_sensitivity.png
+# Input:   data/cognate/abvd_philippines*.nex (all four),
+#          data/cognate/PH_df.csv,
+#          data/network_distance/COGNATE_final.csv
+# Outputs: data/procrustes/COGNATE_NEXUS_sensitivity.csv,
+#          figures/procrustes/COGNATE_NEXUS_sensitivity.png
 # =============================================================================
 
 library(adegenet)   # loads ade4 (dudi.pca, procuste, procuste.randtest)
 library(tidyverse)
 library(here)
 
-dir.create(here("figures", "cognate", "pca"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "procrustes"), recursive = TRUE, showWarnings = FALSE)
 
 MAX_MISSING <- 0.20   # same cutoff [0]_COGNATE_LOANS.R uses
 N_PERM      <- 999
 
-COGNATE_final <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv"))
+COGNATE_final <- read.csv(here("data", "network_distance", "COGNATE_final.csv"))
 analysis_glottocodes <- COGNATE_final$glottocode
 
-PH_df <- read_csv(here("data", "cognate", "initial_datasets", "PH_df.csv"), show_col_types = FALSE)
+PH_df <- read_csv(here("data", "cognate", "PH_df.csv"), show_col_types = FALSE)
 id_to_glottocode <- PH_df |>
   select(language_id, glottocode) |>
   separate_longer_delim(language_id, ", ") |>
@@ -130,7 +130,7 @@ variants <- tribble(
 )
 
 results <- purrr::pmap(variants, function(label, file) {
-  ex <- extract_nexus_matrix(here("data", "cognate", "initial_datasets", file))
+  ex <- extract_nexus_matrix(here("data", "cognate", file))
   message(sprintf("[%s] %d/%d taxa matched -> %d languages; %d/%d characters kept (>%.0f%% missing dropped).",
                   label, ex$n_taxa_matched, ex$n_taxa_total, nrow(ex$matrix),
                   ex$n_chars_kept, ex$n_chars_total, MAX_MISSING * 100))
@@ -138,7 +138,7 @@ results <- purrr::pmap(variants, function(label, file) {
 }) |> bind_rows()
 
 print(results)
-write_csv(results, here("data", "cognate", "procrustes", "COGNATE_NEXUS_sensitivity.csv"))
+write_csv(results, here("data", "procrustes", "COGNATE_NEXUS_sensitivity.csv"))
 
 # ── 4. Comparison plot ───────────────────────────────────────────────────────
 p_sensitivity <- ggplot(results, aes(x = fct_reorder(variant, correlation), y = correlation)) +
@@ -151,5 +151,5 @@ p_sensitivity <- ggplot(results, aes(x = fct_reorder(variant, correlation), y = 
   theme_minimal() +
   theme(panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.7))
 print(p_sensitivity)
-ggsave(here("figures", "cognate", "pca", "COGNATE_NEXUS_sensitivity.png"), p_sensitivity,
+ggsave(here("figures", "procrustes", "COGNATE_NEXUS_sensitivity.png"), p_sensitivity,
        width = 8, height = 6, units = "in", dpi = 300, bg = "white")

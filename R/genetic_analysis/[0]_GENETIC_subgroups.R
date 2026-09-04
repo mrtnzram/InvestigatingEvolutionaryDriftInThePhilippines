@@ -35,7 +35,7 @@
 # Palawan "Batak") and family-level nodes, and it returns no glottocode or
 # level to audit the match with.
 #
-# Input:   data/GENETIC_final.csv (population), data/subgroup_palette.csv
+# Input:   data/GENETIC_final.csv (population), data/shared/subgroup_palette.csv
 #          (canonical subgroup -> colour, from R/shared/subgroup_palette.R —
 #          run that first)
 # Outputs: data/GENETIC_subgroup_lookup.csv (population, glottocode,
@@ -50,7 +50,7 @@ library(tidyr)
 library(here)
 library(lingtypology)
 
-GENETIC_final <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"), stringsAsFactors = FALSE)
+GENETIC_final <- read.csv(here("data", "network_distance", "GENETIC_final.csv"), stringsAsFactors = FALSE)
 pops <- GENETIC_final$population
 
 stopifnot(
@@ -203,7 +203,7 @@ resolved_manual <- resolve_glottolog(manual$glottolog_name) %>%
 
 GENETIC_subgroup_lookup <- bind_rows(resolved_auto, resolved_manual) %>%
   right_join(tibble(population = pops), by = "population") %>%
-  left_join(read.csv(here("data", "subgroup_palette.csv")) %>% select(subgroup, colour),
+  left_join(read.csv(here("data", "shared", "subgroup_palette.csv")) %>% select(subgroup, colour),
             by = "subgroup") %>%
   select(population, glottocode, glottolog_name, level, subgroup, colour, match_tier, note) %>%
   arrange(population)
@@ -218,7 +218,7 @@ stopifnot(
     !anyNA(GENETIC_subgroup_lookup$colour)
 )
 
-write.csv(GENETIC_subgroup_lookup, here("data", "genetic", "initial_datasets", "GENETIC_subgroup_lookup.csv"), row.names = FALSE)
+write.csv(GENETIC_subgroup_lookup, here("data", "genetic", "GENETIC_subgroup_lookup.csv"), row.names = FALSE)
 
 # Tally for the run log: expect tiers 1-5 = 36 / 3 / 7 / 61 / 8.
 print(count(GENETIC_subgroup_lookup, match_tier))

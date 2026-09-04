@@ -8,16 +8,16 @@
 # sum of squares and correlation.
 #
 # Run order: needs [0]_COGNATE_LOANS.R to have been run
-# (data/cognate/initial_datasets/COGNATE_NEXUS_matrix.csv).
+# (data/cognate/COGNATE_NEXUS_matrix.csv).
 #
-# Input:   data/cognate/initial_datasets/COGNATE_NEXUS_matrix.csv,
-#          data/cognate/network_distance/COGNATE_final.csv (analysis-set
+# Input:   data/cognate/COGNATE_NEXUS_matrix.csv,
+#          data/network_distance/COGNATE_final.csv (analysis-set
 #          glottocodes + coordinates),
-#          data/cognate/initial_datasets/COGNATE_subgroup_lookup.csv
-# Outputs: data/cognate/procrustes/COGNATE_procrustes_results.csv,
-#          data/cognate/procrustes/COGNATE_procrustes_scores.csv,
-#          figures/cognate/pca/COGNATE_pca.png,
-#          figures/cognate/pca/COGNATE_procrustes.png
+#          data/cognate/COGNATE_subgroup_lookup.csv
+# Outputs: data/procrustes/COGNATE_procrustes_results.csv,
+#          data/procrustes/COGNATE_procrustes_scores.csv,
+#          figures/procrustes/COGNATE_pca.png,
+#          figures/procrustes/COGNATE_procrustes.png
 # =============================================================================
 
 library(adegenet)   # loads ade4 (dudi.pca, procuste, procuste.randtest)
@@ -26,15 +26,15 @@ library(here)
 library(ggpubr)
 library(maps)
 
-dir.create(here("figures", "cognate", "pca"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "procrustes"), recursive = TRUE, showWarnings = FALSE)
 
 N_PERM <- 999   # + observed arrangement = 1000 draws
 
-COGNATE_final <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv"))
+COGNATE_final <- read.csv(here("data", "network_distance", "COGNATE_final.csv"))
 analysis_glottocodes <- COGNATE_final$glottocode
 
 # ── 1. NEXUS cognate-coding matrix, restricted to the analysis set ──────────
-nexus_mat <- read.csv(here("data", "cognate", "initial_datasets", "COGNATE_NEXUS_matrix.csv"),
+nexus_mat <- read.csv(here("data", "cognate", "COGNATE_NEXUS_matrix.csv"),
                       row.names = "glottocode", check.names = FALSE)
 nexus_mat <- nexus_mat[rownames(nexus_mat) %in% analysis_glottocodes, , drop = FALSE]
 
@@ -47,7 +47,7 @@ pca_fit <- dudi.pca(as.data.frame(X), center = TRUE, scale = FALSE, scannf = FAL
 scores_df <- tibble(glottocode = rownames(X), PC1 = pca_fit$li[, 1], PC2 = pca_fit$li[, 2])
 
 # ── 3. Join coordinates + subgroup colour ────────────────────────────────────
-subgroup_lookup <- read_csv(here("data", "cognate", "initial_datasets", "COGNATE_subgroup_lookup.csv"), show_col_types = FALSE)
+subgroup_lookup <- read_csv(here("data", "cognate", "COGNATE_subgroup_lookup.csv"), show_col_types = FALSE)
 
 analysis_df <- scores_df %>%
   left_join(COGNATE_final %>% dplyr::select(glottocode, language, longitude, latitude), by = "glottocode") %>%
@@ -112,8 +112,8 @@ axis_lines <- bind_rows(
 results_df <- tibble(domain = "cognate", n = N, ss_gower = ss,
                       correlation = correlation, p_value = p_value, n_perm = N_PERM)
 print(results_df)
-write_csv(results_df, here("data", "cognate", "procrustes", "COGNATE_procrustes_results.csv"))
-write_csv(analysis_df, here("data", "cognate", "procrustes", "COGNATE_procrustes_scores.csv"))
+write_csv(results_df, here("data", "procrustes", "COGNATE_procrustes_results.csv"))
+write_csv(analysis_df, here("data", "procrustes", "COGNATE_procrustes_scores.csv"))
 
 # ── 6. PCA figure (own file) ─────────────────────────────────────────────────
 subgroup_pal <- analysis_df %>% distinct(subgroup, colour) %>% deframe()
@@ -125,7 +125,7 @@ p_pca <- ggplot(analysis_df, aes(PC1, PC2, colour = subgroup)) +
   theme(panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.7)) +
   labs(title = "PCA")
 print(p_pca)
-ggsave(here("figures", "cognate", "pca", "COGNATE_pca.png"), p_pca,
+ggsave(here("figures", "procrustes", "COGNATE_pca.png"), p_pca,
        width = 8, height = 6, units = "in", dpi = 300, bg = "white")
 
 # ── 7. Procrustes-fit vs. actual-coordinates figure (own file) ──────────────
@@ -170,5 +170,5 @@ p_coords <- p_coords + theme(legend.position = "none")
 maps_row <- ggarrange(p_proc, p_coords, ncol = 2, nrow = 1, labels = c("A", "B"))
 p_maps   <- ggarrange(maps_row, as_ggplot(shared_legend), ncol = 2, nrow = 1, widths = c(4, 1))
 print(p_maps)
-ggsave(here("figures", "cognate", "pca", "COGNATE_procrustes.png"), p_maps,
+ggsave(here("figures", "procrustes", "COGNATE_procrustes.png"), p_maps,
        width = 11, height = 6, units = "in", dpi = 300, bg = "white")

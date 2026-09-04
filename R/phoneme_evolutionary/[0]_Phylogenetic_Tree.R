@@ -30,7 +30,7 @@ stopifnot(
     exists("ruhlen_raw")
 )
 
-tree <- read.nexus(here("data", "phoneme", "evolutionary", "initial_datasets", "pulses_summary.trees"))
+tree <- read.nexus(here("data", "phoneme", "pulses_summary.trees"))
 
 # ---- 1. Ruhlen (Austronesian) -> Glottocode -------------------------------
 ruhlen_austronesian_gltc <- ruhlen_raw |>
@@ -52,7 +52,7 @@ if (nrow(unresolved) > 0) {
 # ---- 2. pulses_languages.csv, with the Baliledo Glottocode patched --------
 # Baliledo ships with a blank Glottocode; assigned by hand so its (expected)
 # absence from Ruhlen shows up as an intentional drop rather than a silent NA.
-pulses_languages <- read_csv(here("data", "phoneme", "evolutionary", "initial_datasets", "pulses_languages.csv"), show_col_types = FALSE) |>
+pulses_languages <- read_csv(here("data", "phoneme", "pulses_languages.csv"), show_col_types = FALSE) |>
   mutate(Glottocode = if_else(Name == "Baliledo", "bali1288", Glottocode))
 
 # ---- 3. Mapping table: Glottocode join between Ruhlen and the pulses tree -
@@ -263,11 +263,11 @@ tip_mapping <- mapping_resolved |>
 stopifnot("tip_mapping should be one row per tip after ambiguity resolution" =
             !anyDuplicated(tip_mapping$tip))
 
-write_csv(tip_mapping, here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_evolutionary_tip_mapping.csv"))
-write.tree(tree_pruned, here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_evolutionary_tree.nwk"))
+write_csv(tip_mapping, here("data", "phoneme", "phoneme_evolutionary_tip_mapping.csv"))
+write.tree(tree_pruned, here("data", "phoneme", "phoneme_evolutionary_tree.nwk"))
 saveRDS(
   list(analysis_tree = analysis_tree, regime_tree = regime_tree, philippine_tips = philippine_tips),
-  here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_evolutionary_analysis_tree.rds")
+  here("data", "phoneme", "phoneme_evolutionary_analysis_tree.rds")
 )
 
 message(

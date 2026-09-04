@@ -15,8 +15,8 @@
 #          built once, in [3])
 # Outputs: data/GENETIC_sim_matrix.csv,
 #          data/GENETIC_mmrr_results.csv,
-#          figures/genetic/mmrr/genetic_mmrr_single_similarity_vs_geography.png,
-#          figures/genetic/mmrr/genetic_mmrr_pairplot.png
+#          figures/mmrr/genetic_mmrr_single_similarity_vs_geography.png,
+#          figures/mmrr/genetic_mmrr_pairplot.png
 # ──────────────────────────────────────────────────────────────────────────────
 
 library(tidyverse)
@@ -31,9 +31,9 @@ conflicts_prefer(dplyr::select)
 # ── 1. Y: individual PLINK matrix -> population IBS similarity ──────────────
 # .mdist is a square, headerless, tab-delimited 1-IBS distance matrix over
 # individuals; .id gives each row/col's (FID = population, IID = sample).
-mdist_ids <- read_tsv(here("data", "genetic", "MMRR", "genetic_dist.mdist.id"),
+mdist_ids <- read_tsv(here("data", "mmrr", "genetic_dist.mdist.id"),
                       col_names = c("FID", "IID"), col_types = "cc")
-M <- as.matrix(read_tsv(here("data", "genetic", "MMRR", "genetic_dist.mdist"),
+M <- as.matrix(read_tsv(here("data", "mmrr", "genetic_dist.mdist"),
                         col_names = FALSE, col_types = cols(.default = "d")))
 dimnames(M) <- NULL
 stopifnot("mdist is not square" = nrow(M) == ncol(M),
@@ -72,11 +72,11 @@ GENETIC_sim_matrix <- 1 - pop_dist   # IBS proportion; diagonal = 1 like the cos
 # Built once by [3]_GENETIC_network_distance.R (all-pairs network routing,
 # ratio-bounded direct-line fallback via R/shared/pairwise_network_distance.R)
 # and read back here instead of rebuilt with a second network-graph pass.
-GENETIC_final <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"))
+GENETIC_final <- read.csv(here("data", "network_distance", "GENETIC_final.csv"))
 stopifnot("GENETIC_final.csv population set != mdist" =
             setequal(GENETIC_final$population, rownames(GENETIC_sim_matrix)))
 
-GENETIC_dist_matrix <- read.csv(here("data", "genetic", "network_distance", "GENETIC_dist_matrix.csv"),
+GENETIC_dist_matrix <- read.csv(here("data", "network_distance", "GENETIC_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 
@@ -168,10 +168,10 @@ GENETIC_mmrr_results <- tibble(
 )
 print(GENETIC_mmrr_results)
 write.csv(GENETIC_mmrr_results,
-          file = here("data", "genetic", "MMRR", "GENETIC_mmrr_results.csv"), row.names = FALSE)
+          file = here("data", "mmrr", "GENETIC_mmrr_results.csv"), row.names = FALSE)
 
 # ── 6. Visualization ─────────────────────────────────────────────────────────
-dir.create(here("figures", "genetic", "mmrr"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "mmrr"), recursive = TRUE, showWarnings = FALSE)
 
 # (a) Single-predictor scatter, raw axes (km, IBS proportion) so it reads
 # cleanly; beta/R^2 come from the standardized fit above, not refit here.
@@ -197,7 +197,7 @@ single_plot <- ggplot(raw_df, aes(x, y)) +
   theme(plot.title    = element_text(face = "bold", size = 12),
         plot.subtitle = element_text(size = 10, colour = "grey25"))
 print(single_plot)
-ggsave(here("figures", "genetic", "mmrr", "genetic_mmrr_single_similarity_vs_geography.png"),
+ggsave(here("figures", "mmrr", "genetic_mmrr_single_similarity_vs_geography.png"),
        single_plot, width = 6.5, height = 4.5, units = "in", dpi = 300)
 
 # (b) 2x2 pairplot — same facet_grid machinery as the 3x3 language pairplots,
@@ -256,10 +256,10 @@ pairplot <- ggplot() +
   ) +
   labs(title = "MMRR inputs")
 print(pairplot)
-ggsave(here("figures", "genetic", "mmrr", "genetic_mmrr_pairplot.png"),
+ggsave(here("figures", "mmrr", "genetic_mmrr_pairplot.png"),
        pairplot, width = 6.5, height = 6, units = "in", dpi = 300)
 
 # ── 7. Persist matrices ──────────────────────────────────────────────────────
 # GENETIC_dist_matrix.csv is now [3]'s to write (it built the matrix); this
 # script only persists the similarity matrix it computed itself.
-write.csv(GENETIC_sim_matrix, file = here("data", "genetic", "MMRR", "GENETIC_sim_matrix.csv"), row.names = TRUE)
+write.csv(GENETIC_sim_matrix, file = here("data", "mmrr", "GENETIC_sim_matrix.csv"), row.names = TRUE)

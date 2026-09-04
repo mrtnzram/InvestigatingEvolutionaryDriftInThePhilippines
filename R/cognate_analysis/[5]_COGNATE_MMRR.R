@@ -15,15 +15,15 @@
 # matrix [0]_COGNATE_LOANS.R already extracted, rather than read back from an
 # earlier script.
 #
-# Inputs:  data/cognate/initial_datasets/COGNATE_NEXUS_matrix.csv,
-#          data/cognate/network_distance/COGNATE_dist_matrix.csv       (written by [3])
-#          data/cognate/initial_datasets/COGNATE_phylo_dist_matrix.csv (written by [0]_Phylogenetic_Tree.R)
-# Outputs: data/cognate/MMRR/COGNATE_sim_matrix.csv,
-#          data/cognate/MMRR/COGNATE_mmrr_results.csv        (joint two-predictor model)
-#          data/cognate/MMRR/COGNATE_mmrr_single_results.csv (single-predictor models)
-#          figures/cognate/mmrr/cognate_mmrr_single_*.png  (3 single-predictor)
-#          figures/cognate/mmrr/cognate_mmrr_pairplot.png,
-#          figures/cognate/mmrr/cognate_mmrr_partial_regression.png
+# Inputs:  data/cognate/COGNATE_NEXUS_matrix.csv,
+#          data/network_distance/COGNATE_dist_matrix.csv       (written by [3])
+#          data/cognate/COGNATE_phylo_dist_matrix.csv (written by [0]_Phylogenetic_Tree.R)
+# Outputs: data/mmrr/COGNATE_sim_matrix.csv,
+#          data/mmrr/COGNATE_mmrr_results.csv        (joint two-predictor model)
+#          data/mmrr/COGNATE_mmrr_single_results.csv (single-predictor models)
+#          figures/mmrr/cognate_mmrr_single_*.png  (3 single-predictor)
+#          figures/mmrr/cognate_mmrr_pairplot.png,
+#          figures/mmrr/cognate_mmrr_partial_regression.png
 # =============================================================================
 
 library(readr)
@@ -44,7 +44,7 @@ conflicts_prefer(dplyr::summarise)
 conflicts_prefer(tidyr::extract)
 
 # ---- 0. Load data -----------------------------------------------------------
-nexus_mat <- read.csv(here("data", "cognate", "initial_datasets", "COGNATE_NEXUS_matrix.csv"),
+nexus_mat <- read.csv(here("data", "cognate", "COGNATE_NEXUS_matrix.csv"),
                       row.names = "glottocode", check.names = FALSE) |>
   as.matrix()
 
@@ -65,7 +65,7 @@ COGNATE_sim_matrix <- calculate_cosine_similarity(nexus_mat)
 # ---- 2. Pairwise terrain-penalized distance matrix (X_geo) ------------------
 # Built once by [3]_COGNATE_network_distance.R and read back here instead of
 # rebuilt, matching phoneme/grammar's convention.
-COGNATE_dist_matrix <- read.csv(here("data", "cognate", "network_distance", "COGNATE_dist_matrix.csv"),
+COGNATE_dist_matrix <- read.csv(here("data", "network_distance", "COGNATE_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 
@@ -73,7 +73,7 @@ COGNATE_dist_matrix <- read.csv(here("data", "cognate", "network_distance", "COG
 # Written by [0]_Phylogenetic_Tree.R "for parity with the phoneme/grammar
 # pipelines" but never consumed until now.
 COGNATE_phylo_dist_matrix <- read.csv(
-  here("data", "cognate", "initial_datasets", "COGNATE_phylo_dist_matrix.csv"),
+  here("data", "cognate", "COGNATE_phylo_dist_matrix.csv"),
   row.names = 1, check.names = FALSE
 ) |>
   as.matrix()
@@ -198,7 +198,7 @@ MMRR <- function(Y, X, nperm = 9999, scale = TRUE) {
        Fstatistic = Fstat, Fpvalue = Fp, r.squared = r.squared)
 }
 
-dir.create(here("figures", "cognate", "mmrr"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "mmrr"), recursive = TRUE, showWarnings = FALSE)
 
 # ---- 9a. Single-predictor MMRRs (run BEFORE the joint model) ----------------
 # Same MMRR() above, just handed a one-element predictor list — the permutation
@@ -247,7 +247,7 @@ single_mmrr <- function(Ymat, Xmat, y_lab, x_lab, title, file, nperm = 9999) {
           plot.subtitle = element_text(size = 10, colour = "grey25"))
 
   print(p)
-  ggsave(here("figures", "cognate", "mmrr", file), p,
+  ggsave(here("figures", "mmrr", file), p,
          width = 6.5, height = 4.5, units = "in", dpi = 300)
 
   tibble(model = title, beta = beta, p_value = pval, r_squared = r2)
@@ -273,7 +273,7 @@ COGNATE_mmrr_single <- bind_rows(
 )
 print(COGNATE_mmrr_single)
 write.csv(COGNATE_mmrr_single,
-          file = here("data", "cognate", "MMRR", "COGNATE_mmrr_single_results.csv"), row.names = FALSE)
+          file = here("data", "mmrr", "COGNATE_mmrr_single_results.csv"), row.names = FALSE)
 
 
 # ---- 9b. Joint two-predictor MMRR -------------------------------------------
@@ -293,12 +293,12 @@ COGNATE_mmrr_results <- tibble(
 )
 print(COGNATE_mmrr_results)
 write.csv(COGNATE_mmrr_results,
-          file = here("data", "cognate", "MMRR", "COGNATE_mmrr_results.csv"), row.names = FALSE)
+          file = here("data", "mmrr", "COGNATE_mmrr_results.csv"), row.names = FALSE)
 
 # ---- 11. Visualization ------------------------------------------------------
 # Both figures are built on the standardized unfolded lower triangles, so they
 # read on the same scale as the fitted (standardized) MMRR coefficients.
-# (figures/cognate/mmrr already created in §9a, ahead of the first ggsave())
+# (figures/mmrr already created in §9a, ahead of the first ggsave())
 
 mmrr_df <- tibble(
   ling  = as.numeric(unfold(Y_ling)),
@@ -372,7 +372,7 @@ pairplot <- ggplot() +
   ) +
   labs(title = "MMRR inputs")
 print(pairplot)
-ggsave(here("figures", "cognate", "mmrr", "cognate_mmrr_pairplot.png"),
+ggsave(here("figures", "mmrr", "cognate_mmrr_pairplot.png"),
        pairplot, width = 6.5, height = 6, units = "in", dpi = 300)
 
 # (b) Added-variable (partial regression) plots: each panel shows the
@@ -414,8 +414,8 @@ partial_plot <- (p_geo_av + p_phylo_av) +
                        COGNATE_mmrr_results$r_squared, COGNATE_mmrr_results$p_model)
   )
 print(partial_plot)
-ggsave(here("figures", "cognate", "mmrr", "cognate_mmrr_partial_regression.png"),
+ggsave(here("figures", "mmrr", "cognate_mmrr_partial_regression.png"),
        partial_plot, width = 10, height = 4.5, units = "in", dpi = 300)
 
 # ---- 12. Persist matrices ---------------------------------------------------
-write.csv(COGNATE_sim_matrix, file = here("data", "cognate", "MMRR", "COGNATE_sim_matrix.csv"), row.names = TRUE)
+write.csv(COGNATE_sim_matrix, file = here("data", "mmrr", "COGNATE_sim_matrix.csv"), row.names = TRUE)

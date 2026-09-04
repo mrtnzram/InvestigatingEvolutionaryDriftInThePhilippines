@@ -6,7 +6,7 @@
 # direct_cost <= direct_ratio * via_network_cost (default 0.5), not plain pmin().
 #
 # Input:   points_df (id_col, longitude, latitude, nearest_node,
-#          geodist_H1_span), nodes (data/nodes.csv), network_edges (sf, from
+#          geodist_H1_span), nodes (data/shared/nodes.csv), network_edges (sf, from
 #          [3]'s build_network_edges()), land_sf (land mask).
 # Output:  symmetric, zero-diagonal, unit-named matrix (km).
 # =============================================================================
@@ -46,7 +46,7 @@ library(sf)
 #'                      unit -> nearest network node connector cost, km).
 #' @param id_col        Name of the unique identifier column in `points_df`
 #'                      (e.g. "language" or "population").
-#' @param nodes          Waypoint network nodes (data/nodes.csv), `id` as character.
+#' @param nodes          Waypoint network nodes (data/shared/nodes.csv), `id` as character.
 #' @param network_edges  sf object of network edges with a `weighted_cost` column
 #'                      (from [3]'s build_network_edges()).
 #' @param land_sf        Land mask (Philippines + Malaysia).

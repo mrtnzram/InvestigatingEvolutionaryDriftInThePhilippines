@@ -12,7 +12,7 @@
 # Outputs: data/PHONEME_evolutionary_simmap_node_posteriors.csv
 #          data/PHONEME_evolutionary_simmap_transitions.csv
 #          data/PHONEME_evolutionary_simmap_maps.rds
-#          figures/phoneme/evolutionary/simmap_<phoneme>_<model>.png
+#          figures/evolutionary/simmap_<phoneme>_<model>.png
 # =============================================================================
 
 library(ape)
@@ -50,21 +50,21 @@ set.seed(SEED)
 # ── 1. Load data ─────────────────────────────────────────────
 
 RUHLENdf <- read_csv(
-  here("data", "phoneme", "evolutionary", "initial_datasets", "RUHLENdf_PH_evolutionary.csv"),
+  here("data", "phoneme", "RUHLENdf_PH_evolutionary.csv"),
   show_col_types = FALSE
 )
 
 tip_mapping <- read_csv(
-  here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_evolutionary_tip_mapping.csv"),
+  here("data", "phoneme", "phoneme_evolutionary_tip_mapping.csv"),
   show_col_types = FALSE
 )
 
 model_selection <- read_csv(
-  here("data", "phoneme", "evolutionary", "ML_model", "PHONEME_evolutionary_model_selection.csv"),
+  here("data", "evolutionary", "ml_model", "PHONEME_evolutionary_model_selection.csv"),
   show_col_types = FALSE
 )
 
-tree_bundle     <- readRDS(here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_evolutionary_analysis_tree.rds"))
+tree_bundle     <- readRDS(here("data", "phoneme", "phoneme_evolutionary_analysis_tree.rds"))
 analysis_tree   <- tree_bundle$analysis_tree
 regime_tree     <- tree_bundle$regime_tree
 philippine_tips <- tree_bundle$philippine_tips
@@ -587,16 +587,16 @@ transitions <- bind_rows(lapply(results, function(r) {
          mean, median, q025, q975, total_branch_length, per_unit_time) |>
   arrange(phoneme, regime, direction)
 
-write_csv(node_posteriors, here("data", "phoneme", "evolutionary", "stochastic_character_map", "PHONEME_evolutionary_simmap_node_posteriors.csv"))
-write_csv(transitions, here("data", "phoneme", "evolutionary", "stochastic_character_map", "PHONEME_evolutionary_simmap_transitions.csv"))
+write_csv(node_posteriors, here("data", "evolutionary", "stochastic_character_map", "PHONEME_evolutionary_simmap_node_posteriors.csv"))
+write_csv(transitions, here("data", "evolutionary", "stochastic_character_map", "PHONEME_evolutionary_simmap_transitions.csv"))
 saveRDS(
   lapply(results, \(r) r$maps),
-  here("data", "phoneme", "evolutionary", "stochastic_character_map", "PHONEME_evolutionary_simmap_maps.rds")
+  here("data", "evolutionary", "stochastic_character_map", "PHONEME_evolutionary_simmap_maps.rds")
 )
 
 # ── 9. Figures ───────────────────────────────────────────────
 
-fig_dir <- here("figures", "phoneme", "evolutionary")
+fig_dir <- here("figures", "evolutionary")
 dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 
 for (i in seq_len(nrow(targets))) {
@@ -649,7 +649,7 @@ message(
   "\n  transitions     : ", nrow(transitions), " rows -> ",
   "data/PHONEME_evolutionary_simmap_transitions.csv",
   "\n  cached maps     : data/PHONEME_evolutionary_simmap_maps.rds",
-  "\n  figures         : ", nrow(targets), " PNGs -> figures/phoneme/evolutionary/\n"
+  "\n  figures         : ", nrow(targets), " PNGs -> figures/evolutionary/\n"
 )
 
 print(as.data.frame(rate_check))

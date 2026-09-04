@@ -13,8 +13,8 @@
 # Input:   data/RUHLENdf_PH.csv, data/phoneme_freq_ruhlen_austronesian.csv,
 #          data/PHONEME_subgroup_lookup.csv
 # Outputs: data/PHONEME_procrustes_results.csv, data/PHONEME_procrustes_scores.csv,
-#          figures/phoneme/pca/PHONEME_pca.png,
-#          figures/phoneme/pca/PHONEME_procrustes.png
+#          figures/procrustes/PHONEME_pca.png,
+#          figures/procrustes/PHONEME_procrustes.png
 # =============================================================================
 
 library(adegenet)   
@@ -23,18 +23,18 @@ library(here)
 library(ggpubr)
 library(maps)
 
-dir.create(here("figures", "phoneme", "pca"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "procrustes"), recursive = TRUE, showWarnings = FALSE)
 
 N_PERM <- 999   # + observed arrangement = 1000 draws
 
 # ── 1. Rebuild the IDF-weighted phoneme matrix (duplicated from [1]) ────────
-RUHLENdf <- read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"), show_col_types = FALSE)
+RUHLENdf <- read_csv(here("data", "phoneme", "RUHLENdf_PH.csv"), show_col_types = FALSE)
 
 phoneme_cols <- RUHLENdf %>%
   dplyr::select(-language, -source, -iso6393, -Language_type, -latitude, -longitude) %>%
   colnames()
 
-phoneme_freq <- read_csv(here("data", "phoneme", "initial_datasets", "phoneme_freq_ruhlen_austronesian.csv"), show_col_types = FALSE)
+phoneme_freq <- read_csv(here("data", "phoneme", "phoneme_freq_ruhlen_austronesian.csv"), show_col_types = FALSE)
 aligned_freq <- phoneme_freq %>%
   dplyr::filter(phoneme %in% phoneme_cols) %>%
   dplyr::arrange(match(phoneme, phoneme_cols))
@@ -56,7 +56,7 @@ pca_fit <- dudi.pca(as.data.frame(ph_mat), center = TRUE, scale = FALSE, scannf 
 scores_df <- tibble(language = rownames(ph_mat), PC1 = pca_fit$li[, 1], PC2 = pca_fit$li[, 2])
 
 # ── 3. Join coordinates + subgroup colour ────────────────────────────────────
-subgroup_lookup <- read_csv(here("data", "phoneme", "initial_datasets", "PHONEME_subgroup_lookup.csv"), show_col_types = FALSE)
+subgroup_lookup <- read_csv(here("data", "phoneme", "PHONEME_subgroup_lookup.csv"), show_col_types = FALSE)
 
 analysis_df <- scores_df %>%
   left_join(ph_coords, by = "language") %>%
@@ -121,8 +121,8 @@ axis_lines <- bind_rows(
 results_df <- tibble(domain = "phoneme", n = N, ss_gower = ss,
                       correlation = correlation, p_value = p_value, n_perm = N_PERM)
 print(results_df)
-write_csv(results_df, here("data", "phoneme", "procrustes", "PHONEME_procrustes_results.csv"))
-write_csv(analysis_df, here("data", "phoneme", "procrustes", "PHONEME_procrustes_scores.csv"))
+write_csv(results_df, here("data", "procrustes", "PHONEME_procrustes_results.csv"))
+write_csv(analysis_df, here("data", "procrustes", "PHONEME_procrustes_scores.csv"))
 
 # ── 6. PCA figure ─────────────────────────────────────────────────
 subgroup_pal <- analysis_df %>% distinct(subgroup, colour) %>% deframe()
@@ -134,7 +134,7 @@ p_pca <- ggplot(analysis_df, aes(PC1, PC2, colour = subgroup)) +
   theme(panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.7)) +
   labs(title = "PCA")
 print(p_pca)
-ggsave(here("figures", "phoneme", "pca", "PHONEME_pca.png"), p_pca,
+ggsave(here("figures", "procrustes", "PHONEME_pca.png"), p_pca,
        width = 8, height = 6, units = "in", dpi = 300, bg = "white")
 
 # ── 7. Procrustes-fit vs. actual-coordinates figure (own file) ──────────────
@@ -179,5 +179,5 @@ p_coords <- p_coords + theme(legend.position = "none")
 maps_row <- ggarrange(p_proc, p_coords, ncol = 2, nrow = 1, labels = c("A", "B"))
 p_maps   <- ggarrange(maps_row, as_ggplot(shared_legend), ncol = 2, nrow = 1, widths = c(4, 1))
 print(p_maps)
-ggsave(here("figures", "phoneme", "pca", "PHONEME_procrustes.png"), p_maps,
+ggsave(here("figures", "procrustes", "PHONEME_procrustes.png"), p_maps,
        width = 11, height = 6, units = "in", dpi = 300, bg = "white")

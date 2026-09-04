@@ -12,8 +12,8 @@
 #          data/PHONEME_unrelated_families.csv, data/PHONEME_cossim.csv
 # Outputs: data/PHONEME_family_weight_comparison.csv (per unrelated language:
 #            n_exceed_raw, n_exceed_family, family, size)
-#          figures/phoneme/corrections/phoneme_unrelated_family_distribution.png
-#          figures/phoneme/corrections/phoneme_ridge_raw_vs_corrected.png
+#          figures/corrections/phoneme_unrelated_family_distribution.png
+#          figures/corrections/phoneme_ridge_raw_vs_corrected.png
 # =============================================================================
 
 library(tidyverse)
@@ -21,11 +21,11 @@ library(ggplot2)
 library(ggridges)
 library(here)
 
-fig_dir <- here("figures", "phoneme", "corrections")
+fig_dir <- here("figures", "corrections")
 dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 
 # --- Loading data --------------------------------------------------------------
-RUHLENdf <- read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"))
+RUHLENdf <- read_csv(here("data", "phoneme", "RUHLENdf_PH.csv"))
 ph_lang  <- RUHLENdf |> filter(Language_type == "Philippine Language") |> pull(language)
 unr_lang <- RUHLENdf |> filter(Language_type == "Unrelated Language")  |> pull(language)
 
@@ -36,13 +36,13 @@ inventory_size <- RUHLENdf |>
   transmute(language, size = rowSums(dplyr::across(dplyr::all_of(phoneme_cols)))) |>
   deframe()
 
-cosine_matrix <- read.csv(here("data", "phoneme", "cosine_similarity", "PHONEME_cosine_matrix.csv"),
+cosine_matrix <- read.csv(here("data", "cosine_similarity", "PHONEME_cosine_matrix.csv"),
                           row.names = 1, check.names = FALSE) |>
   as.matrix()
 null_mat <- cosine_matrix[ph_lang, unr_lang, drop = FALSE]  # 58 x 137
 
 # Family lookup + weights: w = 1/family_size, aligned to the 137 unrelated cols.
-fam_lookup <- read_csv(here("data", "phoneme", "cosine_similarity", "PHONEME_unrelated_families.csv")) |>
+fam_lookup <- read_csv(here("data", "cosine_similarity", "PHONEME_unrelated_families.csv")) |>
   add_count(language_family, name = "fam_n") |>
   mutate(w = 1 / fam_n)
 fam_w <- setNames(fam_lookup$w, fam_lookup$language)[unr_lang]
@@ -98,7 +98,7 @@ fw_comparison <- tally_skew(null_mat) |> rename(n_exceed_raw = n_exceed) |>
   arrange(desc(n_exceed_raw))
 
 print(fw_comparison, n = Inf)
-write.csv(fw_comparison, file = here("data", "phoneme", "cosine_similarity", "PHONEME_family_weight_comparison.csv"), row.names = FALSE)
+write.csv(fw_comparison, file = here("data", "cosine_similarity", "PHONEME_family_weight_comparison.csv"), row.names = FALSE)
 
 # Unrelated null mean per PH language: raw rowMeans vs family-weighted mean.
 cat(sprintf("\nUnrelated null mean (over 58 PH languages): raw = %.4f, family-weighted = %.4f\n",
@@ -110,7 +110,7 @@ cat(sprintf("\nUnrelated null mean (over 58 PH languages): raw = %.4f, family-we
 # =============================================================================
 # Only the Unrelated baseline changes: the interest baselines are single
 # languages, so their raw and corrected columns are identical by construction.
-PHONEME_cossim <- read_csv(here("data", "phoneme", "cosine_similarity", "PHONEME_cossim.csv")) |>
+PHONEME_cossim <- read_csv(here("data", "cosine_similarity", "PHONEME_cossim.csv")) |>
   dplyr::select(-any_of("...1"))
 
 bl <- PHONEME_cossim |>

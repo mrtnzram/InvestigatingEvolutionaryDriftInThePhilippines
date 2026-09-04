@@ -7,11 +7,11 @@
 # out of the raw ABVD NEXUS file and collapses it to one row per glottocode,
 # for [9]_COGNATE_PROCRUSTES.R's PCA.
 #
-# Inputs:  data/cognate/initial_datasets/PH_final.csv,
-#          data/cognate/initial_datasets/abvd_philippines.nex,
-#          data/cognate/initial_datasets/PH_df.csv
-# Outputs: data/cognate/initial_datasets/COGNATE_loans.csv,
-#          data/cognate/initial_datasets/COGNATE_NEXUS_matrix.csv
+# Inputs:  data/cognate/PH_final.csv,
+#          data/cognate/abvd_philippines.nex,
+#          data/cognate/PH_df.csv
+# Outputs: data/cognate/COGNATE_loans.csv,
+#          data/cognate/COGNATE_NEXUS_matrix.csv
 # ================================================================
 
 library(here)
@@ -19,7 +19,7 @@ library(tidyverse)
 
 # read_csv, not read.csv: several gloss headers contain commas and slashes that
 # check.names would mangle.
-PH_cognate <- read_csv(here("data", "cognate", "initial_datasets", "PH_final.csv"),
+PH_cognate <- read_csv(here("data", "cognate", "PH_final.csv"),
                        show_col_types = FALSE)
 
 META_COLS <- c("language_id", "language", "latitude", "longitude",
@@ -78,7 +78,7 @@ PH_cognate |>
 # but it is what an exposure-offset model would need.
 PH_cognate |>
   select(all_of(META_COLS), number_of_loans, loans_norm) |>
-  write.csv(file = here("data", "cognate", "initial_datasets", "COGNATE_loans.csv"), row.names = FALSE)
+  write.csv(file = here("data", "cognate", "COGNATE_loans.csv"), row.names = FALSE)
 
 
 # ── 3. NEXUS cognate-coding matrix ──────────────────────────────────────────
@@ -91,7 +91,7 @@ PH_cognate |>
 # inputs or outputs with the loanword-count logic.
 MAX_MISSING <- 0.20   # drop characters missing in more than this fraction of languages
 
-nex_lines <- readLines(here("data", "cognate", "initial_datasets", "abvd_philippines.nex"))
+nex_lines <- readLines(here("data", "cognate", "abvd_philippines.nex"))
 matrix_start <- which(nex_lines == "MATRIX")
 stopifnot("Expected exactly one MATRIX block in the NEXUS file." = length(matrix_start) == 1)
 
@@ -113,7 +113,7 @@ mode(char_mat) <- "integer"
 rownames(char_mat) <- taxa
 colnames(char_mat) <- paste0("char_", seq_len(ncol(char_mat)))   # stable across the missingness filter below
 
-PH_df <- read_csv(here("data", "cognate", "initial_datasets", "PH_df.csv"), show_col_types = FALSE)
+PH_df <- read_csv(here("data", "cognate", "PH_df.csv"), show_col_types = FALSE)
 id_to_glottocode <- PH_df |>
   select(language_id, glottocode) |>
   separate_longer_delim(language_id, ", ") |>
@@ -157,4 +157,4 @@ message(sprintf("NEXUS matrix: %d languages x %d characters kept (%d dropped abo
 nexus_mat |>
   as.data.frame() |>
   rownames_to_column("glottocode") |>
-  write.csv(file = here("data", "cognate", "initial_datasets", "COGNATE_NEXUS_matrix.csv"), row.names = FALSE)
+  write.csv(file = here("data", "cognate", "COGNATE_NEXUS_matrix.csv"), row.names = FALSE)

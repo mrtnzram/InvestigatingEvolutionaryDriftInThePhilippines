@@ -9,6 +9,7 @@ Outputs: genetic_surface_raster.csv, nodepos_genetic.csv, edgew_genetic.csv,
          genetic_feems_meta.json, GENETIC_feems_sample_match.csv. With --permute,
          also: genetic_surface_raster_null_mean.csv, genetic_null_density.png,
          genetic_feems_null_meta.json (and genetic_null_surface.png if --plot too).
+         With --plot: genetic_feems_cv_curve.png, genetic_feems_surface.png.
 
 Usage:
     python genetic_feems.py --stage match --bfile /path/to/Phil_1000g_SGDP_1.66M \
@@ -788,7 +789,7 @@ def run_fit(args, match_df: pd.DataFrame):
             ax.axvline(np.log10(lamb_cv), ls="--", c="r")
             ax.set_xlabel(r"$\log_{10}\lambda$")
             ax.set_ylabel("LOO CV error")
-            fig.savefig(args.out / "feems_cv_curve.png", bbox_inches="tight")
+            fig.savefig(args.out / "genetic_feems_cv_curve.png", bbox_inches="tight")
             plt.close(fig)
 
     sp_graph.fit(lamb=lamb_cv, optimize_q=None)
@@ -825,7 +826,7 @@ def run_fit(args, match_df: pd.DataFrame):
         )
         ax.scatter(coord[:, 0], coord[:, 1], s=12, c="black")
         ax.set_aspect("equal")
-        fig.savefig(args.out / "feems_surface.png", bbox_inches="tight")
+        fig.savefig(args.out / "genetic_feems_surface.png", bbox_inches="tight")
         plt.close(fig)
 
     # --- exports: schema matches the other FEEMS pipelines' outputs in data/ ---

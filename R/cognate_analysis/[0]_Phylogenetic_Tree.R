@@ -19,7 +19,7 @@
 #
 # Run order: after [0]_COGNATE_LOANS.R, before [3]_COGNATE_network_distance.R.
 #
-# Input:   data/mcc.tree, data/cognate/COGNATE_loans.csv, data/subgroup_palette.csv
+# Input:   data/mcc.tree, data/cognate/COGNATE_loans.csv, data/shared/subgroup_palette.csv
 #          (canonical subgroup -> colour, from R/shared/subgroup_palette.R — run
 #          that first)
 # Outputs: data/cognate/COGNATE_tree_languages.csv (the 94-language analysis set;
@@ -30,7 +30,7 @@
 #          [5]_MMRR, since the response is the per-language scalar loans_norm),
 #          data/cognate/COGNATE_tip_selection.csv (representative-tip audit),
 #          data/cognate/COGNATE_subgroup_lookup.csv (language -> subgroup -> colour),
-#          figures/shared/cognate_phylogenetic_tree.png.
+#          figures/phylogenetic_tree/cognate_phylogenetic_tree.png.
 # In-env:  tree_pruned, tip_map — consumed by [4]_COGNATE_PVR.R.
 # Next:    [3]_COGNATE_network_distance.R
 # =============================================================================
@@ -43,9 +43,9 @@ library(ggplot2)
 library(lingtypology)   # glottolog affiliation -> family subgroup for tip colours
 library(here)
 
-COGNATE_loans <- read.csv(here("data", "cognate", "initial_datasets", "COGNATE_loans.csv"))
+COGNATE_loans <- read.csv(here("data", "cognate", "COGNATE_loans.csv"))
 
-tree <- read.nexus(here("data", "mcc.tree"))
+tree <- read.nexus(here("data", "shared", "mcc.tree"))
 
 
 # ── 1. Match cognate languages to tree tips ─────────────────────────────────
@@ -107,7 +107,7 @@ message(
 # the waypoint connectors, so everything downstream of it inherits the 94.
 tip_map %>%
   select(glottocode, language, tip = original) %>%
-  write.csv(here("data", "cognate", "initial_datasets", "COGNATE_tree_languages.csv"), row.names = FALSE)
+  write.csv(here("data", "cognate", "COGNATE_tree_languages.csv"), row.names = FALSE)
 
 
 # ── 3. What the restriction costs the response ──────────────────────────────
@@ -183,7 +183,7 @@ if (nrow(deep_split) > 0) {
 }
 
 write.csv(tip_selection,
-          here("data", "cognate", "initial_datasets", "COGNATE_tip_selection.csv"), row.names = FALSE)
+          here("data", "cognate", "COGNATE_tip_selection.csv"), row.names = FALSE)
 
 
 # ── 5. Coloured phylogram (tips coloured by Glottolog family subgroup) ──────
@@ -224,11 +224,11 @@ subgroup_levels <- tip_subgroup %>% count(subgroup, sort = TRUE) %>% pull(subgro
 # Colours come from the canonical cross-domain palette (R/shared/subgroup_palette.R),
 # not a locally-derived one, so the same subgroup is the same colour in every
 # domain's figures (phoneme/grammar/cognate/genetic).
-subgroup_pal <- read_csv(here("data", "subgroup_palette.csv"), show_col_types = FALSE) %>%
+subgroup_pal <- read_csv(here("data", "shared", "subgroup_palette.csv"), show_col_types = FALSE) %>%
   select(subgroup, colour) %>%
   deframe()
 stopifnot(
-  "Some subgroups are missing from data/subgroup_palette.csv — rerun R/shared/subgroup_palette.R." =
+  "Some subgroups are missing from data/shared/subgroup_palette.csv — rerun R/shared/subgroup_palette.R." =
     all(subgroup_levels %in% names(subgroup_pal))
 )
 
@@ -359,7 +359,7 @@ message("Regions: ", paste(names(table(cognate_lookup_out$region)),
                            sep = "=", collapse = ", "))
 
 write.csv(cognate_lookup_out,
-          here("data", "cognate", "initial_datasets", "COGNATE_subgroup_lookup.csv"), row.names = FALSE)
+          here("data", "cognate", "COGNATE_subgroup_lookup.csv"), row.names = FALSE)
 
 # Let ape compute the rectangular phylogram layout, then read the tip/node
 # coordinates back out instead of re-deriving them.
@@ -415,8 +415,8 @@ phylo_tree_plot <- ggplot() +
   )
 print(phylo_tree_plot)
 
-dir.create(here("figures", "shared"), recursive = TRUE, showWarnings = FALSE)
-ggsave(here("figures", "shared", "cognate_phylogenetic_tree.png"),
+dir.create(here("figures", "phylogenetic_tree"), recursive = TRUE, showWarnings = FALSE)
+ggsave(here("figures", "phylogenetic_tree", "cognate_phylogenetic_tree.png"),
        phylo_tree_plot, width = 8, height = 18, units = "in", dpi = 300)
 
 
@@ -427,5 +427,5 @@ COGNATE_phylo_dist_matrix <- cophenetic.phylo(tree_pruned)
 diag(COGNATE_phylo_dist_matrix) <- 0
 
 write.csv(COGNATE_phylo_dist_matrix,
-          file = here("data", "cognate", "initial_datasets", "COGNATE_phylo_dist_matrix.csv"),
+          file = here("data", "cognate", "COGNATE_phylo_dist_matrix.csv"),
           row.names = TRUE)

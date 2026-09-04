@@ -21,7 +21,7 @@ library(here)
 # =============================================================================
 # Section 0 — Load & prep (self-contained; no dependency on [1] being sourced)
 # =============================================================================
-RUHLENdf <- read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"), show_col_types = FALSE)
+RUHLENdf <- read_csv(here("data", "phoneme", "RUHLENdf_PH.csv"), show_col_types = FALSE)
 
 ph_lang  <- RUHLENdf |> filter(Language_type == "Philippine Language") |> pull(language)
 unr_lang <- RUHLENdf |> filter(Language_type == "Unrelated Language")  |> pull(language)
@@ -29,11 +29,11 @@ int_lang <- RUHLENdf |> filter(Language_type == "Language of Interest") |> pull(
 feat     <- RUHLENdf |> select(starts_with("phoneme_")) |> names()
 
 # per-PH-language baseline cosines (replaces [1]'s df_unr / df_jap)
-PHONEME_cossim <- read_csv(here("data", "phoneme", "cosine_similarity", "PHONEME_cossim.csv"), show_col_types = FALSE) |>
+PHONEME_cossim <- read_csv(here("data", "cosine_similarity", "PHONEME_cossim.csv"), show_col_types = FALSE) |>
   select(-any_of("...1"))
 
 # IDF weights + Austronesian prevalence (the same weighting [1] uses for the cosine)
-phoneme_freq <- read_csv(here("data", "phoneme", "initial_datasets", "phoneme_freq_ruhlen_austronesian.csv"),
+phoneme_freq <- read_csv(here("data", "phoneme", "phoneme_freq_ruhlen_austronesian.csv"),
                          show_col_types = FALSE)
 idf_vec     <- phoneme_freq |> select(phoneme, IDF) |> distinct() |> deframe()
 idf_aligned <- idf_vec[feat]          # aligned to the phoneme-column order of `feat`
@@ -41,7 +41,7 @@ idf_aligned <- idf_vec[feat]          # aligned to the phoneme-column order of `
 # Global prevalence over the full ~1772-language Ruhlen database (the broadest
 # reference, above Austronesian). Ultra-rare phonemes (global_n <= 3) are absent
 # from this file; their global prevalence is ~0 and coalesced to 0 below.
-phoneme_freq_global <- read_csv(here("data", "phoneme", "initial_datasets", "phoneme_freq_ruhlen.csv"),
+phoneme_freq_global <- read_csv(here("data", "phoneme", "phoneme_freq_ruhlen.csv"),
                                 show_col_types = FALSE)
 
 # binary phoneme matrix (rows = languages, cols = phonemes)
@@ -69,7 +69,7 @@ U         <- V / row_norms
 # Section 4 by matching on modification type.
 #
 # The PHOIBLE pull uses lingtypology (network) and is cached; delete the CSV to rebuild.
-phoible_cache <- here("data", "phoneme", "cosine_similarity", "phoible_freq_austronesian.csv")
+phoible_cache <- here("data", "cosine_similarity", "phoible_freq_austronesian.csv")
 if (!file.exists(phoible_cache)) {
   library(lingtypology)
   ph   <- phoible.feature(source = "all", na.rm = TRUE)
@@ -145,7 +145,7 @@ mm01 <- function(x) { r <- range(x, na.rm = TRUE); (x - r[1]) / (r[2] - r[1]) }
 # =============================================================================
 # The RUHLEN phoneme_### ids map to IPA symbols via the PNAS SI key. The file has
 # a ~13-line preamble, so find the header row ("Column\t...") and read from there.
-raw   <- read_lines(here("data", "phoneme", "initial_datasets", "pnas_1424033112_sd02.txt"))
+raw   <- read_lines(here("data", "phoneme", "pnas_1424033112_sd02.txt"))
 hdr_i <- which(str_starts(raw, "Column\t"))
 
 pnas_key <- read_tsv(I(raw[hdr_i:length(raw)]), show_col_types = FALSE) |>
@@ -329,7 +329,7 @@ driver_table <- tibble(
 print(driver_table, n = 30)
 print(count(driver_table, flag))
 
-write.csv(driver_table, here("data", "phoneme", "cosine_similarity", "PHONEME_driver_table.csv"), row.names = FALSE)
+write.csv(driver_table, here("data", "cosine_similarity", "PHONEME_driver_table.csv"), row.names = FALSE)
 
 
 # =============================================================================
@@ -415,4 +415,4 @@ cat(sprintf("PHOIBLE comparison — both IDFs: %d | Ruhlen-only: %d | PHOIBLE-on
             sum( is.na(driver_phoible$IDF_ruhlen) & !is.na(driver_phoible$IDF_phoible)),
             sum( is.na(driver_phoible$IDF_ruhlen) & !is.na(driver_phoible$idf_shift))))
 
-write.csv(driver_phoible, here("data", "phoneme", "cosine_similarity", "PHONEME_driver_phoible.csv"), row.names = FALSE)
+write.csv(driver_phoible, here("data", "cosine_similarity", "PHONEME_driver_phoible.csv"), row.names = FALSE)

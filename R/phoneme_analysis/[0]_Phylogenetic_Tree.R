@@ -1,18 +1,18 @@
 # =============================================================================
 # [0] Phoneme Analysis — Prune the phylogenetic tree to the study languages
 #
-# Reads the MCC tree (data/mcc.tree), reconciles its tip labels with the
+# Reads the MCC tree (data/shared/mcc.tree), reconciles its tip labels with the
 # Ruhlen/phoneme language names, and prunes it to the Philippine study set.
 #
 # Run order: requires `Ph_Languages` from PART A of [0]_CREANZA_RUHLENdatabase.R,
 # and produces `Ph_Languages_pruned` for its PART B.
 #
-# Input:   data/mcc.tree, data/subgroup_palette.csv (canonical subgroup -> colour,
+# Input:   data/mcc.tree, data/shared/subgroup_palette.csv (canonical subgroup -> colour,
 #          from R/shared/subgroup_palette.R — run that first)
 # Outputs: data/PHONEME_phylo_dist_matrix.csv (patristic distances, the
 #          phylogenetic predictor in [5]), data/PHONEME_subgroup_lookup.csv
 #          (language -> subgroup -> colour, consumed by [8]), and
-#          figures/shared/phylogenetic_tree.png.
+#          figures/phylogenetic_tree/phylogenetic_tree.png.
 # In-env:  tree_pruned, tree_df_matched — consumed by [4]_PHONEME_PVR.R.
 # =============================================================================
 
@@ -29,7 +29,7 @@ stopifnot(
     exists("Ph_Languages")
 )
 
-tree <- read.nexus(here('data','mcc.tree'))
+tree <- read.nexus(here('data', 'shared', 'mcc.tree'))
 
 tree_df <- tibble(
   original = tree$tip.label
@@ -176,7 +176,7 @@ Ph_Languages_pruned <- tree_df_matched %>%
 tip_subgroup <- tibble(original = tree_pruned$tip.label) %>%
   left_join(tip_df, by = "original") %>%
   left_join(
-    read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"), show_col_types = FALSE) %>%
+    read_csv(here("data", "phoneme", "RUHLENdf_PH.csv"), show_col_types = FALSE) %>%
       select(ph = language, iso6393),
     by = "ph"
   ) %>%
@@ -195,11 +195,11 @@ subgroup_levels <- tip_subgroup %>% count(subgroup, sort = TRUE) %>% pull(subgro
 # Colours come from the canonical cross-domain palette (R/shared/subgroup_palette.R),
 # not a locally-derived one, so the same subgroup is the same colour in every
 # domain's figures (phoneme/grammar/cognate/genetic).
-subgroup_pal <- read_csv(here("data", "subgroup_palette.csv"), show_col_types = FALSE) %>%
+subgroup_pal <- read_csv(here("data", "shared", "subgroup_palette.csv"), show_col_types = FALSE) %>%
   select(subgroup, colour) %>%
   deframe()
 stopifnot(
-  "Some subgroups are missing from data/subgroup_palette.csv — rerun R/shared/subgroup_palette.R." =
+  "Some subgroups are missing from data/shared/subgroup_palette.csv — rerun R/shared/subgroup_palette.R." =
     all(subgroup_levels %in% names(subgroup_pal))
 )
 
@@ -293,7 +293,7 @@ message("Regions: ", paste(names(table(phoneme_lookup_out$region)),
                            sep = "=", collapse = ", "))
 
 write.csv(phoneme_lookup_out,
-          here("data", "phoneme", "initial_datasets", "PHONEME_subgroup_lookup.csv"), row.names = FALSE)
+          here("data", "phoneme", "PHONEME_subgroup_lookup.csv"), row.names = FALSE)
 
 # Let ape compute the phylogram layout and read its coordinates back out:
 # plot = FALSE fills .PlotPhyloEnv without drawing, absorbed by the null device.
@@ -362,8 +362,8 @@ phylo_tree_plot <- ggplot() +
   )
 print(phylo_tree_plot)
 
-dir.create(here("figures", "shared"), recursive = TRUE, showWarnings = FALSE)
-ggsave(here("figures", "shared", "phylogenetic_tree.png"),
+dir.create(here("figures", "phylogenetic_tree"), recursive = TRUE, showWarnings = FALSE)
+ggsave(here("figures", "phylogenetic_tree", "phylogenetic_tree.png"),
        phylo_tree_plot, width = 7.5, height = 9, units = "in", dpi = 300)
 
 
@@ -397,5 +397,5 @@ PHONEME_phylo_dist_matrix <- PHONEME_phylo_dist_matrix[, rownames(PHONEME_phylo_
 diag(PHONEME_phylo_dist_matrix) <- 0
 
 write.csv(PHONEME_phylo_dist_matrix,
-          file = here("data", "phoneme", "initial_datasets", "PHONEME_phylo_dist_matrix.csv"), row.names = TRUE)
+          file = here("data", "phoneme", "PHONEME_phylo_dist_matrix.csv"), row.names = TRUE)
 

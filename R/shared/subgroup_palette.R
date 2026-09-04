@@ -11,7 +11,7 @@
 # study sets change and every domain's figures agree.
 #
 # Input:   lingtypology::glottolog (bundled data)
-# Outputs: data/subgroup_palette.csv (subgroup, n_glottolog, colour)
+# Outputs: data/shared/subgroup_palette.csv (subgroup, n_glottolog, colour)
 # Consumers: R/{phoneme,grammar,cognate,genetic}_analysis/[0]_*.R
 # =============================================================================
 
@@ -70,4 +70,4 @@ stopifnot(
 subgroup_palette <- subgroup_counts %>%
   mutate(colour = .pal_slots[seq_len(n())])
 
-write.csv(subgroup_palette, here("data", "subgroup_palette.csv"), row.names = FALSE)
+write.csv(subgroup_palette, here("data", "shared", "subgroup_palette.csv"), row.names = FALSE)

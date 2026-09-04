@@ -14,7 +14,7 @@
 #          data/cognate/COGNATE_dist_matrix.csv
 # Outputs: data/cognate/COGNATE_sPCA_results.csv, data/cognate/COGNATE_sPCA_scores.csv,
 #          data/cognate/COGNATE_sPCA_loadings.csv,
-#          figures/cognate/regression/cognate_sPCA_surface.png,
+#          figures/regression/cognate_sPCA_surface.png,
 #          data/cognate/base_plot_cognate_sPCA.rds
 # =============================================================================
 
@@ -40,7 +40,7 @@ MIN_LANGS <- 2      # drop (gloss, wordform) pairs attested in fewer languages
 
 
 # ── 1. Phylogenetic eigenvectors — same PVR() call as [4]/[4.1] ─────────────
-COGNATE_final <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv"))
+COGNATE_final <- read.csv(here("data", "network_distance", "COGNATE_final.csv"))
 
 tip_df <- COGNATE_final |>
   dplyr::select(glottocode, y = loans_norm, x_km = all_of(PREDICTOR)) |>
@@ -69,7 +69,7 @@ message(k, " phylogenetic eigenvector", if (k == 1) "" else "s",
 # ── 2. Analysis frame: one-hot (gloss, wordform) matrix at language grain ───
 META_COLS <- c("language_id", "language", "latitude", "longitude",
                "glottocode", "author", "number_of_entries", "source_url")
-PH_df <- read.csv(here("data", "cognate", "initial_datasets", "PH_df.csv"))
+PH_df <- read.csv(here("data", "cognate", "PH_df.csv"))
 gloss_cols <- setdiff(names(PH_df), META_COLS)
 
 ph_sub <- PH_df |>
@@ -132,7 +132,7 @@ message(ncol(X), " of ", length(feature_cols), " features retained (non-invarian
 
 
 # ── 4. Spatial weight matrix: threshold search, maximizing sPCA eigenvalue ──
-COGNATE_dist_matrix <- read.csv(here("data", "cognate", "network_distance", "COGNATE_dist_matrix.csv"),
+COGNATE_dist_matrix <- read.csv(here("data", "network_distance", "COGNATE_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 Dgeo <- COGNATE_dist_matrix[df$glottocode, df$glottocode]
@@ -198,13 +198,13 @@ message(sprintf("sPCA: variance explained (axis 1) = %.3f, permutation p = %.4f.
 # ── 6. Per-language scores + per-feature loadings ────────────────────────────
 scores_df <- tibble(language = df$language, longitude = df$longitude,
                     latitude = df$latitude, sPC1 = sPC1)
-write.csv(scores_df, file = here("data", "cognate", "PVR", "COGNATE_sPCA_scores.csv"),
+write.csv(scores_df, file = here("data", "pvr", "COGNATE_sPCA_scores.csv"),
           row.names = FALSE)
 
 loadings_df <- tibble(feature = colnames(R), loading = spca_fit$c1[, 1]) |>
   separate_wider_delim(feature, "::", names = c("gloss", "wordform"), cols_remove = FALSE) |>
   arrange(desc(abs(loading)))
-write.csv(loadings_df, file = here("data", "cognate", "PVR", "COGNATE_sPCA_loadings.csv"),
+write.csv(loadings_df, file = here("data", "pvr", "COGNATE_sPCA_loadings.csv"),
           row.names = FALSE)
 
 
@@ -216,11 +216,11 @@ COGNATE_sPCA_results <- tibble(
 )
 print(COGNATE_sPCA_results)
 write.csv(COGNATE_sPCA_results,
-          file = here("data", "cognate", "PVR", "COGNATE_sPCA_results.csv"), row.names = FALSE)
+          file = here("data", "pvr", "COGNATE_sPCA_results.csv"), row.names = FALSE)
 
 
 # ── 8. Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ───────────
-dir.create(here("figures", "cognate", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
 
 world_map  <- map_data("world")
 map_subset <- world_map |> filter(region %in% c("Philippines", "Malaysia"))
@@ -260,6 +260,6 @@ p_surface <- ggplot() +
        subtitle = sprintf("p = %.3f, r^2 = %.3f", perm_p, var_explained))
 print(p_surface)
 
-ggsave(here("figures", "cognate", "regression", "cognate_sPCA_surface.png"),
+ggsave(here("figures", "regression", "cognate_sPCA_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
-saveRDS(p_surface, file = here("data", "cognate", "PVR", "base_plot_cognate_sPCA.rds"))
+saveRDS(p_surface, file = here("data", "pvr", "base_plot_cognate_sPCA.rds"))

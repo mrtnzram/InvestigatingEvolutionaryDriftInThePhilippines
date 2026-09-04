@@ -18,9 +18,9 @@
 # Outputs: data/PHONEME_sim_matrix.csv,
 #          data/PHONEME_mmrr_results.csv        (joint two-predictor model)
 #          data/PHONEME_mmrr_single_results.csv (single-predictor models)
-#          figures/phoneme/mmrr/phoneme_mmrr_single_*.png  (3 single-predictor)
-#          figures/phoneme/mmrr/phoneme_mmrr_pairplot.png,
-#          figures/phoneme/mmrr/phoneme_mmrr_partial_regression.png
+#          figures/mmrr/phoneme_mmrr_single_*.png  (3 single-predictor)
+#          figures/mmrr/phoneme_mmrr_pairplot.png,
+#          figures/mmrr/phoneme_mmrr_partial_regression.png
 # =============================================================================
 
 library(readr)
@@ -41,14 +41,14 @@ conflicts_prefer(dplyr::summarise)
 conflicts_prefer(tidyr::extract)
 
 # ---- 0. Load data -----------------------------------------------------------
-RUHLENdf <- read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"))
+RUHLENdf <- read_csv(here("data", "phoneme", "RUHLENdf_PH.csv"))
 
 ph_lang <- RUHLENdf |>
   filter(Language_type == "Philippine Language") |>
   pull(language)
 
 # Cosine-similarity matrix written by [1]_PHONEME_cosine_similarity.R
-cosine_matrix <- read.csv(here("data", "phoneme", "cosine_similarity", "PHONEME_cosine_matrix.csv"),
+cosine_matrix <- read.csv(here("data", "cosine_similarity", "PHONEME_cosine_matrix.csv"),
                           row.names = 1, check.names = FALSE) |>
   as.matrix()
 
@@ -60,7 +60,7 @@ PHONEME_sim_matrix <- cosine_matrix_phil
 # Built once by [3]_PHONEME_network_distance.R (all-pairs network routing,
 # ratio-bounded direct-line fallback via R/shared/pairwise_network_distance.R)
 # and read back here instead of rebuilt with a second hand-rolled Dijkstra.
-PHONEME_dist_matrix <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_dist_matrix.csv"),
+PHONEME_dist_matrix <- read.csv(here("data", "network_distance", "PHONEME_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 PHONEME_dist_matrix <- PHONEME_dist_matrix[ph_lang, ph_lang]
@@ -69,7 +69,7 @@ PHONEME_dist_matrix <- PHONEME_dist_matrix[ph_lang, ph_lang]
 # check.names = FALSE preserves names-with-spaces so the labels still match the
 # cosine/dist matrices exactly.
 PHONEME_phylo_dist_matrix <- read.csv(
-  here("data", "phoneme", "initial_datasets", "PHONEME_phylo_dist_matrix.csv"),
+  here("data", "phoneme", "PHONEME_phylo_dist_matrix.csv"),
   row.names = 1, check.names = FALSE
 ) |>
   as.matrix()
@@ -194,7 +194,7 @@ MMRR <- function(Y, X, nperm = 9999, scale = TRUE) {
 
 # dir.create() hoisted here, before the first ggsave() in §9a — it used to sit
 # at §11 and left a fresh checkout failing on the very first single-predictor plot.
-dir.create(here("figures", "phoneme", "mmrr"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "mmrr"), recursive = TRUE, showWarnings = FALSE)
 
 # ---- 9a. Single-predictor MMRRs (run BEFORE the joint model) ----------------
 # Same MMRR() above, just handed a one-element predictor list — the permutation
@@ -243,7 +243,7 @@ single_mmrr <- function(Ymat, Xmat, y_lab, x_lab, title, file, nperm = 9999) {
           plot.subtitle = element_text(size = 10, colour = "grey25"))
 
   print(p)
-  ggsave(here("figures", "phoneme", "mmrr", file), p,
+  ggsave(here("figures", "mmrr", file), p,
          width = 6.5, height = 4.5, units = "in", dpi = 300)
 
   tibble(model = title, beta = beta, p_value = pval, r_squared = r2)
@@ -269,7 +269,7 @@ PHONEME_mmrr_single <- bind_rows(
 )
 print(PHONEME_mmrr_single)
 write.csv(PHONEME_mmrr_single,
-          file = here("data", "phoneme", "MMRR", "PHONEME_mmrr_single_results.csv"), row.names = FALSE)
+          file = here("data", "mmrr", "PHONEME_mmrr_single_results.csv"), row.names = FALSE)
 
 
 # ---- 9b. Joint two-predictor MMRR -------------------------------------------
@@ -289,12 +289,12 @@ PHONEME_mmrr_results <- tibble(
 )
 print(PHONEME_mmrr_results)
 write.csv(PHONEME_mmrr_results,
-          file = here("data", "phoneme", "MMRR", "PHONEME_mmrr_results.csv"), row.names = FALSE)
+          file = here("data", "mmrr", "PHONEME_mmrr_results.csv"), row.names = FALSE)
 
 # ---- 11. Visualization ------------------------------------------------------
 # Both figures are built on the standardized unfolded lower triangles, so they
 # read on the same scale as the fitted (standardized) MMRR coefficients.
-# (figures/phoneme/mmrr already created in §9a, ahead of the first ggsave())
+# (figures/mmrr already created in §9a, ahead of the first ggsave())
 
 mmrr_df <- tibble(
   ling  = as.numeric(unfold(Y_ling)),
@@ -368,7 +368,7 @@ pairplot <- ggplot() +
   ) +
   labs(title = "MMRR inputs")
 print(pairplot)
-ggsave(here("figures", "phoneme", "mmrr", "phoneme_mmrr_pairplot.png"),
+ggsave(here("figures", "mmrr", "phoneme_mmrr_pairplot.png"),
        pairplot, width = 6.5, height = 6, units = "in", dpi = 300)
 
 # (b) Added-variable (partial regression) plots: each panel shows the
@@ -410,10 +410,10 @@ partial_plot <- (p_geo_av + p_phylo_av) +
                        PHONEME_mmrr_results$r_squared, PHONEME_mmrr_results$p_model)
   )
 print(partial_plot)
-ggsave(here("figures", "phoneme", "mmrr", "phoneme_mmrr_partial_regression.png"),
+ggsave(here("figures", "mmrr", "phoneme_mmrr_partial_regression.png"),
        partial_plot, width = 10, height = 4.5, units = "in", dpi = 300)
 
 # ---- 12. Persist matrices ---------------------------------------------------
 # PHONEME_dist_matrix.csv is now [3]'s to write (it built the matrix); this
 # script only persists the similarity matrix it computed itself.
-write.csv(PHONEME_sim_matrix, file = here("data", "phoneme", "MMRR", "PHONEME_sim_matrix.csv"), row.names = TRUE)
+write.csv(PHONEME_sim_matrix, file = here("data", "mmrr", "PHONEME_sim_matrix.csv"), row.names = TRUE)

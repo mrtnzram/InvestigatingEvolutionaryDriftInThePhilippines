@@ -10,9 +10,9 @@
 #          data/base_plot_phoneme_FEEMS.rds, data/base_plot_phoneme_FEEMS_null.rds,
 #          data/legend_strip_phoneme_subgroup.rds (from [6]),
 #          data/phoneme_waypoint_plot.rds (arrow layers, from [3])
-# Outputs: figures/phoneme/mst_waypoints/PA_weight_mst_cosine.png,
-#          figures/phoneme/mst_waypoints/PA_weight_mst_feems.png,
-#          figures/phoneme/mst_waypoints/PA_weight_mst_feems_null.png
+# Outputs: figures/mst_waypoints/PA_weight_mst_cosine.png,
+#          figures/mst_waypoints/PA_weight_mst_feems.png,
+#          figures/mst_waypoints/PA_weight_mst_feems_null.png
 # =============================================================================
 
 library(ggplot2)
@@ -20,7 +20,7 @@ library(patchwork)
 library(here)
 
 # ---- Load the base maps and the waypoint-route arrow layers ----
-arrows <- readRDS(here("data", "phoneme", "network_distance", "phoneme_waypoint_plot.rds"))
+arrows <- readRDS(here("data", "network_distance", "phoneme_waypoint_plot.rds"))
 
 # ---- Shared overlay: crop to the base map, add the arrows + Manila marker ----
 ref_coords1 <- c(121, 14.6)
@@ -39,35 +39,35 @@ add_routes_and_capital <- function(base) {
 }
 
 # ---- Figure A: cosine similarity + routes -----------------------------------
-base_plot_cosine <- readRDS(here("data", "phoneme", "cosine_similarity", "base_plot_phoneme_cosine.rds"))
+base_plot_cosine <- readRDS(here("data", "cosine_similarity", "base_plot_phoneme_cosine.rds"))
 final_plot_cosine <- add_routes_and_capital(base_plot_cosine)
 
 print(final_plot_cosine)
 
-ggsave(here("figures", "phoneme", "mst_waypoints", "PA_weight_mst_cosine.png"),
+ggsave(here("figures", "mst_waypoints", "PA_weight_mst_cosine.png"),
        final_plot_cosine, width = 7, height = 9, units = "in", dpi = 300)
 
 # ---- Figure B: FEEMS surface + subgroup points + routes ---------------------
-base_plot_feems  <- readRDS(here("data", "phoneme", "feems", "base_plot_phoneme_FEEMS.rds"))
-legend_strip     <- readRDS(here("data", "phoneme", "feems", "legend_strip_phoneme_subgroup.rds"))
+base_plot_feems  <- readRDS(here("data", "feems", "base_plot_phoneme_FEEMS.rds"))
+legend_strip     <- readRDS(here("data", "feems", "legend_strip_phoneme_subgroup.rds"))
 
 final_plot_feems <- (add_routes_and_capital(base_plot_feems) | legend_strip) +
   plot_layout(widths = c(5, 1.4))
 
 print(final_plot_feems)
 
-ggsave(here("figures", "phoneme", "mst_waypoints", "PA_weight_mst_feems.png"),
+ggsave(here("figures", "mst_waypoints", "PA_weight_mst_feems.png"),
        final_plot_feems, width = 9, height = 9, units = "in", dpi = 300)
 
 # ---- Figure C: FEEMS null-model surface + subgroup points + routes ----------
 # Geographic-shuffle null (100 permutations, from phoneme_feems.ipynb), on the
 # same color scale as Figure B (set jointly in [6]) so the two are comparable.
-base_plot_feems_null  <- readRDS(here("data", "phoneme", "feems", "base_plot_phoneme_FEEMS_null.rds"))
+base_plot_feems_null  <- readRDS(here("data", "feems", "base_plot_phoneme_FEEMS_null.rds"))
 
 final_plot_feems_null <- (add_routes_and_capital(base_plot_feems_null) | legend_strip) +
   plot_layout(widths = c(5, 1.4))
 
 print(final_plot_feems_null)
 
-ggsave(here("figures", "phoneme", "mst_waypoints", "PA_weight_mst_feems_null.png"),
+ggsave(here("figures", "mst_waypoints", "PA_weight_mst_feems_null.png"),
        final_plot_feems_null, width = 9, height = 9, units = "in", dpi = 300)

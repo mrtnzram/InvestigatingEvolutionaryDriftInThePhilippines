@@ -15,10 +15,10 @@
 #
 # Run order: requires `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
 #
-# Input:   data/phoneme/network_distance/PHONEME_final.csv (from [3]_PHONEME_network_distance.R)
-# Outputs: data/phoneme/PVR/PHONEME_geo_vs_ancestry.csv                       (§4 results table)
-#          figures/phoneme/regression/phoneme_regression_geography.png          (y vs. distance)
-#          figures/phoneme/regression/phoneme_regression_actual_vs_predicted.png (A | B calibration)
+# Input:   data/network_distance/PHONEME_final.csv (from [3]_PHONEME_network_distance.R)
+# Outputs: data/pvr/PHONEME_geo_vs_ancestry.csv                       (§4 results table)
+#          figures/regression/phoneme_regression_geography.png          (y vs. distance)
+#          figures/regression/phoneme_regression_actual_vs_predicted.png (A | B calibration)
 # =============================================================================
 
 library(PVR)
@@ -44,7 +44,7 @@ DISPLAY_UNIT_KM <- 100                 # slopes are reported per this many km
 # tip_map duplicates multi-tip languages: one row per tip, values repeated.
 tip_map <- tree_df_matched |> dplyr::select(original, ph)
 
-df <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_final.csv")) |>
+df <- read.csv(here("data", "network_distance", "PHONEME_final.csv")) |>
   dplyr::select(language, y = cossim_span_norm, x_km = all_of(PREDICTOR)) |>
   left_join(tip_map, by = c("language" = "ph")) |>
   filter(!is.na(original), !is.na(y), !is.na(x_km)) |>
@@ -125,7 +125,7 @@ message(sprintf("cor with migration distance:  metric = %+.3f | raw ancestry pre
 
 
 # ── 3. Plots ──────────────────────────────────────────────────────────────
-dir.create(here("figures", "phoneme", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
 
 # 3a. Geography: raw metric vs. migration distance.
 p_geo <- ggplot(data.frame(x_disp = df$x_km / DISPLAY_UNIT_KM, y = y), aes(x_disp, y)) +
@@ -139,7 +139,7 @@ p_geo <- ggplot(data.frame(x_disp = df$x_km / DISPLAY_UNIT_KM, y = y), aes(x_dis
                           unname(geo_cf["Pr(>|t|)"]), geo_r2, geo_perf["rmse"], N),
        x = sprintf("Migration distance (%d km)", DISPLAY_UNIT_KM),
        y = "Normalized Spanish phoneme similarity")
-ggsave(here("figures", "phoneme", "regression", "phoneme_regression_geography.png"),
+ggsave(here("figures", "regression", "phoneme_regression_geography.png"),
        p_geo, width = 7, height = 4.5, units = "in", dpi = 300)
 
 # 3b. Actual vs. predicted for both models, shared square axes, dashed y = x.
@@ -170,7 +170,7 @@ p_avp <- ggplot(avp_df, aes(pred, y)) +
   labs(title = "Predicting Spanish phoneme similarity: geography vs. geography-free ancestry",
        subtitle = "actual vs. model-predicted; dashed line is y = x",
        x = "Predicted normalized similarity", y = "Actual normalized similarity")
-ggsave(here("figures", "phoneme", "regression", "phoneme_regression_actual_vs_predicted.png"),
+ggsave(here("figures", "regression", "phoneme_regression_actual_vs_predicted.png"),
        p_avp, width = 9, height = 4.8, units = "in", dpi = 300)
 
 
@@ -197,5 +197,5 @@ PHONEME_geo_vs_ancestry <- tibble(
 )
 print(PHONEME_geo_vs_ancestry)
 write.csv(PHONEME_geo_vs_ancestry,
-          file = here("data", "phoneme", "PVR", "PHONEME_geo_vs_ancestry.csv"),
+          file = here("data", "pvr", "PHONEME_geo_vs_ancestry.csv"),
           row.names = FALSE)

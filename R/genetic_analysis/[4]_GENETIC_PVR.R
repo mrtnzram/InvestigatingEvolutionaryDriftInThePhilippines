@@ -19,12 +19,12 @@
 # [0]_GENETIC_ADMX_MALDER.R); that spike at 0 dominates the slope. Both models
 # are fit twice — zeros removed (primary) and kept — both conditions in the table.
 #
-# Input:   data/genetic/network_distance/GENETIC_final.csv (from [3]),
-#          data/Phil_2.24M_pca_results.eigenvec (PLINK --pca, individual-level,
+# Input:   data/network_distance/GENETIC_final.csv (from [3]),
+#          data/genetic/Phil_2.24M_pca_results.eigenvec (PLINK --pca, individual-level,
 #          headerless FID/IID/PC1..; same file [9]_GENETIC_PROCRUSTES.R reads)
-# Outputs: data/genetic/PVR/GENETIC_geo_vs_ancestry.csv                                (§4 results table)
-#          figures/genetic/regression/genetic_regression_geography[_zeros_kept].png          (y vs. distance)
-#          figures/genetic/regression/genetic_regression_actual_vs_predicted[_zeros_kept].png (A | B calibration)
+# Outputs: data/pvr/GENETIC_geo_vs_ancestry.csv                                (§4 results table)
+#          figures/regression/genetic_regression_geography[_zeros_kept].png          (y vs. distance)
+#          figures/regression/genetic_regression_actual_vs_predicted[_zeros_kept].png (A | B calibration)
 # =============================================================================
 
 library(tidyverse)
@@ -40,7 +40,7 @@ scl             <- DISPLAY_UNIT_KM / 1000
 
 # ── Setup: population-structure eigenvectors, frames, and the geo/ancestry fitter ──
 # PLINK --pca is per individual; aggregate to per-population means.
-eigenvec_raw <- read.table(here("data", "Phil_2.24M_pca_results.eigenvec"),
+eigenvec_raw <- read.table(here("data", "genetic", "Phil_2.24M_pca_results.eigenvec"),
                            header = FALSE, stringsAsFactors = FALSE)
 n_pc <- ncol(eigenvec_raw) - 2
 names(eigenvec_raw) <- c("population", "sample", paste0("PC", seq_len(n_pc)))
@@ -51,7 +51,7 @@ eigenvec_pop <- eigenvec_raw |>
   group_by(population) |>
   summarise(across(starts_with("PC"), mean), .groups = "drop")
 
-GENETIC_final <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"))
+GENETIC_final <- read.csv(here("data", "network_distance", "GENETIC_final.csv"))
 stopifnot(
   "eigenvec population set != GENETIC_final population set" =
     setequal(eigenvec_pop$population, GENETIC_final$population)
@@ -145,7 +145,7 @@ for (r in list(removed, kept)) {
 
 # ── 3. Plots ──────────────────────────────────────────────────────────────
 # Point area = span_w (inverse-variance weight), matching the [7] map.
-dir.create(here("figures", "genetic", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
 
 mk_geo_plot <- function(r, tag) {
   rg <- r$rows[r$rows$model == "A_geography", ]
@@ -190,13 +190,13 @@ mk_avp_plot <- function(r, tag) {
          x = "Predicted normalized admixture", y = "Actual normalized admixture")
 }
 
-ggsave(here("figures", "genetic", "regression", "genetic_regression_geography.png"),
+ggsave(here("figures", "regression", "genetic_regression_geography.png"),
        mk_geo_plot(removed, "removed"), width = 7, height = 4.5, units = "in", dpi = 300)
-ggsave(here("figures", "genetic", "regression", "genetic_regression_actual_vs_predicted.png"),
+ggsave(here("figures", "regression", "genetic_regression_actual_vs_predicted.png"),
        mk_avp_plot(removed, "removed"), width = 9, height = 4.8, units = "in", dpi = 300)
-ggsave(here("figures", "genetic", "regression", "genetic_regression_geography_zeros_kept.png"),
+ggsave(here("figures", "regression", "genetic_regression_geography_zeros_kept.png"),
        mk_geo_plot(kept, "kept"), width = 7, height = 4.5, units = "in", dpi = 300)
-ggsave(here("figures", "genetic", "regression", "genetic_regression_actual_vs_predicted_zeros_kept.png"),
+ggsave(here("figures", "regression", "genetic_regression_actual_vs_predicted_zeros_kept.png"),
        mk_avp_plot(kept, "kept"), width = 9, height = 4.8, units = "in", dpi = 300)
 
 
@@ -210,5 +210,5 @@ ggsave(here("figures", "genetic", "regression", "genetic_regression_actual_vs_pr
 GENETIC_geo_vs_ancestry <- bind_rows(removed$rows, kept$rows)
 print(GENETIC_geo_vs_ancestry)
 write.csv(GENETIC_geo_vs_ancestry,
-          file = here("data", "genetic", "PVR", "GENETIC_geo_vs_ancestry.csv"),
+          file = here("data", "pvr", "GENETIC_geo_vs_ancestry.csv"),
           row.names = FALSE)

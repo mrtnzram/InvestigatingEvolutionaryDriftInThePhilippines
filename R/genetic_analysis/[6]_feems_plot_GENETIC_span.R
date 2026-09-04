@@ -24,9 +24,9 @@ library(dplyr)
 library(here)
 library(scales)
 
-gen_surface      <- read.csv(here("data", "genetic", "feems", "genetic_surface_raster.csv"))
-gen_surface_null <- read.csv(here("data", "genetic", "feems", "genetic_surface_raster_null_mean.csv"))
-PH_genetic       <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"))
+gen_surface      <- read.csv(here("data", "feems", "genetic_surface_raster.csv"))
+gen_surface_null <- read.csv(here("data", "feems", "genetic_surface_raster_null_mean.csv"))
+PH_genetic       <- read.csv(here("data", "network_distance", "GENETIC_final.csv"))
 
 # Shared color scale across the real and null maps (not each normalized to its own
 # max) — this is what makes a flatter null surface visibly wash out next to the real
@@ -39,7 +39,7 @@ world_map  <- map_data("world")
 map_subset <- world_map %>% filter(region %in% c("Philippines", "Malaysia"))
 
 # ---- Subgroup palette + membership -------------------------------------------
-subgroup_lookup <- read.csv(here("data", "genetic", "initial_datasets", "GENETIC_subgroup_lookup.csv"))
+subgroup_lookup <- read.csv(here("data", "genetic", "GENETIC_subgroup_lookup.csv"))
 pal <- setNames(subgroup_lookup$colour, subgroup_lookup$subgroup)
 
 points_coloured <- PH_genetic |>
@@ -86,7 +86,7 @@ base_plot <- ggplot() +
         axis.ticks = element_blank())
 
 base_plot
-saveRDS(base_plot, file = here("data", "genetic", "feems", "base_plot_genetic_FEEMS.rds"))
+saveRDS(base_plot, file = here("data", "feems", "base_plot_genetic_FEEMS.rds"))
 
 # ---- Null-model base map (same points, same shared color scale) -------------
 # Geographic-shuffle null: average FEEMS surface across 100 permutations that
@@ -121,7 +121,7 @@ base_plot_null <- ggplot() +
         axis.ticks = element_blank())
 
 base_plot_null
-saveRDS(base_plot_null, file = here("data", "genetic", "feems", "base_plot_genetic_FEEMS_null.rds"))
+saveRDS(base_plot_null, file = here("data", "feems", "base_plot_genetic_FEEMS_null.rds"))
 
 # ---- Legend strip (identical construction to phoneme/grammar) ---------------
 # Hand-built stacked colour tiles, ordered by mean latitude (north first) so
@@ -147,4 +147,4 @@ legend_strip <- ggplot(legend_df) +
   theme(plot.margin = margin(6, 2, 6, 2))
 
 legend_strip
-saveRDS(legend_strip, file = here("data", "genetic", "feems", "legend_strip_genetic_subgroup.rds"))
+saveRDS(legend_strip, file = here("data", "feems", "legend_strip_genetic_subgroup.rds"))

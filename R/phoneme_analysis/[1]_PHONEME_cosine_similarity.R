@@ -22,7 +22,7 @@ library(ggplot2)
 library(here)
 
 # ---- Prepping Globals -------------------------------------------------------
-RUHLENdf <- read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"))
+RUHLENdf <- read_csv(here("data", "phoneme", "RUHLENdf_PH.csv"))
 
 ph_lang <- RUHLENdf |>
   filter(Language_type == 'Philippine Language') |>
@@ -41,7 +41,7 @@ phoneme_cols <- RUHLENdf %>%
 
 phoneme_cols <- colnames(phoneme_cols)
 
-phoneme_freq <- read_csv(here("data", "phoneme", "initial_datasets", "phoneme_freq_ruhlen_austronesian.csv"))
+phoneme_freq <- read_csv(here("data", "phoneme", "phoneme_freq_ruhlen_austronesian.csv"))
 
 # ---- sensitivity analysis -----
 
@@ -146,7 +146,7 @@ ggplot(melted_matrix, aes(x = Var1, y = Var2, fill = value)) +
   coord_fixed()
 
 # ----- saving dataframes -----------------------------------------------------
-write.csv(cosine_matrix, file = here("data", "phoneme", "cosine_similarity", "PHONEME_cosine_matrix.csv"), row.names = TRUE)
+write.csv(cosine_matrix, file = here("data", "cosine_similarity", "PHONEME_cosine_matrix.csv"), row.names = TRUE)
 
 PHONEME_cossim <- RUHLENdf |>
   filter(Language_type == 'Philippine Language') |>
@@ -165,7 +165,7 @@ cossim_span_max <- max(PHONEME_cossim$cossim_span, na.rm = TRUE)
 PHONEME_cossim <- PHONEME_cossim |>
   mutate(cossim_span_norm = cossim_span / cossim_span_max)
 
-write.csv(PHONEME_cossim, file = here("data", "phoneme", "cosine_similarity", "PHONEME_cossim.csv"), row.names = TRUE)
+write.csv(PHONEME_cossim, file = here("data", "cosine_similarity", "PHONEME_cossim.csv"), row.names = TRUE)
 
 # ---- Cosine base map --------------------------------------------------------
 # The per-language scores on a Philippines map, saved for [7] to overlay the
@@ -197,4 +197,4 @@ base_plot_cosine <- ggplot() +
         axis.ticks = element_blank())
 
 base_plot_cosine
-saveRDS(base_plot_cosine, file = here("data", "phoneme", "cosine_similarity", "base_plot_phoneme_cosine.rds"))
+saveRDS(base_plot_cosine, file = here("data", "cosine_similarity", "base_plot_phoneme_cosine.rds"))

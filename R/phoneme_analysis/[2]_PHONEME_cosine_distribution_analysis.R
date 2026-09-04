@@ -28,13 +28,13 @@ library(lmerTest)
 # --- Loading data ------------------------------------------------------------
 # Drop read_csv's "...1" index column and any *_influenced / sig_* columns left
 # by a previous run, so the classification joins below stay idempotent.
-PHONEME_cossim <- read_csv(here("data", "phoneme", "cosine_similarity", "PHONEME_cossim.csv")) |>
+PHONEME_cossim <- read_csv(here("data", "cosine_similarity", "PHONEME_cossim.csv")) |>
   dplyr::select(-any_of(c("...1", "span_influenced", "jap_influenced", "eng_influenced",
                    "sig_span", "sig_jap", "sig_eng")))
 
 # Philippine / unrelated language sets (derived locally so [2] is self-contained
 # and does not depend on [1] having been sourced in the same session).
-RUHLENdf <- read_csv(here("data", "phoneme", "initial_datasets", "RUHLENdf_PH.csv"))
+RUHLENdf <- read_csv(here("data", "phoneme", "RUHLENdf_PH.csv"))
 ph_lang  <- RUHLENdf |> filter(Language_type == "Philippine Language") |> pull(language)
 unr_lang <- RUHLENdf |> filter(Language_type == "Unrelated Language")  |> pull(language)
 
@@ -42,7 +42,7 @@ unr_lang <- RUHLENdf |> filter(Language_type == "Unrelated Language")  |> pull(l
 # individual unrelated controls (each language's null distribution of cosine
 # similarities). Used by the bimodality and individual-level analyses below.
 load_null_matrix <- function(ph_lang, unr_lang) {
-  read.csv(here("data", "phoneme", "cosine_similarity", "PHONEME_cosine_matrix.csv"),
+  read.csv(here("data", "cosine_similarity", "PHONEME_cosine_matrix.csv"),
            row.names = 1, check.names = FALSE) |>
     as.matrix() |>
     (\(m) m[ph_lang, unr_lang, drop = FALSE])()
@@ -104,7 +104,7 @@ cossim_phoneme_density_ridge <- ggplot(combined_scores, aes(x = Similarity_Score
 cossim_phoneme_density_ridge
 
 ggsave(
-  filename = here("figures", "phoneme", "distributions", "phoneme_ridgeplot.png"),
+  filename = here("figures", "distributions", "phoneme_ridgeplot.png"),
   plot = cossim_phoneme_density_ridge,
   width = 7,
   height = 4.5,
@@ -233,7 +233,7 @@ wilcox_boxplot <- ggplot(delta_long, aes(x = delta, y = baseline, color = baseli
 wilcox_boxplot
 
 ggsave(
-  filename = here("figures", "phoneme", "distributions", "phoneme_wilcoxon_boxplot.png"),
+  filename = here("figures", "distributions", "phoneme_wilcoxon_boxplot.png"),
   plot = wilcox_boxplot,
   width = 8, height = 3.5, units = "in", dpi = 300
 )
@@ -329,7 +329,7 @@ lmm_ranef_plot <- ggplot(ranef_tbl, aes(x = u_i, y = language, color = direction
 lmm_ranef_plot
 
 ggsave(
-  filename = here("figures", "phoneme", "distributions", "phoneme_lmm_ranef.png"),
+  filename = here("figures", "distributions", "phoneme_lmm_ranef.png"),
   plot = lmm_ranef_plot,
   width = 10, height = 6, units = "in", dpi = 300
 )
@@ -454,7 +454,7 @@ qq_plot <- ggplot(null_sel_long, aes(sample = similarity)) +
 qq_plot
 
 ggsave(
-  filename = here("figures", "phoneme", "distributions", "phoneme_null_qqplots.png"),
+  filename = here("figures", "distributions", "phoneme_null_qqplots.png"),
   plot = qq_plot,
   width = 8, height = 3.5, units = "in", dpi = 300
 )
@@ -544,7 +544,7 @@ null_ridge <- ggplot(null_ridge_long, aes(x = similarity, y = label)) +
 null_ridge
 
 ggsave(
-  filename = here("figures", "phoneme", "distributions", "phoneme_null_ridge_markers.png"),
+  filename = here("figures", "distributions", "phoneme_null_ridge_markers.png"),
   plot = null_ridge,
   width = 7, height = 4.5, units = "in", dpi = 300
 )
@@ -623,7 +623,7 @@ percentile_ridge <- ggplot(percentile_df, aes(x = percentile, y = baseline, fill
 percentile_ridge
 
 ggsave(
-  filename = here("figures", "phoneme", "distributions", "phoneme_percentile_ridge.png"),
+  filename = here("figures", "distributions", "phoneme_percentile_ridge.png"),
   plot = percentile_ridge,
   width = 7, height = 4.5, units = "in", dpi = 300
 )
@@ -672,11 +672,11 @@ null_influenced_span
 null_influenced_jap
 null_influenced_eng
 
-ggsave(here("figures", "phoneme", "distributions", "phoneme_influenced_null_spanish.png"),
+ggsave(here("figures", "distributions", "phoneme_influenced_null_spanish.png"),
        null_influenced_span, width = 7, height = 4.5, units = "in", dpi = 300)
-ggsave(here("figures", "phoneme", "distributions", "phoneme_influenced_null_japanese.png"),
+ggsave(here("figures", "distributions", "phoneme_influenced_null_japanese.png"),
        null_influenced_jap,  width = 7, height = 7,   units = "in", dpi = 300)
-ggsave(here("figures", "phoneme", "distributions", "phoneme_influenced_null_english.png"),
+ggsave(here("figures", "distributions", "phoneme_influenced_null_english.png"),
        null_influenced_eng,  width = 7, height = 4.5, units = "in", dpi = 300)
 
 # --- Influenced baseline vs. the unrelated baseline (one plot per baseline) ---
@@ -729,11 +729,11 @@ influenced_vs_unr_span
 influenced_vs_unr_jap
 influenced_vs_unr_eng
 
-ggsave(here("figures", "phoneme", "distributions", "phoneme_influenced_vs_unrelated_spanish.png"),
+ggsave(here("figures", "distributions", "phoneme_influenced_vs_unrelated_spanish.png"),
        influenced_vs_unr_span, width = 7, height = 3.5, units = "in", dpi = 300)
-ggsave(here("figures", "phoneme", "distributions", "phoneme_influenced_vs_unrelated_japanese.png"),
+ggsave(here("figures", "distributions", "phoneme_influenced_vs_unrelated_japanese.png"),
        influenced_vs_unr_jap,  width = 7, height = 3.5, units = "in", dpi = 300)
-ggsave(here("figures", "phoneme", "distributions", "phoneme_influenced_vs_unrelated_english.png"),
+ggsave(here("figures", "distributions", "phoneme_influenced_vs_unrelated_english.png"),
        influenced_vs_unr_eng,  width = 7, height = 3.5, units = "in", dpi = 300)
 
 # --- Venn diagram of the influence classification ----------------------------
@@ -799,7 +799,7 @@ venn_plot <- ggplot() +
 venn_plot
 
 ggsave(
-  filename = here("figures", "phoneme", "distributions", "phoneme_influence_venn.png"),
+  filename = here("figures", "distributions", "phoneme_influence_venn.png"),
   plot = venn_plot,
   width = 6, height = 6, units = "in", dpi = 300
 )
@@ -818,4 +818,4 @@ PHONEME_cossim_marked <- PHONEME_cossim |>
 
 # =============================================================================
 # =============================================================================
-write.csv(PHONEME_cossim_marked, file = here("data", "phoneme", "cosine_distribution", "PHONEME_cossim_marked.csv"), row.names = FALSE)
+write.csv(PHONEME_cossim_marked, file = here("data", "cosine_distribution", "PHONEME_cossim_marked.csv"), row.names = FALSE)

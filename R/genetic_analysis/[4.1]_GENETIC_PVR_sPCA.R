@@ -5,16 +5,16 @@
 # Regresses population-structure-scrubbed Spanish admixture on Moran
 # eigenvector maps to recover its dominant spatial component (sPC1), plotted
 # as sPCA point symbols — genetics has no tree, so population-structure PCA
-# eigenvectors (data/Phil_2.24M_pca_results.eigenvec) substitute for the
+# eigenvectors (data/genetic/Phil_2.24M_pca_results.eigenvec) substitute for the
 # phylogenetic ones the other three domains use.
 #
 # Run order: no [0]_Phylogenetic_Tree.R dependency — reads
-#            data/Phil_2.24M_pca_results.eigenvec directly.
+#            data/genetic/Phil_2.24M_pca_results.eigenvec directly.
 #
-# Input:   data/genetic/network_distance/GENETIC_final.csv, GENETIC_dist_matrix.csv (both from [3]),
-#          data/Phil_2.24M_pca_results.eigenvec
+# Input:   data/network_distance/GENETIC_final.csv, GENETIC_dist_matrix.csv (both from [3]),
+#          data/genetic/Phil_2.24M_pca_results.eigenvec
 # Outputs: data/GENETIC_pvr_spca_results.csv, data/GENETIC_spca_scores.csv,
-#          figures/genetic/regression/genetic_pvr_spca_surface.png,
+#          figures/regression/genetic_pvr_spca_surface.png,
 #          data/base_plot_genetic_PVR_sPCA.rds
 # =============================================================================
 
@@ -29,11 +29,11 @@ source(here("R", "shared", "select_moran_eigenvectors.R"))
 PREDICTOR <- "geodist_H1_span"
 N_PERM    <- 999   # + observed arrangement = 1000 draws
 
-GENETIC_final <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"))
+GENETIC_final <- read.csv(here("data", "network_distance", "GENETIC_final.csv"))
 
 
 # ── 1. Population-structure eigenvectors (same construction as [4]) ─────────
-eigenvec_raw <- read.table(here("data", "Phil_2.24M_pca_results.eigenvec"),
+eigenvec_raw <- read.table(here("data", "genetic", "Phil_2.24M_pca_results.eigenvec"),
                            header = FALSE, stringsAsFactors = FALSE)
 n_pc <- ncol(eigenvec_raw) - 2
 names(eigenvec_raw) <- c("population", "sample", paste0("PC", seq_len(n_pc)))
@@ -86,7 +86,7 @@ resid_y <- resid(fit_e_only(y, E_sel))
 
 
 # ── 5. Spatial weight matrix: threshold search ──────────────────────────────
-GENETIC_dist_matrix <- read.csv(here("data", "genetic", "network_distance", "GENETIC_dist_matrix.csv"),
+GENETIC_dist_matrix <- read.csv(here("data", "network_distance", "GENETIC_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 Dgeo <- GENETIC_dist_matrix[df$population, df$population]
@@ -154,7 +154,7 @@ scores_df <- df |>
   mutate(sPC1 = sPC1) |>
   summarise(sPC1 = mean(sPC1), .by = c(population, longitude, latitude))
 
-write.csv(scores_df, file = here("data", "genetic", "PVR", "GENETIC_spca_scores.csv"), row.names = FALSE)
+write.csv(scores_df, file = here("data", "pvr", "GENETIC_spca_scores.csv"), row.names = FALSE)
 
 
 # ── 8. Results table ─────────────────────────────────────────────────────────
@@ -165,11 +165,11 @@ GENETIC_pvr_spca_results <- tibble(
 )
 print(GENETIC_pvr_spca_results)
 write.csv(GENETIC_pvr_spca_results,
-          file = here("data", "genetic", "PVR", "GENETIC_pvr_spca_results.csv"), row.names = FALSE)
+          file = here("data", "pvr", "GENETIC_pvr_spca_results.csv"), row.names = FALSE)
 
 
 # ── 9. Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ───────────
-dir.create(here("figures", "genetic", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
 
 world_map  <- map_data("world")
 map_subset <- world_map |> filter(region %in% c("Philippines", "Malaysia"))
@@ -210,6 +210,6 @@ p_surface <- ggplot() +
        subtitle = sprintf("p = %.3f, r^2 = %.3f", best$perm_p, summary(spca_fit)$r.squared))
 print(p_surface)
 
-ggsave(here("figures", "genetic", "regression", "genetic_pvr_spca_surface.png"),
+ggsave(here("figures", "regression", "genetic_pvr_spca_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
-saveRDS(p_surface, file = here("data", "genetic", "PVR", "base_plot_genetic_PVR_sPCA.rds"))
+saveRDS(p_surface, file = here("data", "pvr", "base_plot_genetic_PVR_sPCA.rds"))

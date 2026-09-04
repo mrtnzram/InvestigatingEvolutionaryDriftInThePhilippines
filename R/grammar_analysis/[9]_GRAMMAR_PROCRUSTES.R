@@ -15,8 +15,8 @@
 # Input:   data/GRAMBANKdf_full.csv, data/gramfeature_freq.csv,
 #          data/GRAMMAR_subgroup_lookup.csv
 # Outputs: data/GRAMMAR_procrustes_results.csv, data/GRAMMAR_procrustes_scores.csv,
-#          figures/grammar/pca/GRAMMAR_pca.png,
-#          figures/grammar/pca/GRAMMAR_procrustes.png
+#          figures/procrustes/GRAMMAR_pca.png,
+#          figures/procrustes/GRAMMAR_procrustes.png
 # =============================================================================
 
 library(adegenet)   # loads ade4 (dudi.pca, procuste, procuste.randtest)
@@ -26,18 +26,18 @@ library(ggpubr)
 library(maps)
 library(fastDummies)
 
-dir.create(here("figures", "grammar", "pca"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "procrustes"), recursive = TRUE, showWarnings = FALSE)
 
 N_PERM <- 999   # + observed arrangement = 1000 draws
 
 # ── 1. Rebuild the IDF-weighted GRAMBANK matrix (duplicated from [1]) ───────
-GRAMBANKdf_PH <- read_csv(here("data", "grammar", "initial_datasets", "GRAMBANKdf_full.csv"), show_col_types = FALSE)
+GRAMBANKdf_PH <- read_csv(here("data", "grammar", "GRAMBANKdf_full.csv"), show_col_types = FALSE)
 
 feature_cols <- GRAMBANKdf_PH %>%
   dplyr::select(-Language_ID, -language, -Family_name, -Macroarea, -Longitude, -Latitude, -Language_Type) %>%
   colnames()
 
-gramfeature_freq <- read_csv(here("data", "grammar", "initial_datasets", "gramfeature_freq.csv"), show_col_types = FALSE)
+gramfeature_freq <- read_csv(here("data", "grammar", "gramfeature_freq.csv"), show_col_types = FALSE)
 
 n_levels <- purrr::map_int(
   feature_cols,
@@ -106,7 +106,7 @@ pca_fit <- dudi.pca(as.data.frame(ph_mat), center = TRUE, scale = FALSE, scannf 
 scores_df <- tibble(language = rownames(ph_mat), PC1 = pca_fit$li[, 1], PC2 = pca_fit$li[, 2])
 
 # ── 3. Join coordinates + subgroup colour ────────────────────────────────────
-subgroup_lookup <- read_csv(here("data", "grammar", "initial_datasets", "GRAMMAR_subgroup_lookup.csv"), show_col_types = FALSE)
+subgroup_lookup <- read_csv(here("data", "grammar", "GRAMMAR_subgroup_lookup.csv"), show_col_types = FALSE)
 
 analysis_df <- scores_df %>%
   left_join(ph_coords, by = "language") %>%
@@ -171,8 +171,8 @@ axis_lines <- bind_rows(
 results_df <- tibble(domain = "grammar", n = N, ss_gower = ss,
                       correlation = correlation, p_value = p_value, n_perm = N_PERM)
 print(results_df)
-write_csv(results_df, here("data", "grammar", "procrustes", "GRAMMAR_procrustes_results.csv"))
-write_csv(analysis_df, here("data", "grammar", "procrustes", "GRAMMAR_procrustes_scores.csv"))
+write_csv(results_df, here("data", "procrustes", "GRAMMAR_procrustes_results.csv"))
+write_csv(analysis_df, here("data", "procrustes", "GRAMMAR_procrustes_scores.csv"))
 
 # ── 6. PCA figure (own file) ─────────────────────────────────────────────────
 subgroup_pal <- analysis_df %>% distinct(subgroup, colour) %>% deframe()
@@ -184,7 +184,7 @@ p_pca <- ggplot(analysis_df, aes(PC1, PC2, colour = subgroup)) +
   theme(panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.7)) +
   labs(title = "PCA")
 print(p_pca)
-ggsave(here("figures", "grammar", "pca", "GRAMMAR_pca.png"), p_pca,
+ggsave(here("figures", "procrustes", "GRAMMAR_pca.png"), p_pca,
        width = 8, height = 6, units = "in", dpi = 300, bg = "white")
 
 # ── 7. Procrustes-fit vs. actual-coordinates figure (own file) ──────────────
@@ -229,5 +229,5 @@ p_coords <- p_coords + theme(legend.position = "none")
 maps_row <- ggarrange(p_proc, p_coords, ncol = 2, nrow = 1, labels = c("A", "B"))
 p_maps   <- ggarrange(maps_row, as_ggplot(shared_legend), ncol = 2, nrow = 1, widths = c(4, 1))
 print(p_maps)
-ggsave(here("figures", "grammar", "pca", "GRAMMAR_procrustes.png"), p_maps,
+ggsave(here("figures", "procrustes", "GRAMMAR_procrustes.png"), p_maps,
        width = 11, height = 6, units = "in", dpi = 300, bg = "white")

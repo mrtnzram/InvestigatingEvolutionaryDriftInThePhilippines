@@ -12,7 +12,7 @@
 #          data/PHONEME_subgroup_lookup.csv (region column, from [0])
 # Outputs: data/PHONEME_regional_pvr_mem_results.csv,
 #          data/PHONEME_regional_pvr_mem_scores.csv,
-#          figures/phoneme/regression/phoneme_regional_pvr_mem_<region>.png
+#          figures/regression/phoneme_regional_pvr_mem_<region>.png
 #          (one standalone file per region — not combined into a single figure,
 #          since each region's map has its own aspect ratio)
 # =============================================================================
@@ -37,11 +37,11 @@ N_PERM    <- 999
 MIN_N     <- 7      # moran.mc(nsim = 999) needs N! > 999
 REGIONS   <- c("Luzon", "Visayas", "Mindanao")
 
-PHONEME_final  <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_final.csv"))
-region_lookup  <- read.csv(here("data", "phoneme", "initial_datasets", "PHONEME_subgroup_lookup.csv")) |>
+PHONEME_final  <- read.csv(here("data", "network_distance", "PHONEME_final.csv"))
+region_lookup  <- read.csv(here("data", "phoneme", "PHONEME_subgroup_lookup.csv")) |>
   dplyr::select(language, region)
 tip_map        <- tree_df_matched |> dplyr::select(original, ph)
-dist_matrix    <- read.csv(here("data", "phoneme", "network_distance", "PHONEME_dist_matrix.csv"),
+dist_matrix    <- read.csv(here("data", "network_distance", "PHONEME_dist_matrix.csv"),
                            row.names = 1, check.names = FALSE) |> as.matrix()
 
 
@@ -180,16 +180,16 @@ for (rg in REGIONS) {
 PHONEME_regional_results <- bind_rows(results)
 print(PHONEME_regional_results)
 write.csv(PHONEME_regional_results,
-          here("data", "phoneme", "PVR", "PHONEME_regional_pvr_mem_results.csv"), row.names = FALSE)
+          here("data", "pvr", "PHONEME_regional_pvr_mem_results.csv"), row.names = FALSE)
 
 scores_all <- bind_rows(scores)
 write.csv(scores_all,
-          here("data", "phoneme", "PVR", "PHONEME_regional_pvr_mem_scores.csv"), row.names = FALSE)
+          here("data", "pvr", "PHONEME_regional_pvr_mem_scores.csv"), row.names = FALSE)
 stopifnot("No region produced scores — nothing to plot." = nrow(scores_all) > 0)
 
 
 # ── 3. Plot: one panel per region, legend normalized across all of them ─────
-dir.create(here("figures", "phoneme", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
 
 map_subset <- map_data("world") |> filter(region %in% c("Philippines", "Malaysia"))
 
@@ -244,7 +244,7 @@ names(panels) <- run_regions
 
 for (rg in run_regions) {
   print(panels[[rg]])
-  ggsave(here("figures", "phoneme", "regression",
+  ggsave(here("figures", "regression",
               paste0("phoneme_regional_pvr_mem_", tolower(rg), ".png")),
          panels[[rg]], width = 5.5, height = 6, units = "in", dpi = 300)
 }

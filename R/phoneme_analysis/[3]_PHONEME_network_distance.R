@@ -1,6 +1,6 @@
 # ── [3]_PHONEME_network_distance.R ───────────────────────────────────────────
 # Graph network creation + per-language distance calculation.
-# Input:   data/PHONEME_cossim_marked.csv (from [2]), data/nodes.csv, data/edges.csv
+# Input:   data/PHONEME_cossim_marked.csv (from [2]), data/nodes.csv, data/shared/edges.csv
 # Outputs: data/PHONEME_final.csv (cossim + geodist_H1_span, the final
 #          per-language table for the regression file), data/phoneme_waypoint_plot.rds
 #          (overview arrow plot), data/PHONEME_dist_matrix.csv (pairwise
@@ -15,10 +15,10 @@ library(sfheaders)
 library(here)
 
 # ── 0. Load data ─────────────────────────────────────────────────────────────
-PHONEME_cossim <- read.csv(here("data", "phoneme", "cosine_distribution", "PHONEME_cossim_marked.csv"))
+PHONEME_cossim <- read.csv(here("data", "cosine_distribution", "PHONEME_cossim_marked.csv"))
 
-nodes <- read.csv(here("data", "nodes.csv")) |> mutate(id = as.character(id))
-edges <- read.csv(here("data", "edges.csv")) |>
+nodes <- read.csv(here("data", "shared", "nodes.csv")) |> mutate(id = as.character(id))
+edges <- read.csv(here("data", "shared", "edges.csv")) |>
   mutate(from = as.character(from), to = as.character(to))
 
 
@@ -284,7 +284,7 @@ PHONEME_cossim |>
   select(language, latitude, longitude, starts_with("cossim_"),
          any_of(c("span_influenced", "jap_influenced", "eng_influenced")),
          geodist_H1_span, geodist_H2_span, using_network) |>
-  write.csv(file = here("data", "phoneme", "network_distance", "PHONEME_final.csv"), row.names = FALSE)
+  write.csv(file = here("data", "network_distance", "PHONEME_final.csv"), row.names = FALSE)
 
 
 # ── 6a. Pairwise language x language distance matrix ────────────────────────
@@ -301,7 +301,7 @@ PHONEME_dist_matrix <- build_pairwise_distance_matrix(
   land_penalty  = 4.44
 )
 
-write.csv(PHONEME_dist_matrix, file = here("data", "phoneme", "network_distance", "PHONEME_dist_matrix.csv"), row.names = TRUE)
+write.csv(PHONEME_dist_matrix, file = here("data", "network_distance", "PHONEME_dist_matrix.csv"), row.names = TRUE)
 
 
 # ── 7. Assemble full_tree_sf (main edges + per-language connectors) ─────────
@@ -415,4 +415,4 @@ arrow_plot <- ggplot() +
   )
 
 print(arrow_plot)
-saveRDS(arrow_plot, file = here("data", "phoneme", "network_distance", "phoneme_waypoint_plot.rds"))
+saveRDS(arrow_plot, file = here("data", "network_distance", "phoneme_waypoint_plot.rds"))

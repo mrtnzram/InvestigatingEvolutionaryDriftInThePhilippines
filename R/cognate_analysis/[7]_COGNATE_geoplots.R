@@ -5,7 +5,7 @@
 # analysis set, the same one [4] regresses on — [3] applied the restriction.
 #
 # Input:   data/cognate/COGNATE_final.csv, data/cognate/cognate_waypoint_plot.rds (from [3])
-# Outputs: figures/cognate/mst_waypoints/COGNATE_loans.png
+# Outputs: figures/mst_waypoints/COGNATE_loans.png
 # =============================================================================
 
 library(ggplot2)
@@ -14,8 +14,8 @@ library(maps)
 library(sf)
 library(here)
 
-PH_cognate <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv"))
-arrows     <- readRDS(here("data", "cognate", "network_distance", "cognate_waypoint_plot.rds"))
+PH_cognate <- read.csv(here("data", "network_distance", "COGNATE_final.csv"))
+arrows     <- readRDS(here("data", "network_distance", "cognate_waypoint_plot.rds"))
 
 points_df <- PH_cognate |> filter(!is.na(loans_norm))
 
@@ -73,8 +73,8 @@ final_plot <- add_routes(base_plot) +
 
 print(final_plot)
 
-dir.create(here("figures", "cognate", "mst_waypoints"),
+dir.create(here("figures", "mst_waypoints"),
            recursive = TRUE, showWarnings = FALSE)
 
-ggsave(here("figures", "cognate", "mst_waypoints", "COGNATE_loans.png"),
+ggsave(here("figures", "mst_waypoints", "COGNATE_loans.png"),
        final_plot, width = 7, height = 9, units = "in", dpi = 300)

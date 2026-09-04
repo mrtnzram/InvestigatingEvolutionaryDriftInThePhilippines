@@ -10,17 +10,17 @@
 # Input:   data/GENETIC_final.csv (per-population admixture + coordinates, from [0]),
 #          data/base_plot_genetic_FEEMS.rds, data/base_plot_genetic_FEEMS_null.rds (from [6]),
 #          data/genetic_waypoint_plot.rds (arrow layers, from [3])
-# Outputs: figures/genetic/mst_waypoints/GENETIC_span_admx_weighted.png,
-#          figures/genetic/mst_waypoints/GENETIC_weight_mst_feems.png,
-#          figures/genetic/mst_waypoints/GENETIC_weight_mst_feems_null.png
+# Outputs: figures/mst_waypoints/GENETIC_span_admx_weighted.png,
+#          figures/mst_waypoints/GENETIC_weight_mst_feems.png,
+#          figures/mst_waypoints/GENETIC_weight_mst_feems_null.png
 # =============================================================================
 
 library(ggplot2)
 library(dplyr)
 library(here)
 
-PH_genetic <- read.csv(here("data", "genetic", "network_distance", "GENETIC_final.csv"))
-arrows     <- readRDS(here("data", "genetic", "network_distance", "genetic_waypoint_plot.rds"))
+PH_genetic <- read.csv(here("data", "network_distance", "GENETIC_final.csv"))
+arrows     <- readRDS(here("data", "network_distance", "genetic_waypoint_plot.rds"))
 
 points_df <- PH_genetic |> filter(!is.na(span_admx), !is.na(span_w))
 
@@ -50,7 +50,7 @@ add_routes_and_capital <- function(base) {
     theme(legend.position = "right")
 }
 
-dir.create(here("figures", "genetic", "mst_waypoints"),
+dir.create(here("figures", "mst_waypoints"),
            recursive = TRUE, showWarnings = FALSE)
 
 # ---- Figure A: Spanish admixture + routes -----------------------------------
@@ -94,25 +94,25 @@ final_plot_admx <- add_routes_and_capital(base_plot_admx)
 
 print(final_plot_admx)
 
-ggsave(here("figures", "genetic", "mst_waypoints", "GENETIC_span_admx_weighted.png"),
+ggsave(here("figures", "mst_waypoints", "GENETIC_span_admx_weighted.png"),
        final_plot_admx, width = 7, height = 9, units = "in", dpi = 300)
 
 # ---- Figure B: FEEMS surface + routes ----------------------------------------
-base_plot_feems  <- readRDS(here("data", "genetic", "feems", "base_plot_genetic_FEEMS.rds"))
+base_plot_feems  <- readRDS(here("data", "feems", "base_plot_genetic_FEEMS.rds"))
 final_plot_feems <- add_routes_and_capital(base_plot_feems)
 
 print(final_plot_feems)
 
-ggsave(here("figures", "genetic", "mst_waypoints", "GENETIC_weight_mst_feems.png"),
+ggsave(here("figures", "mst_waypoints", "GENETIC_weight_mst_feems.png"),
        final_plot_feems, width = 7, height = 9, units = "in", dpi = 300)
 
 # ---- Figure C: FEEMS null-model surface + routes ------------------------------
 # Geographic-shuffle null (100 permutations, from genetic_feems.py --permute), on
 # the same color scale as Figure B (set jointly in [6]) so the two are comparable.
-base_plot_feems_null  <- readRDS(here("data", "genetic", "feems", "base_plot_genetic_FEEMS_null.rds"))
+base_plot_feems_null  <- readRDS(here("data", "feems", "base_plot_genetic_FEEMS_null.rds"))
 final_plot_feems_null <- add_routes_and_capital(base_plot_feems_null)
 
 print(final_plot_feems_null)
 
-ggsave(here("figures", "genetic", "mst_waypoints", "GENETIC_weight_mst_feems_null.png"),
+ggsave(here("figures", "mst_waypoints", "GENETIC_weight_mst_feems_null.png"),
        final_plot_feems_null, width = 7, height = 9, units = "in", dpi = 300)

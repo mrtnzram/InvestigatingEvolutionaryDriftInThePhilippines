@@ -18,9 +18,9 @@
 # Outputs: data/GRAMMAR_sim_matrix.csv,
 #          data/GRAMMAR_mmrr_results.csv        (joint two-predictor model)
 #          data/GRAMMAR_mmrr_single_results.csv (single-predictor models)
-#          figures/grammar/mmrr/grammar_mmrr_single_*.png  (3 single-predictor)
-#          figures/grammar/mmrr/grammar_mmrr_pairplot.png,
-#          figures/grammar/mmrr/grammar_mmrr_partial_regression.png
+#          figures/mmrr/grammar_mmrr_single_*.png  (3 single-predictor)
+#          figures/mmrr/grammar_mmrr_pairplot.png,
+#          figures/mmrr/grammar_mmrr_partial_regression.png
 # =============================================================================
 
 library(readr)
@@ -41,14 +41,14 @@ conflicts_prefer(dplyr::summarise)
 conflicts_prefer(tidyr::extract)
 
 # ---- 0. Load data -----------------------------------------------------------
-GRAMBANKdf_PH <- read_csv(here("data", "grammar", "initial_datasets", "GRAMBANKdf_full.csv"))
+GRAMBANKdf_PH <- read_csv(here("data", "grammar", "GRAMBANKdf_full.csv"))
 
 ph_lang <- GRAMBANKdf_PH |>
   filter(Language_Type == "Philippine Language") |>
   pull(language)
 
 # Cosine-similarity matrix written by [1]_GRAMMAR_cosine_similarity.R
-cosine_matrix <- read.csv(here("data", "grammar", "cosine_similarity", "GRAMMAR_cosine_matrix.csv"),
+cosine_matrix <- read.csv(here("data", "cosine_similarity", "GRAMMAR_cosine_matrix.csv"),
                           row.names = 1, check.names = FALSE) |>
   as.matrix()
 
@@ -64,7 +64,7 @@ GRAMMAR_sim_matrix <- cosine_matrix_phil
 # 26 tree-matched languages (a strict subset of ph_lang), so indexing by the
 # wider ph_lang would error on the languages [3] correctly dropped. §7's
 # common-label intersection is what reconciles this against Y_ling/X_phylo.
-GRAMMAR_dist_matrix <- read.csv(here("data", "grammar", "network_distance", "GRAMMAR_dist_matrix.csv"),
+GRAMMAR_dist_matrix <- read.csv(here("data", "network_distance", "GRAMMAR_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 
@@ -72,7 +72,7 @@ GRAMMAR_dist_matrix <- read.csv(here("data", "grammar", "network_distance", "GRA
 # check.names = FALSE preserves names-with-spaces so the labels still match the
 # cosine/dist matrices exactly.
 GRAMMAR_phylo_dist_matrix <- read.csv(
-  here("data", "grammar", "initial_datasets", "GRAMMAR_phylo_dist_matrix.csv"),
+  here("data", "grammar", "GRAMMAR_phylo_dist_matrix.csv"),
   row.names = 1, check.names = FALSE
 ) |>
   as.matrix()
@@ -196,7 +196,7 @@ MMRR <- function(Y, X, nperm = 9999, scale = TRUE) {
 }
 
 # dir.create() hoisted here, before the first ggsave() in §9a.
-dir.create(here("figures", "grammar", "mmrr"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "mmrr"), recursive = TRUE, showWarnings = FALSE)
 
 # ---- 9a. Single-predictor MMRRs (run BEFORE the joint model) ----------------
 # Same MMRR() above, just handed a one-element predictor list — the permutation
@@ -245,7 +245,7 @@ single_mmrr <- function(Ymat, Xmat, y_lab, x_lab, title, file, nperm = 9999) {
           plot.subtitle = element_text(size = 10, colour = "grey25"))
 
   print(p)
-  ggsave(here("figures", "grammar", "mmrr", file), p,
+  ggsave(here("figures", "mmrr", file), p,
          width = 6.5, height = 4.5, units = "in", dpi = 300)
 
   tibble(model = title, beta = beta, p_value = pval, r_squared = r2)
@@ -271,7 +271,7 @@ GRAMMAR_mmrr_single <- bind_rows(
 )
 print(GRAMMAR_mmrr_single)
 write.csv(GRAMMAR_mmrr_single,
-          file = here("data", "grammar", "MMRR", "GRAMMAR_mmrr_single_results.csv"), row.names = FALSE)
+          file = here("data", "mmrr", "GRAMMAR_mmrr_single_results.csv"), row.names = FALSE)
 
 
 # ---- 9b. Joint two-predictor MMRR -------------------------------------------
@@ -291,12 +291,12 @@ GRAMMAR_mmrr_results <- tibble(
 )
 print(GRAMMAR_mmrr_results)
 write.csv(GRAMMAR_mmrr_results,
-          file = here("data", "grammar", "MMRR", "GRAMMAR_mmrr_results.csv"), row.names = FALSE)
+          file = here("data", "mmrr", "GRAMMAR_mmrr_results.csv"), row.names = FALSE)
 
 # ---- 11. Visualization ------------------------------------------------------
 # Both figures are built on the standardized unfolded lower triangles, so they
 # read on the same scale as the fitted (standardized) MMRR coefficients.
-# (figures/grammar/mmrr already created in §9a, ahead of the first ggsave())
+# (figures/mmrr already created in §9a, ahead of the first ggsave())
 
 mmrr_df <- tibble(
   ling  = as.numeric(unfold(Y_ling)),
@@ -370,7 +370,7 @@ pairplot <- ggplot() +
   ) +
   labs(title = "MMRR inputs")
 print(pairplot)
-ggsave(here("figures", "grammar", "mmrr", "grammar_mmrr_pairplot.png"),
+ggsave(here("figures", "mmrr", "grammar_mmrr_pairplot.png"),
        pairplot, width = 6.5, height = 6, units = "in", dpi = 300)
 
 # (b) Added-variable (partial regression) plots: each panel shows the
@@ -412,10 +412,10 @@ partial_plot <- (p_geo_av + p_phylo_av) +
                        GRAMMAR_mmrr_results$r_squared, GRAMMAR_mmrr_results$p_model)
   )
 print(partial_plot)
-ggsave(here("figures", "grammar", "mmrr", "grammar_mmrr_partial_regression.png"),
+ggsave(here("figures", "mmrr", "grammar_mmrr_partial_regression.png"),
        partial_plot, width = 10, height = 4.5, units = "in", dpi = 300)
 
 # ---- 12. Persist matrices ---------------------------------------------------
 # GRAMMAR_dist_matrix.csv is now [3]'s to write (it built the matrix); this
 # script only persists the similarity matrix it computed itself.
-write.csv(GRAMMAR_sim_matrix, file = here("data", "grammar", "MMRR", "GRAMMAR_sim_matrix.csv"), row.names = TRUE)
+write.csv(GRAMMAR_sim_matrix, file = here("data", "mmrr", "GRAMMAR_sim_matrix.csv"), row.names = TRUE)

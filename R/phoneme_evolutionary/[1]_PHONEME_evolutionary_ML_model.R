@@ -31,18 +31,18 @@ ALPHA <- 0.05
 # ── 1. Load data ─────────────────────────────────────────────
 
 RUHLENdf <- read_csv(
-  here("data", "phoneme", "evolutionary", "initial_datasets", "RUHLENdf_PH_evolutionary.csv"),
+  here("data", "phoneme", "RUHLENdf_PH_evolutionary.csv"),
   show_col_types = FALSE
 )
 
 tip_mapping <- read_csv(
-  here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_evolutionary_tip_mapping.csv"),
+  here("data", "phoneme", "phoneme_evolutionary_tip_mapping.csv"),
   show_col_types = FALSE
 )
 
 # Tree pruning, conflict-tip resolution, and the Philippine regime are decided
 # once in [0]_Phylogenetic_Tree.R and loaded here, not rebuilt.
-tree_bundle     <- readRDS(here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_evolutionary_analysis_tree.rds"))
+tree_bundle     <- readRDS(here("data", "phoneme", "phoneme_evolutionary_analysis_tree.rds"))
 analysis_tree   <- tree_bundle$analysis_tree
 regime_tree     <- tree_bundle$regime_tree
 philippine_tips <- tree_bundle$philippine_tips
@@ -58,7 +58,7 @@ phoneme_cols <- grep("^phoneme_", names(RUHLENdf), value = TRUE)
 
 # phoneme_n -> IPA keymap, built and exported by [0]_CREANZA_RUHLENdatabase.R
 pnas_key <- read_csv(
-  here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_key_pnas.csv"),
+  here("data", "phoneme", "phoneme_key_pnas.csv"),
   show_col_types = FALSE
 ) |>
   select(phoneme = phoneme_id, ipa, class)
@@ -351,8 +351,8 @@ dropped_phonemes <- phoneme_summary |>
   ) |>
   arrange(phoneme)
 
-write_csv(model_selection, here("data", "phoneme", "evolutionary", "ML_model", "PHONEME_evolutionary_model_selection.csv"))
-write_csv(dropped_phonemes, here("data", "phoneme", "evolutionary", "ML_model", "PHONEME_evolutionary_dropped_phonemes.csv"))
+write_csv(model_selection, here("data", "evolutionary", "ml_model", "PHONEME_evolutionary_model_selection.csv"))
+write_csv(dropped_phonemes, here("data", "evolutionary", "ml_model", "PHONEME_evolutionary_dropped_phonemes.csv"))
 
 message(
   "\nDone in ", round(as.numeric(difftime(Sys.time(), t_start, units = "mins")), 1), " min.",

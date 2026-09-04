@@ -14,12 +14,12 @@
 # are passed in-environment, since PART B writes GRAMBANKdf_full.csv only after
 # consuming the pruned set built here.
 #
-# Input:   data/mcc.tree, data/subgroup_palette.csv (canonical subgroup -> colour,
+# Input:   data/mcc.tree, data/shared/subgroup_palette.csv (canonical subgroup -> colour,
 #          from R/shared/subgroup_palette.R — run that first)
 # Outputs: data/GRAMMAR_phylo_dist_matrix.csv (patristic distance matrix,
 #          consumed by [5]_GRAMMAR_MMRR.R), data/GRAMMAR_subgroup_lookup.csv
 #          (language -> subgroup -> colour, consumed by [8]), and
-#          figures/shared/grammar_phylogenetic_tree.png.
+#          figures/phylogenetic_tree/grammar_phylogenetic_tree.png.
 # In-env:  tree_pruned, tree_df_matched — consumed by [4]_GRAMMAR_PVR.R.
 # Next:    [1]_GRAMMAR_cosine_similarity.R
 # =============================================================================
@@ -39,7 +39,7 @@ stopifnot(
     exists("GRAMBANKdf_PH_maximized")
 )
 
-tree <- read.nexus(here('data', 'mcc.tree'))
+tree <- read.nexus(here('data', 'shared', 'mcc.tree'))
 
 tree_df <- tibble(
   original = tree$tip.label
@@ -134,11 +134,11 @@ subgroup_levels <- tip_subgroup %>% count(subgroup, sort = TRUE) %>% pull(subgro
 # Colours come from the canonical cross-domain palette (R/shared/subgroup_palette.R),
 # not a locally-derived one, so the same subgroup is the same colour in every
 # domain's figures (phoneme/grammar/cognate/genetic).
-subgroup_pal <- read_csv(here("data", "subgroup_palette.csv"), show_col_types = FALSE) %>%
+subgroup_pal <- read_csv(here("data", "shared", "subgroup_palette.csv"), show_col_types = FALSE) %>%
   select(subgroup, colour) %>%
   deframe()
 stopifnot(
-  "Some subgroups are missing from data/subgroup_palette.csv — rerun R/shared/subgroup_palette.R." =
+  "Some subgroups are missing from data/shared/subgroup_palette.csv — rerun R/shared/subgroup_palette.R." =
     all(subgroup_levels %in% names(subgroup_pal))
 )
 
@@ -147,7 +147,7 @@ stopifnot(
 tip_subgroup %>%
   distinct(language = gram, subgroup) %>%
   mutate(colour = unname(subgroup_pal[subgroup])) %>%
-  write.csv(here("data", "grammar", "initial_datasets", "GRAMMAR_subgroup_lookup.csv"), row.names = FALSE)
+  write.csv(here("data", "grammar", "GRAMMAR_subgroup_lookup.csv"), row.names = FALSE)
 
 # Let ape compute the rectangular phylogram layout, then read the tip/node
 # coordinates back out instead of re-deriving them.
@@ -203,8 +203,8 @@ phylo_tree_plot <- ggplot() +
   )
 print(phylo_tree_plot)
 
-dir.create(here("figures", "shared"), recursive = TRUE, showWarnings = FALSE)
-ggsave(here("figures", "shared", "grammar_phylogenetic_tree.png"),
+dir.create(here("figures", "phylogenetic_tree"), recursive = TRUE, showWarnings = FALSE)
+ggsave(here("figures", "phylogenetic_tree", "grammar_phylogenetic_tree.png"),
        phylo_tree_plot, width = 7.5, height = 9, units = "in", dpi = 300)
 
 # ── Pairwise phylogenetic (patristic) distance matrix ───────────────────────
@@ -232,4 +232,4 @@ GRAMMAR_phylo_dist_matrix <- GRAMMAR_phylo_dist_matrix[, rownames(GRAMMAR_phylo_
 diag(GRAMMAR_phylo_dist_matrix) <- 0
 
 write.csv(GRAMMAR_phylo_dist_matrix,
-          file = here("data", "grammar", "initial_datasets", "GRAMMAR_phylo_dist_matrix.csv"), row.names = TRUE)
+          file = here("data", "grammar", "GRAMMAR_phylo_dist_matrix.csv"), row.names = TRUE)

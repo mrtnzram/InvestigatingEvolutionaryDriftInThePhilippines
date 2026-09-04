@@ -10,7 +10,7 @@
 #
 # Input:   data/cognate/COGNATE_final.csv, data/cognate/COGNATE_dist_matrix.csv (both from [3])
 # Outputs: data/cognate/COGNATE_pvr_spca_results.csv, data/cognate/COGNATE_spca_scores.csv,
-#          figures/cognate/regression/cognate_pvr_spca_surface.png,
+#          figures/regression/cognate_pvr_spca_surface.png,
 #          data/cognate/base_plot_cognate_PVR_sPCA.rds
 # =============================================================================
 
@@ -32,7 +32,7 @@ stopifnot(
 PREDICTOR <- "geodist_H1_span"
 N_PERM    <- 999   # + observed arrangement = 1000 draws
 
-COGNATE_final <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv"))
+COGNATE_final <- read.csv(here("data", "network_distance", "COGNATE_final.csv"))
 
 
 # ── 1. Analysis frame, ordered to tip.label (same construction as [4]) ──────
@@ -73,7 +73,7 @@ resid_y <- resid(lm(y ~ E_sel))
 
 
 # ── 4. Spatial weight matrix: threshold search ──────────────────────────────
-COGNATE_dist_matrix <- read.csv(here("data", "cognate", "network_distance", "COGNATE_dist_matrix.csv"),
+COGNATE_dist_matrix <- read.csv(here("data", "network_distance", "COGNATE_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 Dgeo <- COGNATE_dist_matrix[df$glottocode, df$glottocode]
@@ -141,7 +141,7 @@ scores_df <- df |>
   mutate(sPC1 = sPC1) |>
   summarise(sPC1 = mean(sPC1), .by = c(language, longitude, latitude))
 
-write.csv(scores_df, file = here("data", "cognate", "PVR", "COGNATE_spca_scores.csv"),
+write.csv(scores_df, file = here("data", "pvr", "COGNATE_spca_scores.csv"),
           row.names = FALSE)
 
 
@@ -153,11 +153,11 @@ COGNATE_pvr_spca_results <- tibble(
 )
 print(COGNATE_pvr_spca_results)
 write.csv(COGNATE_pvr_spca_results,
-          file = here("data", "cognate", "PVR", "COGNATE_pvr_spca_results.csv"), row.names = FALSE)
+          file = here("data", "pvr", "COGNATE_pvr_spca_results.csv"), row.names = FALSE)
 
 
 # ── 8. Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ───────────
-dir.create(here("figures", "cognate", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
 
 world_map  <- map_data("world")
 map_subset <- world_map |> filter(region %in% c("Philippines", "Malaysia"))
@@ -198,6 +198,6 @@ p_surface <- ggplot() +
        subtitle = sprintf("p = %.3f, r^2 = %.3f", best$perm_p, summary(spca_fit)$r.squared))
 print(p_surface)
 
-ggsave(here("figures", "cognate", "regression", "cognate_pvr_spca_surface.png"),
+ggsave(here("figures", "regression", "cognate_pvr_spca_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
-saveRDS(p_surface, file = here("data", "cognate", "PVR", "base_plot_cognate_PVR_sPCA.rds"))
+saveRDS(p_surface, file = here("data", "pvr", "base_plot_cognate_PVR_sPCA.rds"))

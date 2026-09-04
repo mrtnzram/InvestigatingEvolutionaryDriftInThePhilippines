@@ -18,17 +18,17 @@ library(sfheaders)
 library(here)
 
 # ── 0. Load data ─────────────────────────────────────────────────────────────
-GRAMMAR_cossim <- read.csv(here("data", "grammar", "cosine_distribution", "GRAMMAR_cossim_marked.csv"))
+GRAMMAR_cossim <- read.csv(here("data", "cosine_distribution", "GRAMMAR_cossim_marked.csv"))
 
 # Restrict to the 26 Philippine languages that have an ABVD tree tip: the other
 # 13 (Sabah/Sama-Bajau + Karao) are dropped so every downstream spatial and
 # phylogenetic output ([4]/[5]/[7]/[8]) shares one language set.
-tree_langs <- read.csv(here("data", "grammar", "initial_datasets", "GRAMMAR_subgroup_lookup.csv"))$language
+tree_langs <- read.csv(here("data", "grammar", "GRAMMAR_subgroup_lookup.csv"))$language
 GRAMMAR_cossim <- GRAMMAR_cossim[GRAMMAR_cossim$language %in% tree_langs, ]
 message("Restricted to ", nrow(GRAMMAR_cossim), " tree-pruned Philippine languages.")
 
-nodes <- read.csv(here("data", "nodes.csv")) |> mutate(id = as.character(id))
-edges <- read.csv(here("data", "edges.csv")) |>
+nodes <- read.csv(here("data", "shared", "nodes.csv")) |> mutate(id = as.character(id))
+edges <- read.csv(here("data", "shared", "edges.csv")) |>
   mutate(from = as.character(from), to = as.character(to))
 
 
@@ -294,7 +294,7 @@ GRAMMAR_cossim |>
   select(language, latitude, longitude, starts_with("cossim_"),
          any_of(c("span_influenced", "jap_influenced", "eng_influenced")),
          geodist_H1_span, geodist_H2_span, using_network) |>
-  write.csv(file = here("data", "grammar", "network_distance", "GRAMMAR_final.csv"), row.names = FALSE)
+  write.csv(file = here("data", "network_distance", "GRAMMAR_final.csv"), row.names = FALSE)
 
 
 # ── 6a. Pairwise language x language distance matrix ────────────────────────
@@ -311,7 +311,7 @@ GRAMMAR_dist_matrix <- build_pairwise_distance_matrix(
   land_penalty  = 4.44
 )
 
-write.csv(GRAMMAR_dist_matrix, file = here("data", "grammar", "network_distance", "GRAMMAR_dist_matrix.csv"), row.names = TRUE)
+write.csv(GRAMMAR_dist_matrix, file = here("data", "network_distance", "GRAMMAR_dist_matrix.csv"), row.names = TRUE)
 
 
 # ── 7. Assemble full_tree_sf (main edges + per-language connectors) ─────────
@@ -425,4 +425,4 @@ arrow_plot <- ggplot() +
   )
 
 print(arrow_plot)
-saveRDS(arrow_plot, file = here("data", "grammar", "network_distance", "grammar_waypoint_plot.rds"))
+saveRDS(arrow_plot, file = here("data", "network_distance", "grammar_waypoint_plot.rds"))

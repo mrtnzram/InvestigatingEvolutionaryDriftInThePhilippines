@@ -7,7 +7,7 @@
 # stabilizes. The thresholds settled here are what [0]_GRAMBANKdatabase.R applies
 # as a single deterministic pass.
 #
-# Input:   data/languages.csv, data/values.csv
+# Input:   data/languages.csv, data/shared/values.csv
 # Outputs: none (diagnostic; console/plot output only)
 # Next:    [0]_GRAMBANKdatabase.R
 # =============================================================================
@@ -19,8 +19,8 @@ library(glue)
 library(here)
 
 # ---- 1. Load GRAMBANK languages + values ----
-languages <- read_csv(here("data", "languages.csv"))
-values <- read_csv(here("data", "values.csv"))
+languages <- read_csv(here("data", "shared", "languages.csv"))
+values <- read_csv(here("data", "shared", "values.csv"))
 
 # ---- 2. Filter to Philippine languages (by lat/long) plus English/Japanese ----
 # Spanish is added later, hard-coded from WALS (see [0]_GRAMBANKdatabase.R) —

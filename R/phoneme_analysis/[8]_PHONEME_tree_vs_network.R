@@ -10,9 +10,9 @@
 # subgroup lookup) and source()s [3]_PHONEME_network_distance.R for the network
 # objects.
 #
-# Inputs:  figures/shared/phylogenetic_tree.png, data/PHONEME_subgroup_lookup.csv
-# Outputs: figures/shared/tree_vs_network.png,
-#          figures/phoneme/mst_waypoints/PHONEME_network_by_subgroup.png
+# Inputs:  figures/phylogenetic_tree/phylogenetic_tree.png, data/PHONEME_subgroup_lookup.csv
+# Outputs: figures/tree_vs_network/tree_vs_network.png,
+#          figures/mst_waypoints/PHONEME_network_by_subgroup.png
 # =============================================================================
 
 library(tidyverse)
@@ -30,7 +30,7 @@ library(here)
 source(here("R", "phoneme_analysis", "[3]_PHONEME_network_distance.R"), echo = FALSE)
 
 # ---- 2. Shared subgroup palette (identical to the tree) ----------------------
-subgroup_lookup <- read_csv(here("data", "phoneme", "initial_datasets", "PHONEME_subgroup_lookup.csv"),
+subgroup_lookup <- read_csv(here("data", "phoneme", "PHONEME_subgroup_lookup.csv"),
                             show_col_types = FALSE)
 pal <- setNames(subgroup_lookup$colour, subgroup_lookup$subgroup)
 
@@ -81,10 +81,14 @@ network_panel <- plot_network_coloured(full_tree_sf, arrow_connectors,
                                        points_coloured, refdf1 = MANILA)
 
 # ---- 4. Left panel: the phylogeny PNG as a raster ---------------------------
-tree_png  <- png::readPNG(here("figures", "shared", "phylogenetic_tree.png"))
+tree_png  <- png::readPNG(here("figures", "phylogenetic_tree", "phylogenetic_tree.png"))
 tree_grob <- grid::rasterGrob(tree_png, interpolate = TRUE)
 
 # ---- 5. Combine + save ------------------------------------------------------
+# The two output folders are method-scoped, so neither is guaranteed to exist yet:
+# [0] only creates figures/phylogenetic_tree/.
+dir.create(here("figures", "tree_vs_network"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "mst_waypoints"), recursive = TRUE, showWarnings = FALSE)
 combined <- (patchwork::wrap_elements(full = tree_grob) | network_panel) +
   plot_layout(widths = c(0.92, 1)) +
   plot_annotation(
@@ -94,7 +98,7 @@ combined <- (patchwork::wrap_elements(full = tree_grob) | network_panel) +
   )
 print(combined)
 
-ggsave(here("figures", "shared", "tree_vs_network.png"),
+ggsave(here("figures", "tree_vs_network", "tree_vs_network.png"),
        combined, width = 15, height = 9, units = "in", dpi = 300)
 
 # ---- 6. Standalone network figure, with a tree-style legend strip -----------
@@ -136,7 +140,7 @@ network_with_legend <- (network_standalone | legend_strip) +
   )
 print(network_with_legend)
 
-# Filed under figures/phoneme/, not shared/: this network is specific to the
-# phoneme dataset, matching the PHONEME_/GRAMMAR_ split of the other waypoint figures.
-ggsave(here("figures", "phoneme", "mst_waypoints", "PHONEME_network_by_subgroup.png"),
+# Filed under figures/mst_waypoints/ with the other waypoint figures, and named
+# PHONEME_ rather than left generic: this network is specific to the phoneme dataset.
+ggsave(here("figures", "mst_waypoints", "PHONEME_network_by_subgroup.png"),
        network_with_legend, width = 11, height = 9, units = "in", dpi = 300)

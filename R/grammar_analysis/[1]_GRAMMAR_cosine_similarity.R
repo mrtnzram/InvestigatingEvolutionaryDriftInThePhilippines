@@ -30,7 +30,7 @@ library(stringr)
 library(tibble)
 
 # ---- Prepping Globals -------------------------------------------------------
-GRAMBANKdf_PH <- read_csv(here("data", "grammar", "initial_datasets", "GRAMBANKdf_full.csv"), show_col_types = FALSE)
+GRAMBANKdf_PH <- read_csv(here("data", "grammar", "GRAMBANKdf_full.csv"), show_col_types = FALSE)
 
 ph_lang <- GRAMBANKdf_PH |>
   filter(Language_Type == 'Philippine Language') |>
@@ -49,7 +49,7 @@ feature_cols <- GRAMBANKdf_PH %>%
 
 feature_cols <- colnames(feature_cols)
 
-gramfeature_freq <- read_csv(here("data", "grammar", "initial_datasets", "gramfeature_freq.csv"), show_col_types = FALSE)
+gramfeature_freq <- read_csv(here("data", "grammar", "gramfeature_freq.csv"), show_col_types = FALSE)
 
 # ---- one-hot encode categorical columns --------------------------------------
 n_levels <- map_int(
@@ -192,7 +192,7 @@ ggplot(melted_matrix, aes(x = Var1, y = Var2, fill = value)) +
   coord_fixed()
 
 # ----- saving dataframes -----------------------------------------------------
-write.csv(cosine_matrix, file = here("data", "grammar", "cosine_similarity", "GRAMMAR_cosine_matrix.csv"), row.names = TRUE)
+write.csv(cosine_matrix, file = here("data", "cosine_similarity", "GRAMMAR_cosine_matrix.csv"), row.names = TRUE)
 
 GRAMMAR_cossim <- GRAMBANKdf_PH |>
   filter(Language_Type == 'Philippine Language') |>
@@ -211,7 +211,7 @@ cossim_span_max <- max(GRAMMAR_cossim$cossim_span, na.rm = TRUE)
 GRAMMAR_cossim <- GRAMMAR_cossim |>
   mutate(cossim_span_norm = cossim_span / cossim_span_max)
 
-write.csv(GRAMMAR_cossim, file = here("data", "grammar", "cosine_similarity", "GRAMMAR_cossim.csv"), row.names = TRUE)
+write.csv(GRAMMAR_cossim, file = here("data", "cosine_similarity", "GRAMMAR_cossim.csv"), row.names = TRUE)
 
 # ---- Cosine base map --------------------------------------------------------
 # The per-language scores on a Philippines map, saved for [7] to overlay the
@@ -243,4 +243,4 @@ base_plot_cosine <- ggplot() +
         axis.ticks = element_blank())
 
 base_plot_cosine
-saveRDS(base_plot_cosine, file = here("data", "grammar", "cosine_similarity", "base_plot_grammar_cosine.rds"))
+saveRDS(base_plot_cosine, file = here("data", "cosine_similarity", "base_plot_grammar_cosine.rds"))

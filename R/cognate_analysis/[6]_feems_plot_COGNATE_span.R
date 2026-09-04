@@ -13,16 +13,16 @@
 # loanword map) — both RDS objects are still saved for consistency with the
 # other domains, but this script also ggsaves the two finished maps directly.
 #
-# Input:   data/cognate/feems/cognate_surface_raster.csv,
-#          data/cognate/feems/cognate_surface_raster_null_mean.csv
+# Input:   data/feems/cognate_surface_raster.csv,
+#          data/feems/cognate_surface_raster_null_mean.csv
 #          (FEEMS surface + null-model average, from python/cognate_feems.ipynb),
-#          data/cognate/network_distance/COGNATE_final.csv (per-language coordinates),
-#          data/cognate/initial_datasets/COGNATE_subgroup_lookup.csv (subgroup + colour)
-# Outputs: data/cognate/feems/base_plot_cognate_FEEMS.rds,
-#          data/cognate/feems/base_plot_cognate_FEEMS_null.rds,
-#          data/cognate/feems/legend_strip_cognate_subgroup.rds,
-#          figures/cognate/feems/cognate_feems_surface.png,
-#          figures/cognate/feems/cognate_feems_surface_null.png
+#          data/network_distance/COGNATE_final.csv (per-language coordinates),
+#          data/cognate/COGNATE_subgroup_lookup.csv (subgroup + colour)
+# Outputs: data/feems/base_plot_cognate_FEEMS.rds,
+#          data/feems/base_plot_cognate_FEEMS_null.rds,
+#          data/feems/legend_strip_cognate_subgroup.rds,
+#          figures/feems/cognate_feems_surface.png,
+#          figures/feems/cognate_feems_surface_null.png
 # =============================================================================
 
 library(ggplot2)
@@ -31,11 +31,11 @@ library(here)
 library(scales)
 library(maps)
 
-dir.create(here("figures", "cognate", "feems"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "feems"), recursive = TRUE, showWarnings = FALSE)
 
-cog_surface      <- read.csv(here("data", "cognate", "feems", "cognate_surface_raster.csv"))
-cog_surface_null <- read.csv(here("data", "cognate", "feems", "cognate_surface_raster_null_mean.csv"))
-COGNATE_final    <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv"))
+cog_surface      <- read.csv(here("data", "feems", "cognate_surface_raster.csv"))
+cog_surface_null <- read.csv(here("data", "feems", "cognate_surface_raster_null_mean.csv"))
+COGNATE_final    <- read.csv(here("data", "network_distance", "COGNATE_final.csv"))
 
 # Shared color scale across the real and null maps (not each normalized to its own
 # max) — this is what makes a flatter null surface visibly wash out next to the real
@@ -47,7 +47,7 @@ world_map  <- map_data("world")
 map_subset <- world_map %>% filter(region %in% c("Philippines", "Malaysia"))
 
 # ---- Subgroup palette + membership -------------------------------------------
-subgroup_lookup <- read.csv(here("data", "cognate", "initial_datasets", "COGNATE_subgroup_lookup.csv"))
+subgroup_lookup <- read.csv(here("data", "cognate", "COGNATE_subgroup_lookup.csv"))
 pal <- setNames(subgroup_lookup$colour, subgroup_lookup$subgroup)
 
 points_coloured <- COGNATE_final |>
@@ -93,8 +93,8 @@ base_plot <- ggplot() +
         axis.ticks = element_blank())
 
 print(base_plot)
-saveRDS(base_plot, file = here("data", "cognate", "feems", "base_plot_cognate_FEEMS.rds"))
-ggsave(here("figures", "cognate", "feems", "cognate_feems_surface.png"), base_plot,
+saveRDS(base_plot, file = here("data", "feems", "base_plot_cognate_FEEMS.rds"))
+ggsave(here("figures", "feems", "cognate_feems_surface.png"), base_plot,
        width = 7, height = 9, units = "in", dpi = 300, bg = "white")
 
 # ---- Null-model base map (same points, same shared color scale) -------------
@@ -129,8 +129,8 @@ base_plot_null <- ggplot() +
         axis.ticks = element_blank())
 
 print(base_plot_null)
-saveRDS(base_plot_null, file = here("data", "cognate", "feems", "base_plot_cognate_FEEMS_null.rds"))
-ggsave(here("figures", "cognate", "feems", "cognate_feems_surface_null.png"), base_plot_null,
+saveRDS(base_plot_null, file = here("data", "feems", "base_plot_cognate_FEEMS_null.rds"))
+ggsave(here("figures", "feems", "cognate_feems_surface_null.png"), base_plot_null,
        width = 7, height = 9, units = "in", dpi = 300, bg = "white")
 
 # ---- Legend strip (identical construction to phoneme/grammar/genetic) -------
@@ -157,4 +157,4 @@ legend_strip <- ggplot(legend_df) +
   theme(plot.margin = margin(6, 2, 6, 2))
 
 print(legend_strip)
-saveRDS(legend_strip, file = here("data", "cognate", "feems", "legend_strip_cognate_subgroup.rds"))
+saveRDS(legend_strip, file = here("data", "feems", "legend_strip_cognate_subgroup.rds"))

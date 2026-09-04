@@ -19,10 +19,10 @@
 #
 # Run order: requires `tree_pruned` and `tip_map` from [0]_Phylogenetic_Tree.R.
 #
-# Input:   data/cognate/network_distance/COGNATE_final.csv (from [3]_COGNATE_network_distance.R)
-# Outputs: data/cognate/PVR/COGNATE_geo_vs_ancestry.csv                                (§4 results table)
-#          figures/cognate/regression/cognate_regression_geography[_zeros_kept].png          (y vs. distance)
-#          figures/cognate/regression/cognate_regression_actual_vs_predicted[_zeros_kept].png (A | B calibration)
+# Input:   data/network_distance/COGNATE_final.csv (from [3]_COGNATE_network_distance.R)
+# Outputs: data/pvr/COGNATE_geo_vs_ancestry.csv                                (§4 results table)
+#          figures/regression/cognate_regression_geography[_zeros_kept].png          (y vs. distance)
+#          figures/regression/cognate_regression_actual_vs_predicted[_zeros_kept].png (A | B calibration)
 # =============================================================================
 
 library(PVR)
@@ -43,7 +43,7 @@ scl             <- DISPLAY_UNIT_KM / 1000
 
 # ── Setup: analysis frames, trees, and the geo/ancestry fitter ─────────────
 # [0] relabelled tips to glottocodes, one per language — no duplication here.
-df_full <- read.csv(here("data", "cognate", "network_distance", "COGNATE_final.csv")) |>
+df_full <- read.csv(here("data", "network_distance", "COGNATE_final.csv")) |>
   dplyr::select(glottocode, language, y = loans_norm, x_km = all_of(PREDICTOR)) |>
   semi_join(tip_map, by = "glottocode") |>
   filter(!is.na(y), !is.na(x_km)) |>
@@ -131,7 +131,7 @@ for (r in list(removed, kept)) {
 
 
 # ── 3. Plots ──────────────────────────────────────────────────────────────
-dir.create(here("figures", "cognate", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
 
 mk_geo_plot <- function(r, tag) {
   rg <- r$rows[r$rows$model == "A_geography", ]
@@ -174,13 +174,13 @@ mk_avp_plot <- function(r, tag) {
          x = "Predicted normalized loanword count", y = "Actual normalized loanword count")
 }
 
-ggsave(here("figures", "cognate", "regression", "cognate_regression_geography.png"),
+ggsave(here("figures", "regression", "cognate_regression_geography.png"),
        mk_geo_plot(removed, "removed"), width = 7, height = 4.5, units = "in", dpi = 300)
-ggsave(here("figures", "cognate", "regression", "cognate_regression_actual_vs_predicted.png"),
+ggsave(here("figures", "regression", "cognate_regression_actual_vs_predicted.png"),
        mk_avp_plot(removed, "removed"), width = 9, height = 4.8, units = "in", dpi = 300)
-ggsave(here("figures", "cognate", "regression", "cognate_regression_geography_zeros_kept.png"),
+ggsave(here("figures", "regression", "cognate_regression_geography_zeros_kept.png"),
        mk_geo_plot(kept, "kept"), width = 7, height = 4.5, units = "in", dpi = 300)
-ggsave(here("figures", "cognate", "regression", "cognate_regression_actual_vs_predicted_zeros_kept.png"),
+ggsave(here("figures", "regression", "cognate_regression_actual_vs_predicted_zeros_kept.png"),
        mk_avp_plot(kept, "kept"), width = 9, height = 4.8, units = "in", dpi = 300)
 
 
@@ -194,5 +194,5 @@ ggsave(here("figures", "cognate", "regression", "cognate_regression_actual_vs_pr
 COGNATE_geo_vs_ancestry <- bind_rows(removed$rows, kept$rows)
 print(COGNATE_geo_vs_ancestry)
 write.csv(COGNATE_geo_vs_ancestry,
-          file = here("data", "cognate", "PVR", "COGNATE_geo_vs_ancestry.csv"),
+          file = here("data", "pvr", "COGNATE_geo_vs_ancestry.csv"),
           row.names = FALSE)

@@ -38,7 +38,7 @@ col_names_ruhlen <- c(
 )
 
 # ---- 2. Load Ruhlen data (header = 19 lines, data starts line 20) ----
-lines <- readLines(here("data", "phoneme", "initial_datasets", "pnas_1424033112_sd01.txt"))
+lines <- readLines(here("data", "phoneme", "pnas_1424033112_sd01.txt"))
 
 ruhlen_raw <- read_tsv(
   I(paste(lines[20:length(lines)], collapse = "\n")),
@@ -146,7 +146,7 @@ ruhlen_candidates <- ruhlen_raw |>
 # The unrelated baseline must be covered in BOTH Ruhlen and Grambank so the two
 # analyses share a control set. Reproduces [0]_GRAMBANKdatabase.R's definition
 # without its matrix-reduction loop, which only supplied `relatedmacroareas`.
-languages <- read_csv(here("data", "languages.csv"), show_col_types = FALSE)
+languages <- read_csv(here("data", "shared", "languages.csv"), show_col_types = FALSE)
 
 # Macroarea(s) of the Philippine languages (resolves to "Papunesia"), derived
 # from the bounding box so this block stays self-contained.
@@ -276,7 +276,7 @@ if (length(unmatched) > 0) {
 # ---- 5. Preview geographic spread ----
 map.feature(PHOIBLEdf_PH$language, PHOIBLEdf_PH$Language_type)
 
-write_csv(PHOIBLEdf_PH, here("data", "phoneme", "evolutionary", "initial_datasets", "RUHLENdf_PH_evolutionary.csv"))
+write_csv(PHOIBLEdf_PH, here("data", "phoneme", "RUHLENdf_PH_evolutionary.csv"))
 
 # ---- 6. Compute global phoneme frequencies and IDF weights ----
 # Denominator: every Austronesian language in Ruhlen (n = 284), Philippine
@@ -306,7 +306,7 @@ n_total_languages_an <- nrow(ruhlen_austronesian)
 
 phoneme_freq_austronesian <- compute_phoneme_freq(ruhlen_austronesian, n_total_languages_an)
 
-write_csv(phoneme_freq_austronesian, here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_freq_ruhlen_evolutionary.csv"))
+write_csv(phoneme_freq_austronesian, here("data", "phoneme", "phoneme_freq_ruhlen_evolutionary.csv"))
 
 message(
   "\nDone.",
@@ -318,7 +318,7 @@ message(
   # Phoneme names key mapping -------------------------------------
 
 # ---- build the phoneme_n -> IPA keymap -------------------------------------
-raw   <- read_lines(here('data', 'phoneme', 'initial_datasets', 'pnas_1424033112_sd02.txt'))
+raw   <- read_lines(here('data', 'phoneme', 'pnas_1424033112_sd02.txt'))
 hdr_i <- which(str_starts(raw, "Column\t"))
 
 pnas_key <- read_tsv(I(raw[hdr_i:length(raw)]), show_col_types = FALSE) |>
@@ -344,6 +344,6 @@ if (length(missing_from_key) > 0)
 # Persist the keymap so downstream scripts join against it instead of re-parsing
 # sd02.txt. Not evolutionary-suffixed: it is a straight decode of the SI file
 # with no study-set filtering, so every pipeline shares it.
-write_csv(pnas_key, here("data", "phoneme", "evolutionary", "initial_datasets", "phoneme_key_pnas.csv"))
+write_csv(pnas_key, here("data", "phoneme", "phoneme_key_pnas.csv"))
 
 message("Phoneme keymap: ", nrow(pnas_key), " phonemes -> data/phoneme_key_pnas.csv")

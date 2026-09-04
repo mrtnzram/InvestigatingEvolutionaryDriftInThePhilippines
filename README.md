@@ -29,8 +29,13 @@ R/
   phoneme_analysis/   Numbered Ruhlen/PHOIBLE pipeline ([0]→[1]→…→[8]); FEEMS plotting in [6]/[7]
   grammar_analysis/   Numbered GRAMBANK pipeline ([0]→[1]); FEEMS port still pending
   cognate_analysis/   LingPy cognate analysis (gitignored; not used for the paper)
-data/                 All R-pipeline data: inputs + intermediates (read/written via here("data", ...))
-figures/              Generated plots, grouped by section/type (gitignored)
+data/                 All R-pipeline data, organized method-first (read/written via here("data", ...))
+  <method>/           cosine_similarity, cosine_distribution, network_distance, pvr, mmrr,
+                      feems, procrustes, evolutionary, treemix, legacy — flat inside; the
+                      filename carries the domain (PHONEME_/GRAMMAR_/COGNATE_/GENETIC_)
+  <domain>/           phoneme, grammar, cognate, genetic — that domain's inputs only
+  shared/             cross-domain inputs: mcc.tree, nodes.csv, edges.csv, countries.geojson
+figures/              Generated plots, method-first to match data/ (gitignored)
 python/               FEEMS + waypoint/optimal-path notebooks (phoneme_feems.ipynb is the FEEMS engine)
 archived_code/        Superseded exploratory scripts, kept for reference (gitignored)
 swadeshlist_jsons/    Per-language Swadesh wordlists (cognate input)
@@ -39,7 +44,9 @@ swadeshlist_jsons/    Per-language Swadesh wordlists (cognate input)
 ## Paths convention
 
 All R scripts resolve files with [`here`](https://here.r-lib.org/) anchored to the RStudio
-project (`Indp Research Phillipine Languages.Rproj`), e.g. `read_csv(here("data", "PHOIBLEdf_PH.csv"))`.
+project (`Indp Research Phillipine Languages.Rproj`), e.g.
+`read_csv(here("data", "phoneme", "RUHLENdf_PH.csv"))` for an input and
+`read_csv(here("data", "pvr", "PHONEME_geo_vs_ancestry.csv"))` for a method's output.
 Open the `.Rproj` (or set the working directory to the project root) before sourcing any script.
 
 ## Pipeline order
@@ -64,13 +71,13 @@ bracketed prefix is the execution order:
    `[1]_GRAMMARanalysisweighted_span.R`. (The old monolithic `[1]_PHONEMEanalysisweighted_span.R`
    and `[2]_PHONEMEanalysisweighted_otherlang.R` are retained for reference.)
 3. *(Python — FEEMS)* run `python/phoneme_feems.ipynb` to estimate the effective-migration
-   surface. It reads the feature matrix + frequency table from `data/` and writes the surface
-   raster (`data/phoneme_surface_raster.csv`), node positions (`data/nodepos_phoneme.csv`), and
-   run metadata (`data/phoneme_feems_meta.json`).
+   surface. It reads the feature matrix + frequency table from `data/phoneme/` and writes the
+   surface raster (`data/feems/phoneme_surface_raster.csv`), node positions
+   (`data/feems/nodepos_phoneme.csv`), and run metadata (`data/feems/phoneme_feems_meta.json`).
 4. **`[6]_feems_plot_PA_span.R`** — render the FEEMS surface raster + per-language cosine points
-   into a ggplot base map, saved as `data/base_plot_phoneme_FEEMS.rds`.
+   into a ggplot base map, saved as `data/feems/base_plot_phoneme_FEEMS.rds`.
 5. **`[7]_PA_weight_mst_feems_span.R`** — overlay MST edges / waypoint routes on the base map
-   and mark the colonial capital; saves `figures/phoneme/mst_waypoints/PA_weight_mst_feems.png`.
+   and mark the colonial capital; saves `figures/mst_waypoints/PA_weight_mst_feems.png`.
 
 The grammar analysis has not yet been ported to FEEMS; its migration-surface steps will be
 duplicated from the phoneme `[6]`/`[7]` pattern.
@@ -85,8 +92,8 @@ re-running):
 - `python/optimal_path.ipynb` reads `GRAMFEATURE_match_df.csv`, `PHOIBLE_z_score_df.csv`; writes
   `mst_edges_{GA,PA}.csv`, `smooth_path_{GA,PA}.csv`.
 
-These files live in `data/`. If you re-run the notebooks, point them at `data/` (or move their
-outputs there) so the R scripts pick them up.
+`nodes.csv` / `edges.csv` live in `data/shared/`. If you re-run the notebooks, point them at
+the right method or domain folder (or move their outputs there) so the R scripts pick them up.
 
 ## Prerequisites
 
@@ -99,5 +106,6 @@ outputs there) so the R scripts pick them up.
 ## Not tracked in git
 
 Figures, the cognate analysis, credentials, archived legacy scripts (`archived_code/`), large
-source databases (`values.csv`, `languages.csv`, `logicalTLI_*`), and generated `.rds` objects
+source databases (`data/shared/values.csv`, `data/shared/languages.csv`, `logicalTLI_*`), and
+generated `.rds` objects
 are gitignored (see `.gitignore`). Regenerate them by running the pipeline.
