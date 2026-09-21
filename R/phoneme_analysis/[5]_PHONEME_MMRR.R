@@ -4,8 +4,7 @@
 # Control analysis for internal linguistic diffusion. Regresses pairwise general
 # phonemic similarity (cosine, not Spanish-specific) jointly on terrain-penalized
 # migration distance and patristic phylogenetic distance, with permutation
-# p-values, so geography and shared ancestry — collinear here — are assessed
-# together rather than by a single-predictor Mantel test.
+# p-values.
 #
 # Note: the pairwise distance matrix (X_geo) is built once by
 # [3]_PHONEME_network_distance.R (all-pairs network routing, ratio-bounded
@@ -15,12 +14,15 @@
 # Inputs:  data/PHONEME_cosine_matrix.csv, data/RUHLENdf_PH.csv,
 #          data/PHONEME_dist_matrix.csv       (written by [3])
 #          data/PHONEME_phylo_dist_matrix.csv (written by [0]_Phylogenetic_Tree.R)
-# Outputs: data/PHONEME_sim_matrix.csv,
-#          data/PHONEME_mmrr_results.csv        (joint two-predictor model)
-#          data/PHONEME_mmrr_single_results.csv (single-predictor models)
+# Outputs: data/mmrr/PHONEME_sim_matrix.csv
 #          figures/mmrr/phoneme_mmrr_single_*.png  (3 single-predictor)
-#          figures/mmrr/phoneme_mmrr_pairplot.png,
+#          figures/mmrr/phoneme_mmrr_pairplot.png
 #          figures/mmrr/phoneme_mmrr_partial_regression.png
+#
+# The two results tables are left in the environment as `PHONEME_mmrr_results`
+# and `PHONEME_mmrr_single` rather than written here. R/shared/[5]_ALL_MMRR.R
+# harvests them into data/mmrr/mmrr_results.csv and
+# data/mmrr/mmrr_single_results.csv, consolidated across domains.
 # =============================================================================
 
 library(readr)
@@ -268,8 +270,6 @@ PHONEME_mmrr_single <- bind_rows(
               file  = "phoneme_mmrr_single_geography_vs_phylogeny.png")
 )
 print(PHONEME_mmrr_single)
-write.csv(PHONEME_mmrr_single,
-          file = here("data", "mmrr", "PHONEME_mmrr_single_results.csv"), row.names = FALSE)
 
 
 # ---- 9b. Joint two-predictor MMRR -------------------------------------------
@@ -288,8 +288,6 @@ PHONEME_mmrr_results <- tibble(
   p_model    = unname(mmrr_fit$Fpvalue)
 )
 print(PHONEME_mmrr_results)
-write.csv(PHONEME_mmrr_results,
-          file = here("data", "mmrr", "PHONEME_mmrr_results.csv"), row.names = FALSE)
 
 # ---- 11. Visualization ------------------------------------------------------
 # Both figures are built on the standardized unfolded lower triangles, so they

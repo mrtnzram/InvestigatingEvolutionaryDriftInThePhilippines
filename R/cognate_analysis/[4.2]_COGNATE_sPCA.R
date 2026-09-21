@@ -9,13 +9,13 @@
 #
 # Run order: requires `tree_pruned` and `tip_map` from [0]_Phylogenetic_Tree.R.
 #
-# Input:   data/cognate/PH_df.csv (raw per-gloss wordforms),
-#          data/cognate/COGNATE_final.csv (y/x for eigenvector selection only),
-#          data/cognate/COGNATE_dist_matrix.csv
-# Outputs: data/cognate/COGNATE_sPCA_results.csv, data/cognate/COGNATE_sPCA_scores.csv,
-#          data/cognate/COGNATE_sPCA_loadings.csv,
-#          figures/regression/cognate_sPCA_surface.png,
-#          data/cognate/base_plot_cognate_sPCA.rds
+# Input:   data/cognate/PH_df.csv (raw per-gloss wordforms)
+#          data/network_distance/COGNATE_final.csv (y/x for eigenvector selection only)
+#          data/network_distance/COGNATE_dist_matrix.csv
+# Outputs: data/spca/COGNATE_sPCA_results.csv, data/spca/COGNATE_sPCA_scores.csv
+#          data/spca/COGNATE_sPCA_loadings.csv
+#          data/spca/base_plot_cognate_sPCA.rds
+#          figures/regression/cognate_sPCA_surface.png
 # =============================================================================
 
 library(PVR)
@@ -26,6 +26,8 @@ library(spdep)
 library(adespatial)
 library(adegenet)
 library(maps)
+
+source(here("R", "shared", "spatial_threshold.R"))
 
 stopifnot(
   "Run [0]_Phylogenetic_Tree.R first: `tree_pruned` is not defined." =
@@ -131,52 +133,30 @@ message(ncol(X), " of ", length(feature_cols), " features retained (non-invarian
         "residualized against the ", k, "-eigenvector set above.")
 
 
-# ── 4. Spatial weight matrix: threshold search, maximizing sPCA eigenvalue ──
+# ── 4. Spatial weight matrix: fixed geographic threshold ────────────────────
 COGNATE_dist_matrix <- read.csv(here("data", "network_distance", "COGNATE_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
   as.matrix()
 Dgeo <- COGNATE_dist_matrix[df$glottocode, df$glottocode]
 diag(Dgeo) <- 0
 
-dvals <- Dgeo[upper.tri(Dgeo)]
-dvals <- dvals[dvals > 0]
-thresholds <- sort(unique(quantile(dvals, probs = seq(0.1, 1, length.out = 20), na.rm = TRUE)))
+# Geography-only tau (longest MST edge; see R/shared/spatial_threshold.R). It
+# guarantees every unit a neighbour, which spca()'s matWeight normalization
+# (prop.table) requires — an isolated row would divide by zero.
+tau    <- mst_threshold(Dgeo)
+W_best <- threshold_weights(Dgeo, tau)
+stopifnot("A unit has no neighbour within tau." = all(rowSums(W_best) > 0))
 
-# PCA step is network-independent, so it runs once outside the threshold loop.
 pca_R <- dudi.pca(as.data.frame(R), center = TRUE, scale = FALSE, scannf = FALSE)
-
-best <- list(threshold = NA_real_, eig1 = -Inf, listw = NULL)
-for (th in thresholds) {
-  W <- 1 / Dgeo^2
-  W[!is.finite(W)] <- 0
-  W[Dgeo > th] <- 0
-  diag(W) <- 0
-  # spca()'s matWeight normalization (prop.table) can't tolerate an isolated
-  # row, unlike spdep's zero.policy — reject any candidate with one, not just
-  # a fully-disconnected graph.
-  if (any(rowSums(W) == 0)) next
-
-  lw <- mat2listw(W, style = "W", zero.policy = TRUE)
-  ms <- tryCatch(multispati(pca_R, lw, scannf = FALSE, nfposi = 1, nfnega = 0),
-                 error = function(e) NULL)
-  if (is.null(ms)) next
-
-  if (ms$eig[1] > best$eig1) {
-    best <- list(threshold = th, eig1 = ms$eig[1], listw = lw)
-  }
-}
-stopifnot("No candidate threshold produced a usable spatial weights object." =
-            !is.null(best$listw))
+ms    <- multispati(pca_R, mat2listw(W_best, style = "W", zero.policy = TRUE),
+                    scannf = FALSE, nfposi = 1, nfnega = 0)
+best  <- list(threshold = tau, eig1 = ms$eig[1])
 
 message(sprintf("Spatial weights: threshold = %.1f km, leading eigenvalue = %.4f.",
                 best$threshold, best$eig1))
 
 
 # ── 5. Real spca() ────────────────────────────────────────────────────────
-W_best <- 1 / Dgeo^2
-W_best[!is.finite(W_best)] <- 0
-W_best[Dgeo > best$threshold] <- 0
-diag(W_best) <- 0
 
 spca_fit <- spca(as.data.frame(R), xy = cbind(df$longitude, df$latitude),
                  matWeight = W_best, scannf = FALSE, nfposi = 1, nfnega = 1)
@@ -198,13 +178,13 @@ message(sprintf("sPCA: variance explained (axis 1) = %.3f, permutation p = %.4f.
 # ── 6. Per-language scores + per-feature loadings ────────────────────────────
 scores_df <- tibble(language = df$language, longitude = df$longitude,
                     latitude = df$latitude, sPC1 = sPC1)
-write.csv(scores_df, file = here("data", "pvr", "COGNATE_sPCA_scores.csv"),
+write.csv(scores_df, file = here("data", "spca", "COGNATE_sPCA_scores.csv"),
           row.names = FALSE)
 
 loadings_df <- tibble(feature = colnames(R), loading = spca_fit$c1[, 1]) |>
   separate_wider_delim(feature, "::", names = c("gloss", "wordform"), cols_remove = FALSE) |>
   arrange(desc(abs(loading)))
-write.csv(loadings_df, file = here("data", "pvr", "COGNATE_sPCA_loadings.csv"),
+write.csv(loadings_df, file = here("data", "spca", "COGNATE_sPCA_loadings.csv"),
           row.names = FALSE)
 
 
@@ -216,7 +196,7 @@ COGNATE_sPCA_results <- tibble(
 )
 print(COGNATE_sPCA_results)
 write.csv(COGNATE_sPCA_results,
-          file = here("data", "pvr", "COGNATE_sPCA_results.csv"), row.names = FALSE)
+          file = here("data", "spca", "COGNATE_sPCA_results.csv"), row.names = FALSE)
 
 
 # ── 8. Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ───────────
@@ -262,4 +242,4 @@ print(p_surface)
 
 ggsave(here("figures", "regression", "cognate_sPCA_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
-saveRDS(p_surface, file = here("data", "pvr", "base_plot_cognate_sPCA.rds"))
+saveRDS(p_surface, file = here("data", "spca", "base_plot_cognate_sPCA.rds"))

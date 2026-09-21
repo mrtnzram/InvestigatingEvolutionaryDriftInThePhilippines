@@ -13,18 +13,27 @@
 #
 # B has no single interpretable slope, so the two are compared as predictors:
 # RMSE (and leave-one-out RMSE) of actual vs. predicted y. `cor_with_distance`
-# carries the directional read — see §4.
+# carries the directional read — see §5.
 #
 # Many populations carry zero Spanish admixture (negatives floored to 0 in
 # [0]_GENETIC_ADMX_MALDER.R); that spike at 0 dominates the slope. Both models
 # are fit twice — zeros removed (primary) and kept — both conditions in the table.
 #
+# Populations in the worst qpAdm-SE bucket are dropped before either fit —
+# span_se_capped >= 0.15, the top quartile and the ">= 0.15" tier of
+# [7]_GENETIC_geoplots.R's 4-point size legend (q_hi | 0.15 | 0.018 | q_lo).
+# An SE that large means the admixture estimate itself is unreliable.
+#
 # Input:   data/network_distance/GENETIC_final.csv (from [3]),
 #          data/genetic/Phil_2.24M_pca_results.eigenvec (PLINK --pca, individual-level,
 #          headerless FID/IID/PC1..; same file [9]_GENETIC_PROCRUSTES.R reads)
-# Outputs: data/pvr/GENETIC_geo_vs_ancestry.csv                                (§4 results table)
-#          figures/regression/genetic_regression_geography[_zeros_kept].png          (y vs. distance)
+# Outputs: figures/regression/genetic_regression_geography[_zeros_kept].png           (y vs. distance)
 #          figures/regression/genetic_regression_actual_vs_predicted[_zeros_kept].png (A | B calibration)
+#          figures/regression/genetic_pvr_varpart[_zeros_kept].png                    (a/b/c/d partition)
+#
+# The §5 results table is left in the environment as `GENETIC_geo_vs_ancestry`
+# rather than written here. R/shared/[4]_ALL_PVR.R harvests it and writes
+# data/pvr/geo_vs_ancestry.csv, consolidated across all four domains.
 # =============================================================================
 
 library(tidyverse)
@@ -36,6 +45,9 @@ source(here("R", "shared", "select_moran_eigenvectors.R"))
 PREDICTOR       <- "geodist_H1_span"
 DISPLAY_UNIT_KM <- 100                 # slopes are reported per this many km
 scl             <- DISPLAY_UNIT_KM / 1000
+
+# Worst qpAdm-SE bucket to drop — see the header note; matches [7]'s legend tier.
+SE_HIGH_CUTOFF <- 0.15
 
 
 # ── Setup: population-structure eigenvectors, frames, and the geo/ancestry fitter ──
@@ -60,10 +72,20 @@ stopifnot(
 # qpAdm source populations carry no estimate and drop out. max(span_admx) is
 # unchanged by dropping zeros, so y is on the same scale in both frames.
 df_full <- GENETIC_final |>
-  dplyr::select(population, span_admx, span_w, x_km = all_of(PREDICTOR)) |>
+  dplyr::select(population, span_admx, span_w, span_se_capped, x_km = all_of(PREDICTOR)) |>
   inner_join(eigenvec_pop, by = "population") |>
   filter(!is.na(span_admx), !is.na(x_km)) |>
   as.data.frame()
+
+# Drop the worst-SE bucket before either fit (span_se_capped is never NA once
+# span_admx is present — asserted below).
+stopifnot("span_se_capped is NA for a population with a span_admx estimate." =
+            !anyNA(df_full$span_se_capped))
+n_high_se <- sum(df_full$span_se_capped >= SE_HIGH_CUTOFF)
+df_full   <- df_full[df_full$span_se_capped < SE_HIGH_CUTOFF, , drop = FALSE]
+message(n_high_se, " high-SE populations dropped (span_se_capped >= ", SE_HIGH_CUTOFF,
+        ") | ", nrow(df_full), " retained.")
+
 df_full$y <- df_full$span_admx / max(df_full$span_admx)
 df        <- df_full[df_full$span_admx > 0, , drop = FALSE]   # primary: non-zero set
 message(sum(df_full$span_admx == 0), " zero-admixture populations | ",
@@ -99,17 +121,25 @@ geo_anc_fit <- function(frame, zeros_label) {
     Ep     <- apply(Es, 2, \(col) resid(lm(col ~ xx)))
     m_anc  <- lm(yy ~ Ep)
     anc_r2 <- summary(m_anc)$r.squared
-    inc    <- anova(m_geo, m_full)                 # incremental F: structure on top of geography
-    anc_F  <- inc[["F"]][2]; anc_p <- inc[["Pr(>F)"]][2]
+    fst    <- summary(m_anc)$fstatistic           # overall F-test of B: does structure itself predict y?
+    anc_F  <- unname(fst[1]); anc_p <- unname(pf(fst[1], fst[2], fst[3], lower.tail = FALSE))
     anc_dir <- cor(fitted(lm(yy ~ Es)), xx)        # un-scrubbed structure prediction vs distance
     stopifnot(
       "geography R^2 + structure R^2 != R^2(y ~ E_sel + x)." =
         isTRUE(all.equal(geo_r2 + anc_r2, summary(m_full)$r.squared, tolerance = 1e-6))
     )
   }
+  R2_full <- summary(m_full)$r.squared
+  R2_anc  <- if (kk == 0) 0 else summary(lm(yy ~ Es))$r.squared
+  vp <- tibble(
+    component = c("a", "b", "c", "d"),
+    meaning   = c("geography only", "shared", "population structure only", "unexplained"),
+    fraction  = c(R2_full - R2_anc, geo_r2 + R2_anc - R2_full, anc_r2, 1 - R2_full)
+  )
   gp <- perf(m_geo); ap <- perf(m_anc)
   list(
     frame = frame, m_geo = m_geo, m_anc = m_anc, zeros = zeros_label,
+    vp = vp, r2_full = R2_full,
     rows = tibble(
       model      = c("A_geography", "B_ancestry_given_geography"),
       predictor  = c(paste0(PREDICTOR, " (per ", DISPLAY_UNIT_KM, " km)"),
@@ -143,7 +173,21 @@ for (r in list(removed, kept)) {
 }
 
 
-# ── 3. Plots ──────────────────────────────────────────────────────────────
+# ── 3. Variance partition ─────────────────────────────────────────────────
+# Nested-R^2 split of each full model. b is a difference of R^2, not a variance,
+# and goes negative under suppression.
+GENETIC_pvr_varpart <- bind_rows(
+  mutate(removed$vp, zeros = "removed", .before = 1),
+  mutate(kept$vp,    zeros = "kept",    .before = 1)
+)
+print(GENETIC_pvr_varpart)
+stopifnot("Variance partition does not sum to 1." =
+            all(vapply(list(removed$vp, kept$vp),
+                       \(v) isTRUE(all.equal(sum(v$fraction), 1, tolerance = 1e-8)),
+                       logical(1))))
+
+
+# ── 4. Plots ──────────────────────────────────────────────────────────────
 # Point area = span_w (inverse-variance weight), matching the [7] map.
 dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
 
@@ -190,6 +234,50 @@ mk_avp_plot <- function(r, tag) {
          x = "Predicted normalized admixture", y = "Actual normalized admixture")
 }
 
+# vp_diagram(): PVR::VarPartplot()'s layout — total variance is the full-width
+# line, geography is the bar above it (a + b) and population structure the bar below (b + c),
+# so the two overlap on the shared fraction b. Rebuilt here rather than called
+# from PVR so it also serves domains with no PVR fit object.
+vp_diagram <- function(vp, title, subtitle, anc_label) {
+  f   <- setNames(vp$fraction, vp$component)[c("a", "b", "c", "d")]
+  x   <- cumsum(c(0, f[["a"]], f[["b"]], f[["c"]]))
+  mid <- x + f / 2
+
+  # Narrow spans cannot sit under their own label, so labels are pushed apart to
+  # a minimum gap and tied back to their span by a leader.
+  gap <- 0.085
+  o <- order(mid); p <- mid[o]
+  for (i in seq_along(p)[-1]) p[i] <- max(p[i], p[i - 1] + gap)
+  if (max(p) > 1) {
+    p <- p - (max(p) - 1)
+    for (i in rev(seq_along(p))[-1]) p[i] <- min(p[i], p[i + 1] - gap)
+  }
+  lx <- numeric(length(mid)); lx[o] <- p
+
+  box <- data.frame(xmin = c(min(x[1], x[3]), min(x[2], x[4])),
+                    xmax = c(max(x[1], x[3]), max(x[2], x[4])),
+                    ymin = c(0.500, 0.375), ymax = c(0.625, 0.500))
+  box <- box[box$xmax > box$xmin, ]   # a zero-width bar would draw as a stray tick
+
+  ggplot() +
+    geom_rect(data = box, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+              fill = "white", colour = "black", linewidth = 0.4) +
+    geom_segment(data = data.frame(x = x), aes(x = x, xend = x, y = 0.5, yend = 0.68),
+                 linetype = "dashed", linewidth = 0.3) +
+    geom_segment(data = data.frame(mid = mid, lx = lx),
+                 aes(x = mid, xend = lx, y = 0.68, yend = 0.755),
+                 linewidth = 0.25, colour = "grey45") +
+    annotate("segment", x = 0, xend = 1, y = 0.5, yend = 0.5, linewidth = 0.9) +
+    geom_text(data = data.frame(lx = lx, lab = sprintf("%s\n%.3f", names(f), f)),
+              aes(lx, 0.80, label = lab), size = 3.4, lineheight = 0.95, vjust = 0) +
+    geom_text(data = data.frame(y = c(0.5625, 0.4375), lab = c("geography", anc_label)),
+              aes(-0.012, y, label = lab), hjust = 1, size = 3.4) +
+    coord_cartesian(xlim = c(0, 1), ylim = c(0.34, 0.94), clip = "off") +
+    theme_void(base_size = 11) +
+    theme(plot.margin = margin(10, 14, 10, 96), plot.title.position = "plot") +
+    labs(title = title, subtitle = subtitle)
+}
+
 ggsave(here("figures", "regression", "genetic_regression_geography.png"),
        mk_geo_plot(removed, "removed"), width = 7, height = 4.5, units = "in", dpi = 300)
 ggsave(here("figures", "regression", "genetic_regression_actual_vs_predicted.png"),
@@ -199,16 +287,22 @@ ggsave(here("figures", "regression", "genetic_regression_geography_zeros_kept.pn
 ggsave(here("figures", "regression", "genetic_regression_actual_vs_predicted_zeros_kept.png"),
        mk_avp_plot(kept, "kept"), width = 9, height = 4.8, units = "in", dpi = 300)
 
+ggsave(here("figures", "regression", "genetic_pvr_varpart.png"),
+       vp_diagram(removed$vp, "Genetic variance partition (zeros removed)",
+                  sprintf("r^2 = %.3f", removed$r2_full), "population structure"),
+       width = 7, height = 3.6, units = "in", dpi = 300)
+ggsave(here("figures", "regression", "genetic_pvr_varpart_zeros_kept.png"),
+       vp_diagram(kept$vp, "Genetic variance partition (zeros kept)",
+                  sprintf("r^2 = %.3f", kept$r2_full), "population structure"),
+       width = 7, height = 3.6, units = "in", dpi = 300)
 
-# ── 4. Results table ──────────────────────────────────────────────────────
+
+# ── 5. Results table ──────────────────────────────────────────────────────
 # Rows: model x zero-handling condition. slope: A only (B is a k-vector block).
-# statistic/p.value: A = t on the distance coefficient, B = incremental F of the
-# structure block on top of geography. r.squared: A = R^2, B = semipartial.
+# statistic/p.value: A = t on the distance coefficient, B = the overall F-test
+# of the structure model itself (y ~ scrubbed eigenvectors). r.squared: A = R^2, B = semipartial.
 # cor_with_distance: A = raw cor(admixture, distance); B = cor(un-scrubbed
 # structure prediction, distance) — sign shows whether structure runs with (-)
 # or against (+) the geographic gradient.
 GENETIC_geo_vs_ancestry <- bind_rows(removed$rows, kept$rows)
 print(GENETIC_geo_vs_ancestry)
-write.csv(GENETIC_geo_vs_ancestry,
-          file = here("data", "pvr", "GENETIC_geo_vs_ancestry.csv"),
-          row.names = FALSE)

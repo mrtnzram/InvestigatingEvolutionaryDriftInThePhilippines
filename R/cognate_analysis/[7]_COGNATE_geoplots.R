@@ -50,9 +50,17 @@ add_routes <- function(base) {
 }
 
 # ---- Loanword points --------------------------------------------------------
-# White -> navy ramp over the full [0, 1] normalized range, drawn as a
+# White -> teal -> navy ramp over the full [0, 1] normalized range, drawn as a
 # translucent disc under a black ring; both layers use POINT_SIZE so the ring
 # cannot drift off the disc. Capital marker goes last to stay on top.
+global_lim <- c(0, 1)
+
+# Mid stop anchored at the 75th percentile rather than the geometric midpoint:
+# loan counts are right-skewed against a floor at 0, so a linear white -> navy
+# ramp put three quarters of the points in one pale band. global_lim starts at 0,
+# so the rescaled position of the anchor is q75 / max.
+mid_frac <- as.numeric(quantile(points_df$loans_norm, 0.75, na.rm = TRUE)) / global_lim[2]
+
 final_plot <- add_routes(base_plot) +
   geom_point(data = points_df,
              aes(x = longitude, y = latitude, colour = loans_norm),
@@ -62,7 +70,9 @@ final_plot <- add_routes(base_plot) +
              shape = 21, colour = "black", size = POINT_SIZE) +
   geom_point(data = capital_df, aes(x = x, y = y, shape = label),
              color = "red", size = 4) +
-  scale_colour_gradient(low = "white", high = "navy", limits = c(0, 1)) +
+  scale_colour_gradientn(colours = c("white", "#2E9E8F", "navy"),
+                         values  = c(0, mid_frac, 1),
+                         limits  = global_lim) +
   scale_shape_manual(values = c("Capital" = 18)) +
   guides(
     colour = guide_colorbar(title = "Spanish loanwords",

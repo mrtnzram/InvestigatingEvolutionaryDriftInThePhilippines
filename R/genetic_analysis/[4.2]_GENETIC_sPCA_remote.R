@@ -131,12 +131,14 @@ message(ncol(freq), " SNPs retained (non-invariant, fully observed).")
 
 
 # ── 4. Population-structure eigenvectors — same E_sel as [4]_GENETIC_PVR.R ──
-# select_moran_eigenvectors.R is scp'd flat next to this script (see README).
+# select_moran_eigenvectors.R and spatial_threshold.R are scp'd flat next to
+# this script (see README).
 script_dir <- {
   file_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
   if (length(file_arg) == 1) dirname(sub("^--file=", "", file_arg)) else "."
 }
 source(file.path(script_dir, "select_moran_eigenvectors.R"))
+source(file.path(script_dir, "spatial_threshold.R"))
 
 eigenvec_raw <- read.table(args$eigenvec, header = FALSE, stringsAsFactors = FALSE)
 n_pc <- ncol(eigenvec_raw) - 2
@@ -207,45 +209,30 @@ message(sprintf("Reduced %d SNPs to %d PC scores (of %d possible), capturing %.1
                 ncol(R), r, r_max, 100 * var_kept))
 
 
-# ── 7. Spatial weight matrix: threshold search, maximizing sPCA eigenvalue ──
+# ── 7. Spatial weight matrix: fixed geographic threshold ────────────────────
 GENETIC_dist_matrix <- read.csv(args$`dist-matrix`, row.names = 1, check.names = FALSE) |>
   as.matrix()
 Dgeo <- GENETIC_dist_matrix[common, common]
 diag(Dgeo) <- 0
 
-dvals <- Dgeo[upper.tri(Dgeo)]
-dvals <- dvals[dvals > 0]
-thresholds <- sort(unique(quantile(dvals, probs = seq(0.1, 1, length.out = 20), na.rm = TRUE)))
+# Geography-only tau (longest MST edge; see R/shared/spatial_threshold.R). It
+# guarantees every unit a neighbour, which spca()'s matWeight normalization
+# (prop.table) requires — an isolated row would divide by zero.
+tau    <- mst_threshold(Dgeo)
+W_best <- threshold_weights(Dgeo, tau)
+stopifnot("A unit has no neighbour within tau." = all(rowSums(W_best) > 0))
 
 pca_scores <- dudi.pca(as.data.frame(scores), center = FALSE, scale = FALSE, scannf = FALSE)
+ms    <- multispati(pca_scores, mat2listw(W_best, style = "W", zero.policy = TRUE),
+                    scannf = FALSE, nfposi = 1, nfnega = 0)
+best  <- list(threshold = tau, eig1 = ms$eig[1])
 
-best <- list(threshold = NA_real_, eig1 = -Inf, listw = NULL)
-for (th in thresholds) {
-  W <- 1 / Dgeo^2
-  W[!is.finite(W)] <- 0
-  W[Dgeo > th] <- 0
-  diag(W) <- 0
-  if (any(rowSums(W) == 0)) next   # spca()'s matWeight normalization needs no isolates
-
-  lw <- mat2listw(W, style = "W", zero.policy = TRUE)
-  ms <- tryCatch(multispati(pca_scores, lw, scannf = FALSE, nfposi = 1, nfnega = 0),
-                 error = function(e) NULL)
-  if (is.null(ms)) next
-  if (ms$eig[1] > best$eig1) best <- list(threshold = th, eig1 = ms$eig[1], listw = lw)
-}
-stopifnot("No candidate threshold produced a usable spatial weights object." =
-            !is.null(best$listw))
 message(sprintf("Spatial weights: threshold = %.1f km, leading eigenvalue = %.4f.",
                 best$threshold, best$eig1))
 
 
 # ── 8. Real spca() ────────────────────────────────────────────────────────
 coords <- GENETIC_final[match(common, GENETIC_final$population), c("longitude", "latitude")]
-
-W_best <- 1 / Dgeo^2
-W_best[!is.finite(W_best)] <- 0
-W_best[Dgeo > best$threshold] <- 0
-diag(W_best) <- 0
 
 spca_fit <- spca(as.data.frame(scores), xy = as.matrix(coords),
                  matWeight = W_best, scannf = FALSE, nfposi = 1, nfnega = 1)

@@ -15,12 +15,15 @@
 # Inputs:  data/GRAMMAR_cosine_matrix.csv, data/GRAMBANKdf_full.csv,
 #          data/GRAMMAR_dist_matrix.csv       (written by [3])
 #          data/GRAMMAR_phylo_dist_matrix.csv (written by [0]_Phylogenetic_Tree.R)
-# Outputs: data/GRAMMAR_sim_matrix.csv,
-#          data/GRAMMAR_mmrr_results.csv        (joint two-predictor model)
-#          data/GRAMMAR_mmrr_single_results.csv (single-predictor models)
+# Outputs: data/mmrr/GRAMMAR_sim_matrix.csv
 #          figures/mmrr/grammar_mmrr_single_*.png  (3 single-predictor)
-#          figures/mmrr/grammar_mmrr_pairplot.png,
+#          figures/mmrr/grammar_mmrr_pairplot.png
 #          figures/mmrr/grammar_mmrr_partial_regression.png
+#
+# The two results tables are left in the environment as `GRAMMAR_mmrr_results`
+# and `GRAMMAR_mmrr_single` rather than written here. R/shared/[5]_ALL_MMRR.R
+# harvests them into data/mmrr/mmrr_results.csv and
+# data/mmrr/mmrr_single_results.csv, consolidated across domains.
 # =============================================================================
 
 library(readr)
@@ -270,8 +273,6 @@ GRAMMAR_mmrr_single <- bind_rows(
               file  = "grammar_mmrr_single_geography_vs_phylogeny.png")
 )
 print(GRAMMAR_mmrr_single)
-write.csv(GRAMMAR_mmrr_single,
-          file = here("data", "mmrr", "GRAMMAR_mmrr_single_results.csv"), row.names = FALSE)
 
 
 # ---- 9b. Joint two-predictor MMRR -------------------------------------------
@@ -290,8 +291,6 @@ GRAMMAR_mmrr_results <- tibble(
   p_model    = unname(mmrr_fit$Fpvalue)
 )
 print(GRAMMAR_mmrr_results)
-write.csv(GRAMMAR_mmrr_results,
-          file = here("data", "mmrr", "GRAMMAR_mmrr_results.csv"), row.names = FALSE)
 
 # ---- 11. Visualization ------------------------------------------------------
 # Both figures are built on the standardized unfolded lower triangles, so they

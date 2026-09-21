@@ -1,5 +1,5 @@
 # =============================================================================
-# [2] Phoneme Analysis — Cosine-similarity distribution analysis
+# [2] Phoneme Analysis — Cosine-similarity distribution analysis (no mod phonemes)
 # Visualizes the distribution of each Philippine language's phoneme cosine
 # similarity to Spanish / English / Japanese / unrelated controls (ridge +
 # density plots), then tests whether the baselines stand out from the unrelated
@@ -11,7 +11,7 @@
 # Inputs:  data/PHONEME_cossim.csv         (from [1]_PHONEME_cosine_similarity.R)
 #          data/PHONEME_cosine_matrix.csv  (per-language null: cols = unrelated)
 #          data/RUHLENdf_PH.csv            (language-type lookup for ph/unr sets)
-# Output:  data/PHONEME_cossim.csv         (overwritten with *_influenced / sig_*
+# Output:  data/PHONEME_cossim_marked.csv  (with *_influenced / sig_*
 #                                            columns for [3] to carry downstream)
 # =============================================================================
 
@@ -69,6 +69,10 @@ combined_scores <- PHONEME_cossim |>
                names_to = "Language",
                values_to = "Similarity_Score")
 
+# Tick max rounded up from the largest observed score (not hard-coded), so the
+# axis stops at the data instead of trailing empty ticks.
+sim_breaks <- seq(0, ceiling(max(combined_scores$Similarity_Score) / 0.05) * 0.05, by = 0.05)
+
 combined_scores_summary <- combined_scores |>
   group_by(Language) |>
   summarize(mean_score = mean(Similarity_Score),
@@ -97,7 +101,7 @@ cossim_phoneme_density_ridge <- ggplot(combined_scores, aes(x = Similarity_Score
     y = "Language"
   ) +
   theme_minimal() +
-  scale_x_continuous(breaks = seq(0, 0.5, by = 0.05)) +
+  scale_x_continuous(breaks = sim_breaks) +
   scale_y_discrete(expand = c(0.01, 0)) +
   theme(legend.position = "none")
 
@@ -127,7 +131,7 @@ density_compare <- function(langs) {
          x = "Similarity Score",
          y = "Density") +
     theme_bw() +
-    scale_x_continuous(breaks = seq(0, 0.4, by = 0.02))
+    scale_x_continuous(breaks = sim_breaks)
 }
 
 phoneme_cos_s <- density_compare(c("Unrelated", "Spanish"))
@@ -713,7 +717,7 @@ plot_influenced_vs_unrelated <- function(inf_col, obs_col, baseline_name, fill_c
     ) +
     scale_fill_manual(values = setNames(c("grey70", fill_color), c("Unrelated", baseline_name))) +
     scale_color_manual(values = setNames(c("grey40", fill_color), c("Unrelated", baseline_name))) +
-    scale_x_continuous(breaks = seq(0, 0.5, by = 0.05)) +
+    scale_x_continuous(breaks = sim_breaks) +
     scale_y_discrete(expand = c(0.01, 0), labels = labels) +
     labs(title = paste0(baseline_name, "-influenced languages vs. the unrelated baseline"),
          x = "Cosine similarity", y = NULL) +

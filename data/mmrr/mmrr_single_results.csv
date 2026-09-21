@@ -1,0 +1,10 @@
+"domain","model","beta","p_value","r_squared"
+"phoneme","similarity_vs_geography",-0.0651436814233131,0.0514,0.00424369922938209
+"phoneme","similarity_vs_phylogeny",-0.125924741806327,0.001,0.0158570405989899
+"phoneme","geography_vs_phylogeny",0.647758951341132,1e-04,0.419591659042559
+"grammar","similarity_vs_geography",0.00416031969192271,0.9625,1.73082599389999e-05
+"grammar","similarity_vs_phylogeny",0.0271343869503432,0.6748,0.000736274955170957
+"grammar","geography_vs_phylogeny",0.68550375691623,1e-04,0.469915400746266
+"cognate","similarity_vs_geography",-0.427052167352186,1e-04,0.182373553640198
+"cognate","similarity_vs_phylogeny",-0.711344513924941,1e-04,0.50601101749117
+"cognate","geography_vs_phylogeny",0.573584849048531,1e-04,0.328999579058067

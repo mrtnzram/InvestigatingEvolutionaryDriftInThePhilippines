@@ -222,6 +222,12 @@ map_subset <- world_map %>% filter(region %in% c("Philippines", "Malaysia"))
 
 global_lim <- c(0, cossim_span_max)
 
+# Mid stop anchored at the 75th percentile rather than the geometric midpoint:
+# these scores are right-skewed against a floor at 0, so a linear white -> navy
+# ramp put three quarters of the points in one pale band. global_lim starts at 0,
+# so the rescaled position of the anchor is q75 / max.
+mid_frac <- as.numeric(quantile(GRAMMAR_cossim$cossim_span, 0.75, na.rm = TRUE)) / global_lim[2]
+
 base_plot_cosine <- ggplot() +
   geom_polygon(data = map_subset, aes(x = long, y = lat, group = group),
                fill = "gray95", color = "gray70") +
@@ -230,7 +236,9 @@ base_plot_cosine <- ggplot() +
              size = 4, alpha = 0.7) +
   geom_point(data = GRAMMAR_cossim, aes(x = longitude, y = latitude),
              size = 4, shape = 21, color = "black") +
-  scale_color_gradient(low = "white", high = "navy", limits = global_lim) +
+  scale_color_gradientn(colours = c("white", "#2E9E8F", "navy"),
+                        values  = c(0, mid_frac, 1),
+                        limits  = global_lim) +
   guides(color = guide_colorbar(title = "Cosine Similarity",
                                 title.position = "top", title.hjust = 0.5)) +
   coord_fixed(xlim = c(115, 130), ylim = c(4, 22)) +

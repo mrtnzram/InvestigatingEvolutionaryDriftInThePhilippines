@@ -14,9 +14,13 @@
 #
 # Input:   data/GRAMBANKdf_full.csv, data/gramfeature_freq.csv,
 #          data/GRAMMAR_subgroup_lookup.csv
-# Outputs: data/GRAMMAR_procrustes_results.csv, data/GRAMMAR_procrustes_scores.csv,
-#          figures/procrustes/GRAMMAR_pca.png,
+# Outputs: data/procrustes/GRAMMAR_procrustes_scores.csv
+#          figures/procrustes/GRAMMAR_pca.png
 #          figures/procrustes/GRAMMAR_procrustes.png
+#
+# The results table is left in the environment as `results_df` rather than
+# written here. R/shared/[9]_ALL_PROCRUSTES.R harvests it and writes
+# data/procrustes/procrustes_results.csv, consolidated across all four domains.
 # =============================================================================
 
 library(adegenet)   # loads ade4 (dudi.pca, procuste, procuste.randtest)
@@ -171,7 +175,6 @@ axis_lines <- bind_rows(
 results_df <- tibble(domain = "grammar", n = N, ss_gower = ss,
                       correlation = correlation, p_value = p_value, n_perm = N_PERM)
 print(results_df)
-write_csv(results_df, here("data", "procrustes", "GRAMMAR_procrustes_results.csv"))
 write_csv(analysis_df, here("data", "procrustes", "GRAMMAR_procrustes_scores.csv"))
 
 # ── 6. PCA figure (own file) ─────────────────────────────────────────────────

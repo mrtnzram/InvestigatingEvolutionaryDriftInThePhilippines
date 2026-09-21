@@ -7,10 +7,10 @@
 #
 # Run order: requires `tree_pruned` and `tree_df_matched` from [0]_Phylogenetic_Tree.R.
 #
-# Input:   data/PHONEME_final.csv, data/PHONEME_dist_matrix.csv (both from [3])
-# Outputs: data/PHONEME_pvr_spca_results.csv, data/PHONEME_spca_scores.csv,
-#          figures/regression/phoneme_pvr_spca_surface.png,
-#          data/base_plot_phoneme_PVR_sPCA.rds
+# Input:   data/network_distance/PHONEME_final.csv, data/network_distance/PHONEME_dist_matrix.csv (both from [3])
+# Outputs: data/pvr_mem/PHONEME_pvr_spca_results.csv, data/pvr_mem/PHONEME_spca_scores.csv
+#          data/pvr_mem/base_plot_phoneme_PVR_sPCA.rds
+#          figures/regression/phoneme_pvr_spca_surface.png
 # =============================================================================
 
 library(PVR)
@@ -20,6 +20,8 @@ library(here)
 library(spdep)
 library(adespatial)
 library(maps)
+
+source(here("R", "shared", "spatial_threshold.R"))
 
 stopifnot(
   "Run [0]_Phylogenetic_Tree.R first: `tree_pruned` is not defined." =
@@ -73,7 +75,7 @@ message(k, " phylogenetic eigenvector", if (k == 1) "" else "s",
 resid_y <- resid(lm(y ~ E_sel))
 
 
-# ── 4. Spatial weight matrix: threshold search ──────────────────────────────
+# ── 4. Spatial weight matrix: fixed geographic threshold ────────────────────
 # Tip-level Dgeo: dialect tips of one language share coordinates, not resid_y.
 PHONEME_dist_matrix <- read.csv(here("data", "network_distance", "PHONEME_dist_matrix.csv"),
                                 row.names = 1, check.names = FALSE) |>
@@ -83,32 +85,16 @@ Dgeo <- PHONEME_dist_matrix[df$language, df$language]
 dimnames(Dgeo) <- list(df$original, df$original)
 diag(Dgeo) <- 0
 
-# cost^-2 weights, row-standardized; threshold minimizing |Moran's I| wins.
-dvals <- Dgeo[upper.tri(Dgeo)]
-dvals <- dvals[dvals > 0]
-thresholds <- sort(unique(quantile(dvals, probs = seq(0.1, 1, length.out = 20), na.rm = TRUE)))
+# cost^-2 weights, row-standardized, truncated at a geography-only tau (longest
+# MST edge; see R/shared/spatial_threshold.R). Zero-distance pairs (duplicate-tip
+# coords) get weight 0, not Inf.
+tau <- mst_threshold(Dgeo)
+lw  <- mat2listw(threshold_weights(Dgeo, tau), style = "W", zero.policy = TRUE)
+mt  <- moran.test(resid_y, lw, zero.policy = TRUE)
+best <- list(threshold = tau, moran_I = unname(mt$estimate[["Moran I statistic"]]),
+             listw = lw)
 
-best <- list(threshold = NA_real_, moran_I = Inf, listw = NULL)
-for (th in thresholds) {
-  W <- 1 / Dgeo^2
-  W[!is.finite(W)] <- 0   # zero-distance pairs (duplicate-tip coords) -> 0, not Inf
-  W[Dgeo > th] <- 0
-  diag(W) <- 0
-  if (all(rowSums(W) == 0)) next   # degenerate: no candidate has any neighbor
-
-  lw <- mat2listw(W, style = "W", zero.policy = TRUE)
-  mt <- tryCatch(moran.test(resid_y, lw, zero.policy = TRUE), error = function(e) NULL)
-  if (is.null(mt)) next
-
-  moran_I <- unname(mt$estimate[["Moran I statistic"]])
-  if (abs(moran_I) < abs(best$moran_I)) {
-    best <- list(threshold = th, moran_I = moran_I, listw = lw)
-  }
-}
-stopifnot("No candidate threshold produced a usable spatial weights object." =
-            !is.null(best$listw))
-
-# Permutation test on the chosen weights: shuffles resid_y N_PERM times.
+# Permutation test on the fixed weights: shuffles resid_y N_PERM times.
 perm <- moran.mc(resid_y, best$listw, nsim = N_PERM, zero.policy = TRUE)
 best$perm_p <- perm$p.value
 
@@ -145,7 +131,7 @@ scores_df <- df |>
   mutate(sPC1 = sPC1) |>
   summarise(sPC1 = mean(sPC1), .by = c(language, longitude, latitude))
 
-write.csv(scores_df, file = here("data", "pvr", "PHONEME_spca_scores.csv"), row.names = FALSE)
+write.csv(scores_df, file = here("data", "pvr_mem", "PHONEME_spca_scores.csv"), row.names = FALSE)
 
 
 # ── 7. Results table ─────────────────────────────────────────────────────────
@@ -156,7 +142,7 @@ PHONEME_pvr_spca_results <- tibble(
 )
 print(PHONEME_pvr_spca_results)
 write.csv(PHONEME_pvr_spca_results,
-          file = here("data", "pvr", "PHONEME_pvr_spca_results.csv"), row.names = FALSE)
+          file = here("data", "pvr_mem", "PHONEME_pvr_spca_results.csv"), row.names = FALSE)
 
 
 # ── 8. Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ───────────
@@ -203,4 +189,4 @@ print(p_surface)
 
 ggsave(here("figures", "regression", "phoneme_pvr_spca_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
-saveRDS(p_surface, file = here("data", "pvr", "base_plot_phoneme_PVR_sPCA.rds"))
+saveRDS(p_surface, file = here("data", "pvr_mem", "base_plot_phoneme_PVR_sPCA.rds"))

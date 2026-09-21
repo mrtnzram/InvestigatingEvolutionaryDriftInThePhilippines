@@ -54,10 +54,16 @@ dir.create(here("figures", "mst_waypoints"),
            recursive = TRUE, showWarnings = FALSE)
 
 # ---- Figure A: Spanish admixture + routes -----------------------------------
-# White -> navy ramp anchored at 0, drawn as a translucent disc under a black
-# ring; both layers share the `size` aesthetic so the ring cannot drift off
-# the disc.
+# White -> teal -> navy ramp anchored at 0, drawn as a translucent disc under a
+# black ring; both layers share the `size` aesthetic so the ring cannot drift
+# off the disc.
 global_lim <- c(0, max(points_df$span_admx, na.rm = TRUE))
+
+# Mid stop anchored at the 75th percentile rather than the geometric midpoint:
+# these scores are right-skewed against a floor at 0, so a linear white -> navy
+# ramp put three quarters of the points in one pale band. global_lim starts at 0,
+# so the rescaled position of the anchor is q75 / max.
+mid_frac <- as.numeric(quantile(points_df$span_admx, 0.75, na.rm = TRUE)) / global_lim[2]
 
 map_subset <- map_data("world") |> filter(region %in% c("Philippines", "Malaysia"))
 
@@ -70,7 +76,9 @@ base_plot_admx <- ggplot() +
   geom_point(data = points_df,
              aes(x = longitude, y = latitude, size = span_w),
              shape = 21, colour = "black") +
-  scale_colour_gradient(low = "white", high = "navy", limits = global_lim) +
+  scale_colour_gradientn(colours = c("white", "#2E9E8F", "navy"),
+                         values  = c(0, mid_frac, 1),
+                         limits  = global_lim) +
   scale_size(
     trans  = "log10",
     range  = c(1, 5.5),

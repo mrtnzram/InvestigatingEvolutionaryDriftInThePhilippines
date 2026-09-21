@@ -1,22 +1,29 @@
 # ── [5]_GENETIC_MMRR.R ───────────────────────────────────────────────────────
 # Multiple Matrix Regression with Randomization (MMRR), genetic analogue of
-# [5]_PHONEME_MMRR.R / [5]_GRAMMAR_MMRR.R. Regresses pairwise population IBS
-# similarity (from PLINK --distance 1-ibs) on terrain-penalized migration
-# distance, with permutation p-values. Single predictor only — there is no
+# [5]_PHONEME_MMRR.R / [5]_GRAMMAR_MMRR.R. Regresses pairwise population IBD
+# (from PLINK --genome, the PI_HAT proportion-IBD estimate) on terrain-penalized
+# migration distance, with permutation p-values. IBD replaces the earlier 1-IBS
+# distance (from PLINK --distance 1-ibs): PI_HAT is allele-frequency-aware and
+# estimates shared ancestry directly, where raw IBS is also driven by each
+# individual's overall heterozygosity. Single predictor only — there is no
 # genetic phylogeny to pair with geography here, so the joint two-predictor
 # model of the language scripts collapses to one fit, and the added-variable
 # (partial regression) figure is skipped: with one predictor it would just
 # reproduce the plain scatter.
 #
-# Input:   data/genetic_dist.mdist, data/genetic_dist.mdist.id (PLINK, individual-
-#          level), data/GENETIC_final.csv (from [3], population connector costs),
-#          data/GENETIC_dist_matrix.csv (pairwise cost matrix, also written by [3]
-#          — read back here rather than rebuilt, so the network graph is only
-#          built once, in [3])
-# Outputs: data/GENETIC_sim_matrix.csv,
-#          data/GENETIC_mmrr_results.csv,
-#          figures/mmrr/genetic_mmrr_single_similarity_vs_geography.png,
+# Input:   data/genetic/genetic_dist.genome (PLINK --genome, individual-level),
+#          data/network_distance/GENETIC_final.csv (from [3], population connector
+#          costs), data/network_distance/GENETIC_dist_matrix.csv (pairwise cost
+#          matrix, also written by [3] — read back here rather than rebuilt, so
+#          the network graph is only built once, in [3])
+# Outputs: data/mmrr/GENETIC_sim_matrix.csv
+#          figures/mmrr/genetic_mmrr_single_ibd_vs_geography.png
 #          figures/mmrr/genetic_mmrr_pairplot.png
+#
+# The results table is left in the environment as `GENETIC_mmrr_results` rather
+# than written here. R/shared/[5]_ALL_MMRR.R harvests it into
+# data/mmrr/mmrr_results.csv, consolidated across domains. Genetics has no
+# tree, so it contributes no single-predictor row.
 # ──────────────────────────────────────────────────────────────────────────────
 
 library(tidyverse)
@@ -28,52 +35,67 @@ conflicts_prefer(purrr::map)
 conflicts_prefer(dplyr::filter)
 conflicts_prefer(dplyr::select)
 
-# ── 1. Y: individual PLINK matrix -> population IBS similarity ──────────────
-# .mdist is a square, headerless, tab-delimited 1-IBS distance matrix over
-# individuals; .id gives each row/col's (FID = population, IID = sample).
-mdist_ids <- read_tsv(here("data", "mmrr", "genetic_dist.mdist.id"),
-                      col_names = c("FID", "IID"), col_types = "cc")
-M <- as.matrix(read_tsv(here("data", "mmrr", "genetic_dist.mdist"),
-                        col_names = FALSE, col_types = cols(.default = "d")))
-dimnames(M) <- NULL
-stopifnot("mdist is not square" = nrow(M) == ncol(M),
-          "mdist/.id row count differs" = nrow(M) == nrow(mdist_ids))
+# ── 1. Y: individual PLINK pairs -> population IBD similarity ───────────────
+# .genome is PLINK's long-format pairwise-individual table (--genome): one row
+# per individual pair (no self-pairs, no diagonal), with PI_HAT the proportion-
+# IBD estimate. Rebuild it into a square individual x individual matrix first,
+# so the same block-average trick as the other domains' MMRR scripts applies.
+genome <- read_table(here("data", "genetic", "genetic_dist.genome"),
+                     col_types = cols_only(FID1 = "c", IID1 = "c",
+                                           FID2 = "c", IID2 = "c", PI_HAT = "d"))
 
 # Same reconciliation [0]_GENETIC_ADMX_MALDER.R applies to the qpAdm table, so
 # labels here join GENETIC_final.csv's `population` column.
-fid <- ifelse(mdist_ids$FID == "ManoboRajahKabunsuwan", "ManoboRK", mdist_ids$FID)
+genome <- genome |>
+  mutate(FID1 = ifelse(FID1 == "ManoboRajahKabunsuwan", "ManoboRK", FID1),
+         FID2 = ifelse(FID2 == "ManoboRajahKabunsuwan", "ManoboRK", FID2))
+
+# IID is unique across the whole file (checked: no sample id repeats across
+# populations), so a single index built from either column covers everyone.
+ids <- bind_rows(
+  genome |> dplyr::select(FID = FID1, IID = IID1),
+  genome |> dplyr::select(FID = FID2, IID = IID2)
+) |> distinct(IID, .keep_all = TRUE) |> arrange(IID)
+
+idx <- setNames(seq_len(nrow(ids)), ids$IID)
+M <- matrix(0, nrow(ids), nrow(ids))
+M[cbind(idx[genome$IID1], idx[genome$IID2])] <- genome$PI_HAT
+M[cbind(idx[genome$IID2], idx[genome$IID1])] <- genome$PI_HAT
+fid <- ids$FID
+stopifnot("genome pair count != choose(n individuals, 2)" =
+            nrow(genome) == choose(nrow(ids), 2))
 
 # Block-average individuals -> populations. Two rowsum() passes give the block
 # SUMS (Z'MZ for the group-indicator matrix Z, without ever materializing Z);
 # dividing by outer(n, n) turns each block sum into its mean. Off-diagonal
 # cells are unbiased pairwise means; the diagonal is not (it includes each
-# individual's own zero self-distance, understating within-population
-# distance by a factor of 1 - 1/n_k) but that is moot below, since the
-# diagonal is overwritten and unfold() only reads the strict lower triangle.
+# individual's own absent self-comparison, coded 0 above, understating
+# within-population IBD by a factor of 1 - 1/n_k) but that is moot below, since
+# the diagonal is overwritten and unfold() only reads the strict lower triangle.
 n_pop   <- table(fid)
 pop_sum <- rowsum(t(rowsum(M, fid)), fid)
-pop_dist <- pop_sum / outer(as.numeric(n_pop), as.numeric(n_pop))
-dimnames(pop_dist) <- list(rownames(pop_sum), rownames(pop_sum))
+pop_ibd <- pop_sum / outer(as.numeric(n_pop), as.numeric(n_pop))
+dimnames(pop_ibd) <- list(rownames(pop_sum), rownames(pop_sum))
 
 stopifnot(
-  "population count != 115"   = nrow(pop_dist) == 115,
-  "pop_dist not symmetric"    = isSymmetric(unname(pop_dist)),
-  "pop_dist out of [0, 1]"    = all(pop_dist >= 0 & pop_dist <= 1)
+  "population count != 115"  = nrow(pop_ibd) == 115,
+  "pop_ibd not symmetric"    = isSymmetric(unname(pop_ibd)),
+  "pop_ibd out of [0, 1]"    = all(pop_ibd >= 0 & pop_ibd <= 1)
 )
 message(sprintf(
   "Y_gen: %d populations, %d-%d individuals each (Arta/Batak thinnest at 3).",
-  nrow(pop_dist), min(n_pop), max(n_pop)
+  nrow(pop_ibd), min(n_pop), max(n_pop)
 ))
 
-diag(pop_dist) <- 0
-GENETIC_sim_matrix <- 1 - pop_dist   # IBS proportion; diagonal = 1 like the cosine matrices
+diag(pop_ibd) <- 1   # self is maximal relatedness, like the cosine matrices' diagonal
+GENETIC_sim_matrix <- pop_ibd   # already a similarity (proportion IBD), no 1 - x inversion needed
 
 # ── 2. X_geo: terrain-penalized pairwise migration distance ─────────────────
 # Built once by [3]_GENETIC_network_distance.R (all-pairs network routing,
 # ratio-bounded direct-line fallback via R/shared/pairwise_network_distance.R)
 # and read back here instead of rebuilt with a second network-graph pass.
 GENETIC_final <- read.csv(here("data", "network_distance", "GENETIC_final.csv"))
-stopifnot("GENETIC_final.csv population set != mdist" =
+stopifnot("GENETIC_final.csv population set != genome" =
             setequal(GENETIC_final$population, rownames(GENETIC_sim_matrix)))
 
 GENETIC_dist_matrix <- read.csv(here("data", "network_distance", "GENETIC_dist_matrix.csv"),
@@ -110,7 +132,7 @@ heatmap_p <- function(m, title) {
     theme(axis.text.x = element_blank(), axis.text.y = element_blank()) +
     coord_fixed()
 }
-print(heatmap_p(X_geo, "Migration distance") + heatmap_p(Y_gen, "IBS similarity"))
+print(heatmap_p(X_geo, "Migration distance") + heatmap_p(Y_gen, "IBD (PI_HAT)"))
 
 # ── 5. MMRR (Wang 2013), single predictor ────────────────────────────────────
 # unfold()/MMRR() copied verbatim from [5]_PHONEME_MMRR.R (Wang Lab's canonical
@@ -167,13 +189,11 @@ GENETIC_mmrr_results <- tibble(
   p_model   = unname(mmrr_fit$Fpvalue)
 )
 print(GENETIC_mmrr_results)
-write.csv(GENETIC_mmrr_results,
-          file = here("data", "mmrr", "GENETIC_mmrr_results.csv"), row.names = FALSE)
 
 # ── 6. Visualization ─────────────────────────────────────────────────────────
 dir.create(here("figures", "mmrr"), recursive = TRUE, showWarnings = FALSE)
 
-# (a) Single-predictor scatter, raw axes (km, IBS proportion) so it reads
+# (a) Single-predictor scatter, raw axes (km, proportion IBD) so it reads
 # cleanly; beta/R^2 come from the standardized fit above, not refit here.
 p_txt <- if (GENETIC_mmrr_results$p_geo <= 1e-4) "p < 0.0001" else
   sprintf("p = %.4f", GENETIC_mmrr_results$p_geo)
@@ -188,22 +208,22 @@ single_plot <- ggplot(raw_df, aes(x, y)) +
   geom_point(alpha = 0.15, size = 0.5, colour = "steelblue") +
   geom_smooth(method = "lm", se = TRUE, colour = "firebrick", linewidth = 0.9) +
   labs(
-    title    = "Genetic similarity vs Geographic distance",
+    title    = "Genetic IBD vs Geographic distance",
     subtitle = sprintf("beta = %+.3f (standardized)   %s   R² = %.4f",
                        GENETIC_mmrr_results$beta_geo, p_txt, GENETIC_mmrr_results$r_squared),
-    x = "Relative migration distance (km)", y = "IBS similarity"
+    x = "Relative migration distance (km)", y = "Proportion IBD (PI_HAT)"
   ) +
   theme_bw() +
   theme(plot.title    = element_text(face = "bold", size = 12),
         plot.subtitle = element_text(size = 10, colour = "grey25"))
 print(single_plot)
-ggsave(here("figures", "mmrr", "genetic_mmrr_single_similarity_vs_geography.png"),
+ggsave(here("figures", "mmrr", "genetic_mmrr_single_ibd_vs_geography.png"),
        single_plot, width = 6.5, height = 4.5, units = "in", dpi = 300)
 
 # (b) 2x2 pairplot — same facet_grid machinery as the 3x3 language pairplots,
 # generic over pair_vars, so a 2-element pair_labs collapses it to one
 # scatter cell, one Pearson-r cell, and two marginal densities.
-pair_labs <- c(gen = "IBS similarity", geo = "Geo distance")
+pair_labs <- c(gen = "IBD (PI_HAT)", geo = "Geo distance")
 pair_vars <- names(pair_labs)
 pair_idx  <- setNames(seq_along(pair_vars), pair_vars)
 as_pair_factor <- function(v) factor(pair_labs[v], levels = pair_labs)

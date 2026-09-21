@@ -16,26 +16,27 @@ to a PLINK binary.
 ## Files to scp to the server
 
 Put these next to each other in one directory (they don't need to be a git
-checkout — just the five files below):
+checkout — just the six files below):
 
 | File | From |
 |---|---|
 | `[4.2]_GENETIC_sPCA_remote.R` | `R/genetic_analysis/` |
 | `select_moran_eigenvectors.R` | `R/shared/` |
-| `pca_results_phil_only.eigenvec` | `data/pvr/` |
+| `spatial_threshold.R` | `R/shared/` |
+| `pca_results_phil_only.eigenvec` | **no longer in the repo** — deleted in d4adfc6, last tracked at `data/genetic/PVR/`. Take the copy on the server, or regenerate it from the pruned PLINK fileset. |
 | `GENETIC_final.csv` | `data/network_distance/` |
 | `GENETIC_dist_matrix.csv` | `data/network_distance/` |
 
 ```bash
-scp R/genetic_analysis/"[4.2]_GENETIC_sPCA_remote.R" R/shared/select_moran_eigenvectors.R \
-    data/pvr/pca_results_phil_only.eigenvec data/network_distance/GENETIC_final.csv \
+scp R/genetic_analysis/"[4.2]_GENETIC_sPCA_remote.R" R/shared/select_moran_eigenvectors.R R/shared/spatial_threshold.R \
+    <path to>/pca_results_phil_only.eigenvec data/network_distance/GENETIC_final.csv \
     data/network_distance/GENETIC_dist_matrix.csv \
     user@server:/path/to/genetic_spca/
 ```
 
-`select_moran_eigenvectors.R` must sit in the same directory as the main
-script — it's sourced relative to the script's own path, not the working
-directory.
+`select_moran_eigenvectors.R` and `spatial_threshold.R` must sit in the same
+directory as the main script — they're sourced relative to the script's own
+path, not the working directory.
 
 ## Server setup
 
@@ -122,7 +123,7 @@ no population match (should be 0, or a small number you can chase down with
 ## Files to bring back
 
 ```bash
-scp 'user@server:/path/to/genetic_spca/out/*' data/pvr/
+scp 'user@server:/path/to/genetic_spca/out/*' data/spca/
 ```
 
 | File | Consumed by |

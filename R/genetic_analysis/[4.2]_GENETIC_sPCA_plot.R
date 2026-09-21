@@ -6,18 +6,18 @@
 # this reads them back and builds the same point-symbol map the other three
 # domains' [4.2] scripts produce inline, since a map needs no server access.
 #
-# Input:   data/pvr/GENETIC_sPCA_scores.csv, GENETIC_sPCA_results.csv
+# Input:   data/spca/GENETIC_sPCA_scores.csv, data/spca/GENETIC_sPCA_results.csv
 #          (both scp'd back from the remote run)
-# Outputs: figures/regression/genetic_sPCA_surface.png,
-#          data/pvr/base_plot_genetic_sPCA.rds
+# Outputs: data/spca/base_plot_genetic_sPCA.rds
+#          figures/regression/genetic_sPCA_surface.png
 # =============================================================================
 
 library(tidyverse)
 library(here)
 library(maps)
 
-scores_df <- read.csv(here("data", "pvr", "GENETIC_sPCA_scores.csv"))
-results   <- read.csv(here("data", "pvr", "GENETIC_sPCA_results.csv"))
+scores_df <- read.csv(here("data", "spca", "GENETIC_sPCA_scores.csv"))
+results   <- read.csv(here("data", "spca", "GENETIC_sPCA_results.csv"))
 
 
 # ── Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ──────────────
@@ -63,4 +63,4 @@ print(p_surface)
 
 ggsave(here("figures", "regression", "genetic_sPCA_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
-saveRDS(p_surface, file = here("data", "pvr", "base_plot_genetic_sPCA.rds"))
+saveRDS(p_surface, file = here("data", "spca", "base_plot_genetic_sPCA.rds"))

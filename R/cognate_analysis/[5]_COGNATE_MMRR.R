@@ -18,12 +18,15 @@
 # Inputs:  data/cognate/COGNATE_NEXUS_matrix.csv,
 #          data/network_distance/COGNATE_dist_matrix.csv       (written by [3])
 #          data/cognate/COGNATE_phylo_dist_matrix.csv (written by [0]_Phylogenetic_Tree.R)
-# Outputs: data/mmrr/COGNATE_sim_matrix.csv,
-#          data/mmrr/COGNATE_mmrr_results.csv        (joint two-predictor model)
-#          data/mmrr/COGNATE_mmrr_single_results.csv (single-predictor models)
+# Outputs: data/mmrr/COGNATE_sim_matrix.csv
 #          figures/mmrr/cognate_mmrr_single_*.png  (3 single-predictor)
-#          figures/mmrr/cognate_mmrr_pairplot.png,
+#          figures/mmrr/cognate_mmrr_pairplot.png
 #          figures/mmrr/cognate_mmrr_partial_regression.png
+#
+# The two results tables are left in the environment as `COGNATE_mmrr_results`
+# and `COGNATE_mmrr_single` rather than written here. R/shared/[5]_ALL_MMRR.R
+# harvests them into data/mmrr/mmrr_results.csv and
+# data/mmrr/mmrr_single_results.csv, consolidated across domains.
 # =============================================================================
 
 library(readr)
@@ -272,8 +275,6 @@ COGNATE_mmrr_single <- bind_rows(
               file  = "cognate_mmrr_single_geography_vs_phylogeny.png")
 )
 print(COGNATE_mmrr_single)
-write.csv(COGNATE_mmrr_single,
-          file = here("data", "mmrr", "COGNATE_mmrr_single_results.csv"), row.names = FALSE)
 
 
 # ---- 9b. Joint two-predictor MMRR -------------------------------------------
@@ -292,8 +293,6 @@ COGNATE_mmrr_results <- tibble(
   p_model    = unname(mmrr_fit$Fpvalue)
 )
 print(COGNATE_mmrr_results)
-write.csv(COGNATE_mmrr_results,
-          file = here("data", "mmrr", "COGNATE_mmrr_results.csv"), row.names = FALSE)
 
 # ---- 11. Visualization ------------------------------------------------------
 # Both figures are built on the standardized unfolded lower triangles, so they

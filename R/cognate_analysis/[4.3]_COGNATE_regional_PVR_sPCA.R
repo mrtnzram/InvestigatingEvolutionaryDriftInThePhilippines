@@ -10,10 +10,10 @@
 #
 # Run order: requires `tree_pruned` and `tip_map` from [0]_Phylogenetic_Tree.R.
 #
-# Input:   data/cognate/COGNATE_final.csv, data/cognate/COGNATE_dist_matrix.csv
-#          (both from [3]), data/cognate/COGNATE_subgroup_lookup.csv (region, from [0])
-# Outputs: data/cognate/COGNATE_regional_pvr_mem_results.csv,
-#          data/cognate/COGNATE_regional_pvr_mem_scores.csv,
+# Input:   data/network_distance/COGNATE_final.csv, data/network_distance/COGNATE_dist_matrix.csv (both from [3])
+#          data/cognate/COGNATE_subgroup_lookup.csv (region column, from [0])
+# Outputs: data/pvr_mem/COGNATE_regional_pvr_mem_results.csv
+#          data/pvr_mem/COGNATE_regional_pvr_mem_scores.csv
 #          figures/regression/cognate_regional_pvr_mem_<region>.png
 #          (one standalone file per region — not combined into a single figure,
 #          since each region's map has its own aspect ratio)
@@ -26,6 +26,8 @@ library(here)
 library(spdep)
 library(adespatial)
 library(maps)
+
+source(here("R", "shared", "spatial_threshold.R"))
 
 stopifnot(
   "Run [0]_Phylogenetic_Tree.R first: `tree_pruned` is not defined." =
@@ -114,32 +116,16 @@ for (rg in REGIONS) {
 
   resid_y <- resid(lm(y ~ E_sel))
 
-  # Spatial weights: same quantile grid / cost^-2 / row-standardized search as
-  # [4.1], minimizing |Moran's I|.
+  # Spatial weights: same cost^-2 / row-standardized scheme as [4.1], with tau
+  # fixed from this region's geography alone (longest MST edge of its own
+  # distance matrix; see R/shared/spatial_threshold.R).
   Dgeo <- dist_matrix[df$glottocode, df$glottocode]
   diag(Dgeo) <- 0
-  dvals <- Dgeo[upper.tri(Dgeo)]; dvals <- dvals[dvals > 0]
-  thresholds <- sort(unique(quantile(dvals, probs = seq(0.1, 1, length.out = 20),
-                                     na.rm = TRUE)))
-
-  best <- list(threshold = NA_real_, moran_I = Inf, listw = NULL)
-  for (th in thresholds) {
-    W <- 1 / Dgeo^2
-    W[!is.finite(W)] <- 0
-    W[Dgeo > th] <- 0
-    diag(W) <- 0
-    if (all(rowSums(W) == 0)) next
-    lw <- mat2listw(W, style = "W", zero.policy = TRUE)
-    mt <- tryCatch(moran.test(resid_y, lw, zero.policy = TRUE), error = function(e) NULL)
-    if (is.null(mt)) next
-    mI <- unname(mt$estimate[["Moran I statistic"]])
-    if (abs(mI) < abs(best$moran_I)) best <- list(threshold = th, moran_I = mI, listw = lw)
-  }
-  if (is.null(best$listw)) {
-    row$status <- "no_usable_threshold"
-    message(sprintf("%-9s N=%2d — skipped (no candidate threshold gave usable weights).", rg, N))
-    results[[rg]] <- row; next
-  }
+  tau <- mst_threshold(Dgeo)
+  lw  <- mat2listw(threshold_weights(Dgeo, tau), style = "W", zero.policy = TRUE)
+  mt  <- moran.test(resid_y, lw, zero.policy = TRUE)
+  best <- list(threshold = tau, moran_I = unname(mt$estimate[["Moran I statistic"]]),
+               listw = lw)
 
   perm <- moran.mc(resid_y, best$listw, nsim = N_PERM, zero.policy = TRUE)
 
@@ -176,11 +162,11 @@ for (rg in REGIONS) {
 COGNATE_regional_results <- bind_rows(results)
 print(COGNATE_regional_results)
 write.csv(COGNATE_regional_results,
-          here("data", "pvr", "COGNATE_regional_pvr_mem_results.csv"), row.names = FALSE)
+          here("data", "pvr_mem", "COGNATE_regional_pvr_mem_results.csv"), row.names = FALSE)
 
 scores_all <- bind_rows(scores)
 write.csv(scores_all,
-          here("data", "pvr", "COGNATE_regional_pvr_mem_scores.csv"), row.names = FALSE)
+          here("data", "pvr_mem", "COGNATE_regional_pvr_mem_scores.csv"), row.names = FALSE)
 stopifnot("No region produced scores — nothing to plot." = nrow(scores_all) > 0)
 
 

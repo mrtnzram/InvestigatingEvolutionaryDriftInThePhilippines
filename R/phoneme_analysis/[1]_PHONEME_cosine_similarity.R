@@ -1,5 +1,5 @@
 # =============================================================================
-# [1] Phoneme Analysis — Weighted cosine similarity
+# [1] Phoneme Analysis — Weighted cosine similarity (no mod_consonant / mod_vowel)
 # Computes the IDF-weighted cosine-similarity matrix over phoneme inventories,
 # extracts each Philippine language's similarity to Spanish / Japanese / English
 # and its mean similarity to the unrelated controls, plus a 0-to-max min-max
@@ -7,7 +7,8 @@
 # writes the matrix + per-language scores for the downstream [2]–[7] analyses
 # and EEMS plotting.
 #
-# Input:   data/RUHLENdf_PH.csv, data/phoneme_freq_ruhlen_austronesian.csv
+# Input:   data/RUHLENdf_PH.csv, data/phoneme_freq_ruhlen_austronesian.csv,
+#          data/phoneme_key_pnas.csv (mod_consonant / mod_vowel rows excluded)
 # Outputs: data/PHONEME_cosine_matrix.csv, data/PHONEME_cossim.csv,
 #          data/base_plot_phoneme_cosine.rds (cosine base map, for [7])
 # Next:    [2]_PHONEME_cosine_distribution_analysis.R,
@@ -102,7 +103,17 @@ calculate_weighted_cosine_similarity <- function(RUHLENdf, phoneme_freq, phoneme
   return(cosine_matrix)
 }
 
-attested_phonemes <- phoneme_freq$phoneme
+# Drop the PNAS key's generic modified-segment features (mod_consonant /
+# mod_vowel, e.g. cː, cʷ, vː, v˜, vowelharmony). IDF is per phoneme, so the
+# remaining weights need no renormalization.
+mod_ids <- read_csv(here("data", "phoneme", "phoneme_key_pnas.csv")) |>
+  filter(class %in% c("mod_consonant", "mod_vowel")) |>
+  pull(phoneme_id)
+
+attested_phonemes <- setdiff(phoneme_freq$phoneme, mod_ids)
+cat(sprintf("Excluded %d mod_consonant/mod_vowel phonemes; %d remain\n",
+            length(phoneme_freq$phoneme) - length(attested_phonemes),
+            length(attested_phonemes)))
 
 cosine_matrix <- calculate_weighted_cosine_similarity(
   RUHLENdf,
@@ -176,6 +187,12 @@ map_subset <- world_map %>% filter(region %in% c("Philippines", "Malaysia"))
 
 global_lim <- c(0, cossim_span_max)
 
+# Mid stop anchored at the 75th percentile rather than the geometric midpoint:
+# these scores are right-skewed against a floor at 0, so a linear white -> navy
+# ramp put three quarters of the points in one pale band. global_lim starts at 0,
+# so the rescaled position of the anchor is q75 / max.
+mid_frac <- as.numeric(quantile(PHONEME_cossim$cossim_span, 0.75, na.rm = TRUE)) / global_lim[2]
+
 base_plot_cosine <- ggplot() +
   geom_polygon(data = map_subset, aes(x = long, y = lat, group = group),
                fill = "gray95", color = "gray70") +
@@ -184,7 +201,9 @@ base_plot_cosine <- ggplot() +
              size = 4, alpha = 0.7) +
   geom_point(data = PHONEME_cossim, aes(x = longitude, y = latitude),
              size = 4, shape = 21, color = "black") +
-  scale_color_gradient(low = "white", high = "navy", limits = global_lim) +
+  scale_color_gradientn(colours = c("white", "#2E9E8F", "navy"),
+                        values  = c(0, mid_frac, 1),
+                        limits  = global_lim) +
   guides(color = guide_colorbar(title = "Cosine Similarity",
                                 title.position = "top", title.hjust = 0.5)) +
   coord_fixed(xlim = c(115, 130), ylim = c(4, 22)) +
