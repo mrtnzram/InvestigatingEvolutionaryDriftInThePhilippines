@@ -77,7 +77,7 @@ message(N, " populations with both an admixture estimate and PCA coverage.")
 E_sel <- select_moran_eigenvectors(y, x, E)
 k     <- ncol(E_sel)
 message(k, " population-structure PC", if (k == 1) "" else "s",
-        " selected (matches [4]_GENETIC_PVR.R).")
+        " selected.")
 
 # lm() rejects a zero-column matrix term, so k = 0 drops E_sel from the formula.
 fit_e_only <- function(y, E) if (ncol(E) == 0) lm(y ~ 1) else lm(y ~ E)

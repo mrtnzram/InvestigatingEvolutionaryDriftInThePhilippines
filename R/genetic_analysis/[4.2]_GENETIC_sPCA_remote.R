@@ -164,7 +164,7 @@ E_sel <- select_moran_eigenvectors(y_pc, x_pc, E_pc)
 k <- ncol(E_sel)
 rownames(E_sel) <- gf$population
 message(k, " population-structure PC", if (k == 1) "" else "s",
-        " selected (matches [4]_GENETIC_PVR.R).")
+        " selected (matches [4.1]_GENETIC_PVR_sPCA.R).")
 
 
 # ── 5. Align + residualize (hat-matrix projection, cheap at N=115) ─────────

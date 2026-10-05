@@ -65,7 +65,7 @@ E_sel <- as.matrix(pvr_fit@Selection$Vectors)
 rownames(E_sel) <- tip_df$glottocode
 k <- ncol(E_sel)
 message(k, " phylogenetic eigenvector", if (k == 1) "" else "s",
-        " selected (matches [4]/[4.1]_COGNATE_PVR.R).")
+        " selected (matches [4.1]_COGNATE_PVR_sPCA.R).")
 
 
 # ── 2. Analysis frame: one-hot (gloss, wordform) matrix at language grain ───

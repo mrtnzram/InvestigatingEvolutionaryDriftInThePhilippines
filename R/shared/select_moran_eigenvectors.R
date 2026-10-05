@@ -6,8 +6,7 @@
 # matrix: PVR() requires a `phylo` object, so it can't run on genetics'
 # population-structure PCA eigenvectors. Adds eigenvectors one at a time and
 # stops once residual Moran's I (tested against Euclidean distance in
-# eigenvector space) is no longer significant. Used by both
-# [4]_GENETIC_PVR.R and [4.1]_GENETIC_PVR_sPCA.R so they select the same subset.
+# eigenvector space) is no longer significant. Used by [4.1]_GENETIC_PVR_sPCA.R.
 # =============================================================================
 
 library(spdep)

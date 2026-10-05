@@ -67,7 +67,7 @@ pvr_fit <- PVR(pvr_dec, phy = tree_pruned, trait = tip_df$y, envVar = tip_df$x_k
 E_sel_tip <- as.matrix(pvr_fit@Selection$Vectors)
 k         <- ncol(E_sel_tip)
 message(k, " phylogenetic eigenvector", if (k == 1) "" else "s",
-        " selected (matches [4]/[4.1]_GRAMMAR_PVR.R).")
+        " selected (matches [4.1]_GRAMMAR_PVR_sPCA.R).")
 
 # Collapse to one row per language (mean across a language's tips).
 E_sel <- as.data.frame(E_sel_tip) |>

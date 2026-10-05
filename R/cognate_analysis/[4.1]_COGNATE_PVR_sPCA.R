@@ -67,7 +67,7 @@ pvr_fit <- PVR(pvr_dec, phy = tree_pruned, trait = y, envVar = x, method = "mora
 E_sel   <- as.matrix(pvr_fit@Selection$Vectors)
 k       <- ncol(E_sel)
 message(k, " phylogenetic eigenvector", if (k == 1) "" else "s",
-        " selected (matches [4]_COGNATE_PVR.R).")
+        " selected.")
 
 
 # ── 3. Phylogeny-scrubbed trait — no geographic covariate, unlike [4] ───────
