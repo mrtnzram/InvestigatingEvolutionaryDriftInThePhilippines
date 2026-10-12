@@ -1,14 +1,15 @@
 # =============================================================================
 # [4] Genetic Analysis — geography vs. pure population structure
 #
-# Residualizes population-mean PLINK PC1 on distance from Manila to get
-# geography-free `pure_phylogeny`, then regresses normalized Spanish admixture on
-# geography and on pure structure, with zero-admixture populations removed and kept.
+# Residualizes population-mean PLINK PC1 on a Manila-anchored signed geographic
+# axis and on distance from Manila to get `pure_phylogeny`, then regresses
+# normalized Spanish admixture on distance from Manila and on pure structure,
+# with zero-admixture populations removed and kept.
 #
-# Input:   data/network_distance/GENETIC_final.csv,
+# Input:   data/network_distance/GENETIC_final.csv, data/network_distance/GENETIC_dist_matrix.csv,
 #          data/genetic/Phil_2.24M_pca_results.eigenvec (PLINK --pca, individual-level, headerless)
-# Outputs: figures/regression/genetic_pvr_{profile,scatter,y_scatter,varpart}[_zeros_kept].png
-#          `pvr_results_table`, `pvr_geo_lm`, `df` (with `pure_phylogeny`) in the environment
+# Outputs: figures/regression/pvr/genetic_pvr_{profile,scatter,y_scatter,y_geography,y_pure,varpart}[_zeros_kept].png
+#          `pvr_results_table`, `pvr_checks`, `pvr_geo_lm`, `df` (with `pure_phylogeny`) in the environment
 # =============================================================================
 
 library(tidyverse)
@@ -41,7 +42,7 @@ stopifnot(
 
 # qpAdm source populations carry no estimate and drop out.
 df_full <- GENETIC_final |>
-  dplyr::select(population, span_admx, span_se_capped, x_km = all_of(PREDICTOR)) |>
+  dplyr::select(population, lat = latitude, span_admx, span_se_capped, x_km = all_of(PREDICTOR)) |>
   inner_join(eigenvec_pop, by = "population") |>
   filter(!is.na(span_admx), !is.na(x_km)) |>
   as.data.frame()
@@ -59,9 +60,14 @@ message(sum(df_full$span_admx == 0), " zero-admixture populations | ",
         nrow(df), " retained for the primary fit.")
 
 
-# ── 1–3. Axis 1, orientation, residualization, y regressions ──────────────
+G_geo <- as.matrix(read.csv(here("data", "network_distance", "GENETIC_dist_matrix.csv"),
+                            row.names = 1, check.names = FALSE))
+
+
+# ── 1–3. Axes, orientation, residualization, y regressions ────────────────
 genetic_fit <- function(frame, zeros) {
-  pure_phylo_fit(frame, frame$PC1, NA_real_, predictor = PREDICTOR, response = "span_admx_norm",
+  geo <- geo_axis_frame(frame, "population", G_geo)
+  pure_phylo_fit(frame, frame$PC1, geo, NA_real_, predictor = PREDICTOR, response = "span_admx_norm",
                  axis_name = "PC1", anc_label = "population structure", zeros = zeros)
 }
 removed <- genetic_fit(df,      "removed")
@@ -73,28 +79,28 @@ pvr_varpart <- bind_rows(
   mutate(removed$vp, zeros = "removed", .before = 1),
   mutate(kept$vp,    zeros = "kept",    .before = 1)
 )
+pvr_checks <- bind_rows(removed$checks, kept$checks)
 print(summary(pvr_geo_lm))
 print(pvr_varpart)
+print(pvr_checks, n = Inf)
 
 
 # ── 4. Plots ──────────────────────────────────────────────────────────────
-dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression", "pvr"), recursive = TRUE, showWarnings = FALSE)
 
 for (r in list(list(fit = removed, tag = "removed", sfx = ""),
                list(fit = kept,    tag = "kept",    sfx = "_zeros_kept"))) {
-  ggsave(here("figures", "regression", paste0("genetic_pvr_profile", r$sfx, ".png")),
+  ggsave(here("figures", "regression", "pvr", paste0("genetic_pvr_profile", r$sfx, ".png")),
          plot_profile(r$fit, sprintf("Genetic geography and pure structure (zeros %s)", r$tag),
                       "population structure"),
          width = 8, height = 6, units = "in", dpi = 300)
-  ggsave(here("figures", "regression", paste0("genetic_pvr_scatter", r$sfx, ".png")),
+  ggsave(here("figures", "regression", "pvr", paste0("genetic_pvr_scatter", r$sfx, ".png")),
          plot_scatter(r$fit, sprintf("Genetic structure vs. geography (zeros %s)", r$tag),
                       "population structure", "PC1"),
          width = 10, height = 4.5, units = "in", dpi = 300)
-  ggsave(here("figures", "regression", paste0("genetic_pvr_y_scatter", r$sfx, ".png")),
-         plot_y_scatter(r$fit, sprintf("Spanish admixture (zeros %s)", r$tag), "population structure",
-                        "Normalized Spanish admixture"),
-         width = 10, height = 4.5, units = "in", dpi = 300)
-  ggsave(here("figures", "regression", paste0("genetic_pvr_varpart", r$sfx, ".png")),
+  save_y_scatters(r$fit, here("figures", "regression", "pvr"), "genetic_pvr", "Spanish admixture", "population structure",
+                  "Normalized Spanish admixture", tag = paste("zeros", r$tag), sfx = r$sfx)
+  ggsave(here("figures", "regression", "pvr", paste0("genetic_pvr_varpart", r$sfx, ".png")),
          vp_diagram(r$fit$vp, sprintf("Genetic variance partition (zeros %s)", r$tag),
                     sprintf("r^2 = %.3f", r$fit$r2_full), "population structure"),
          width = 7, height = 3.6, units = "in", dpi = 300)

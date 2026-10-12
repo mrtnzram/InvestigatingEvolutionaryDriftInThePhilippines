@@ -10,7 +10,7 @@
 # Input:   data/network_distance/GRAMMAR_final.csv, data/network_distance/GRAMMAR_dist_matrix.csv (both from [3])
 # Outputs: data/pvr_mem/GRAMMAR_pvr_spca_results.csv, data/pvr_mem/GRAMMAR_spca_scores.csv
 #          data/pvr_mem/base_plot_grammar_PVR_sPCA.rds
-#          figures/regression/grammar_pvr_spca_surface.png
+#          figures/regression/spatial/grammar_pvr_spca_surface.png
 # =============================================================================
 
 library(PVR)
@@ -146,7 +146,7 @@ write.csv(GRAMMAR_pvr_spca_results,
 
 
 # ── 8. Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ───────────
-dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression", "spatial"), recursive = TRUE, showWarnings = FALSE)
 
 world_map  <- map_data("world")
 map_subset <- world_map |> filter(region %in% c("Philippines", "Malaysia"))
@@ -187,6 +187,6 @@ p_surface <- ggplot() +
        subtitle = sprintf("p = %.3f, r^2 = %.3f", best$perm_p, summary(spca_fit)$r.squared))
 print(p_surface)
 
-ggsave(here("figures", "regression", "grammar_pvr_spca_surface.png"),
+ggsave(here("figures", "regression", "spatial", "grammar_pvr_spca_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
 saveRDS(p_surface, file = here("data", "pvr_mem", "base_plot_grammar_PVR_sPCA.rds"))

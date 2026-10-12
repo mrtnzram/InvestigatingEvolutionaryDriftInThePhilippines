@@ -1,0 +1,73 @@
+"domain","step","r","p.value","expect","status","zeros"
+"phoneme","geo: signed axis vs latitude",0.97621236294756,1.52931875446606e-43,"positive","ok",NA
+"phoneme","geo: |signed axis| vs distance from Manila",0.939302708171155,5.72168287168102e-31,"info","info",NA
+"phoneme","geo: signed axis vs distance from Manila",0.826895098998647,2.14180951321349e-17,"info","info",NA
+"phoneme","align: tree axis vs signed axis (before sign)",0.890025906735395,3.62067073651471e-23,"info","info",NA
+"phoneme","align: tree axis vs signed axis (after sign)",0.890025906735395,3.62067073651471e-23,"positive","ok",NA
+"phoneme","align: tree axis vs distance from Manila",0.613011600882416,5.69717536034543e-08,"info","info",NA
+"phoneme","scrub: tree axis vs geography fit (multiple R)",0.91648461169857,9.36957683605863e-27,"positive","ok",NA
+"phoneme","scrub: pure vs signed axis",3.58279239835672e-17,1,"zero","ok",NA
+"phoneme","scrub: pure vs distance from Manila",1.32865378814042e-16,0.999999999999999,"zero","ok",NA
+"phoneme","scrub: pure vs tree axis",0.400069939535229,0.000960155891162123,"info","info",NA
+"phoneme","y: y vs distance from Manila",-0.259980920666944,0.0364855689233635,"info","info",NA
+"phoneme","y: y vs pure",0.138751388431353,0.270337317072902,"info","info",NA
+"grammar","geo: signed axis vs latitude",0.963261232660297,2.2944101832954e-16,"positive","ok",NA
+"grammar","geo: |signed axis| vs distance from Manila",0.726460101338403,1.2033547983447e-05,"info","info",NA
+"grammar","geo: signed axis vs distance from Manila",0.609071344948758,0.000582118996669588,"info","info",NA
+"grammar","align: tree axis vs signed axis (before sign)",-0.927588213568253,1.26807710000928e-12,"info","info",NA
+"grammar","align: tree axis vs signed axis (after sign)",0.927588213568253,1.26807710000928e-12,"positive","ok",NA
+"grammar","align: tree axis vs distance from Manila",0.537355068470411,0.00319056210781931,"info","info",NA
+"grammar","scrub: tree axis vs geography fit (multiple R)",0.928241337039736,1.13141863271668e-12,"positive","ok",NA
+"grammar","scrub: pure vs signed axis",1.96897309912098e-17,1,"zero","ok",NA
+"grammar","scrub: pure vs distance from Manila",7.01894761073203e-18,1,"zero","ok",NA
+"grammar","scrub: pure vs tree axis",0.371978521168472,0.0512742629188779,"info","info",NA
+"grammar","y: y vs distance from Manila",0.23424724891298,0.230221382839733,"info","info",NA
+"grammar","y: y vs pure",-0.211457201038952,0.280059723033653,"info","info",NA
+"cognate","geo: signed axis vs latitude",0.935964801974531,7.38612966202198e-24,"positive","ok","removed"
+"cognate","geo: |signed axis| vs distance from Manila",0.787295998376847,7.28996230802687e-12,"info","info","removed"
+"cognate","geo: signed axis vs distance from Manila",0.567527762060671,1.40594127228536e-05,"info","info","removed"
+"cognate","align: tree axis vs signed axis (before sign)",0.856508412790973,1.10707177523289e-15,"info","info","removed"
+"cognate","align: tree axis vs signed axis (after sign)",0.856508412790973,1.10707177523289e-15,"positive","ok","removed"
+"cognate","align: tree axis vs distance from Manila",0.414313601005704,0.00250656463277684,"info","info","removed"
+"cognate","scrub: tree axis vs geography fit (multiple R)",0.860933640566689,5.42098797129293e-16,"positive","ok","removed"
+"cognate","scrub: pure vs signed axis",2.23480546756509e-17,1,"zero","ok","removed"
+"cognate","scrub: pure vs distance from Manila",-3.18248475180334e-17,1,"zero","ok","removed"
+"cognate","scrub: pure vs tree axis",0.508717275645901,0.000138012979212937,"info","info","removed"
+"cognate","y: y vs distance from Manila",0.09756737441606,0.495792732178541,"info","info","removed"
+"cognate","y: y vs pure",0.296643361638871,0.0345346292668568,"info","info","removed"
+"cognate","geo: signed axis vs latitude",0.972340054041561,6.6850590134687e-60,"positive","ok","kept"
+"cognate","geo: |signed axis| vs distance from Manila",0.925779752093338,1.22328014306875e-40,"info","info","kept"
+"cognate","geo: signed axis vs distance from Manila",0.722346686725951,2.08286074950282e-16,"info","info","kept"
+"cognate","align: tree axis vs signed axis (before sign)",-0.87167016041935,3.03868463654801e-30,"info","info","kept"
+"cognate","align: tree axis vs signed axis (after sign)",0.87167016041935,3.03868463654801e-30,"positive","ok","kept"
+"cognate","align: tree axis vs distance from Manila",0.467473856787285,2.03150592406499e-06,"info","info","kept"
+"cognate","scrub: tree axis vs geography fit (multiple R)",0.902666053466254,1.87556643719215e-35,"positive","ok","kept"
+"cognate","scrub: pure vs signed axis",-3.07497401787713e-17,1,"zero","ok","kept"
+"cognate","scrub: pure vs distance from Manila",1.02199846488624e-17,1,"zero","ok","kept"
+"cognate","scrub: pure vs tree axis",0.430341719938537,1.49673006570246e-05,"info","info","kept"
+"cognate","y: y vs distance from Manila",-0.0753714819754204,0.470291957308015,"info","info","kept"
+"cognate","y: y vs pure",0.309378744837398,0.00241162655442386,"info","info","kept"
+"genetic","geo: signed axis vs latitude",0.96750088667257,1.18491189219811e-17,"positive","ok","removed"
+"genetic","geo: |signed axis| vs distance from Manila",0.734880470857379,5.631704650867e-06,"info","info","removed"
+"genetic","geo: signed axis vs distance from Manila",0.703410338326427,2.07845241938183e-05,"info","info","removed"
+"genetic","align: tree axis vs signed axis (before sign)",0.0939820270765727,0.627731644750525,"info","info","removed"
+"genetic","align: tree axis vs signed axis (after sign)",0.0939820270765727,0.627731644750525,"positive","FLAG","removed"
+"genetic","align: tree axis vs distance from Manila",0.0706539395260494,0.715706894419275,"info","info","removed"
+"genetic","scrub: tree axis vs geography fit (multiple R)",0.0941994016469912,0.626932664805833,"positive","FLAG","removed"
+"genetic","scrub: pure vs signed axis",-3.7090106349127e-17,1,"zero","ok","removed"
+"genetic","scrub: pure vs distance from Manila",-3.38966834222809e-17,1,"zero","ok","removed"
+"genetic","scrub: pure vs tree axis",0.995553350016637,3.04326117285137e-29,"info","info","removed"
+"genetic","y: y vs distance from Manila",0.215195697464955,0.262251101315776,"info","info","removed"
+"genetic","y: y vs pure",-0.232897050877823,0.224051335319435,"info","info","removed"
+"genetic","geo: signed axis vs latitude",0.965404529177471,1.23010586728564e-49,"positive","ok","kept"
+"genetic","geo: |signed axis| vs distance from Manila",0.880481372414821,2.61452246741853e-28,"info","info","kept"
+"genetic","geo: signed axis vs distance from Manila",0.697118896979164,1.75976313585396e-13,"info","info","kept"
+"genetic","align: tree axis vs signed axis (before sign)",-0.049274381548059,0.656239617406218,"info","info","kept"
+"genetic","align: tree axis vs signed axis (after sign)",0.049274381548059,0.656239617406218,"positive","FLAG","kept"
+"genetic","align: tree axis vs distance from Manila",0.30468165608649,0.00483325142725869,"info","info","kept"
+"genetic","scrub: tree axis vs geography fit (multiple R)",0.380260851046865,0.000359786376762764,"positive","ok","kept"
+"genetic","scrub: pure vs signed axis",1.29459311959807e-16,0.999999999999999,"zero","ok","kept"
+"genetic","scrub: pure vs distance from Manila",1.35457670761575e-16,0.999999999999999,"zero","ok","kept"
+"genetic","scrub: pure vs tree axis",0.924879281398991,3.4949970138187e-36,"info","info","kept"
+"genetic","y: y vs distance from Manila",-0.00531956841058337,0.961696759923041,"info","info","kept"
+"genetic","y: y vs pure",0.252460873207345,0.02051260269336,"info","info","kept"

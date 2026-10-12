@@ -1,9 +1,9 @@
 # =============================================================================
 # Shared — pure phylogeny on the geographic axis
 #
-# Fitters and figures for the [4]_*_PVR.R scripts: orient a phylogenetic axis
-# with distance from Manila, residualize it on that distance, and regress the
-# Spanish signal on geography and on the residual.
+# Fitters and figures for the [4]_*_PVR.R scripts: build a signed geographic
+# axis anchored at Manila, residualize a phylogenetic axis on it and on distance
+# from Manila, and regress the Spanish signal on geography and on the residual.
 #
 # Inputs:  none (sourced)
 # Outputs: none (functions only)
@@ -27,7 +27,40 @@ pcoa_axis1 <- function(D) {
 }
 
 
-#' One results row from a single-predictor lm.
+#' Signed geographic Axis 1 of a pairwise cost matrix, with Manila added as a point.
+#'
+#' @param G   Pairwise cost matrix (km), named by unit.
+#' @param h2  Cost from each unit to Manila (km), aligned to rownames(G).
+#' @param lat Latitude of each unit, aligned to rownames(G).
+#' @return list(signed = named km from Manila along the axis, south positive; var_share).
+geo_axis1 <- function(G, h2, lat) {
+  stopifnot("Pairwise matrix row and column names disagree." = identical(rownames(G), colnames(G)),
+            length(h2) == nrow(G), length(lat) == nrow(G))
+  Ga <- rbind(cbind(G, Manila = h2), Manila = c(h2, 0))
+  p  <- cmdscale(as.dist(Ga), k = 1, eig = TRUE)
+  g  <- p$points[, 1]
+  if (cor(g[rownames(G)], lat) > 0) g <- -g          # sign convention: south = positive
+  list(signed = g[rownames(G)] - g[["Manila"]],
+       var_share = p$eig[1] / sum(p$eig[p$eig > 0]))
+}
+
+
+#' geo_axis1() for an analysis frame that may repeat a unit across rows.
+#'
+#' @param frame Data frame with `key`, `x_km` (cost to Manila) and `lat`.
+#' @param key   Column naming the unit, matching the dimnames of `G`.
+#' @param G     Full pairwise cost matrix for the domain.
+#' @return list(signed = km from Manila per row of `frame`, var_share).
+geo_axis_frame <- function(frame, key, G) {
+  u   <- frame[!duplicated(frame[[key]]), , drop = FALSE]
+  ids <- u[[key]]
+  stopifnot("Units missing from the pairwise matrix." = all(ids %in% rownames(G)))
+  ga <- geo_axis1(G[ids, ids, drop = FALSE], u$x_km, u$lat)
+  list(signed = unname(ga$signed[frame[[key]]]), var_share = ga$var_share)
+}
+
+
+#' One results row for one term of an lm; F, p and R^2 are for the whole model.
 lm_row <- function(m, term, model, response, predictor, scale = 1) {
   s  <- summary(m)
   cf <- s$coefficients[term, ]
@@ -35,6 +68,7 @@ lm_row <- function(m, term, model, response, predictor, scale = 1) {
   tibble(model, response, predictor, n = nobs(m),
          slope         = cf[["Estimate"]]   * scale,
          slope_se      = cf[["Std. Error"]] * scale,
+         term_p        = cf[["Pr(>|t|)"]],
          f.statistic   = unname(fs[1]),
          p.value       = unname(pf(fs[1], fs[2], fs[3], lower.tail = FALSE)),
          r.squared     = s$r.squared,
@@ -42,85 +76,130 @@ lm_row <- function(m, term, model, response, predictor, scale = 1) {
 }
 
 
+#' One alignment-check row: Pearson r (and its test) between two vectors.
+#'
+#' @param expect "positive" (r > 0, p < 0.05) or "zero" (|r| < 1e-8); anything else is reported only.
+cor_check <- function(step, a, b, expect = "info") {
+  ct <- suppressWarnings(cor.test(a, b))
+  r  <- unname(ct$estimate)
+  status <- switch(expect,
+    positive = if (r > 0 && ct$p.value < 0.05) "ok" else "FLAG",
+    zero     = if (abs(r) < 1e-8) "ok" else "FLAG",
+    "info")
+  tibble(step, r = r, p.value = ct$p.value, expect, status)
+}
+
+
 #' Decompose a phylogenetic axis against geography and regress y on both parts.
 #'
-#' @param frame     Data frame with `y` and `x_km`, rows aligned to `axis1`.
+#' @param frame     Data frame with `y` and `x_km` (cost to Manila), rows aligned to `axis1`.
 #' @param axis1     Phylogenetic Axis 1, one value per row of `frame`.
+#' @param geo       geo_axis_frame() result for `frame`.
 #' @param var_share Axis-1 variance share, carried into the results table.
-#' @param predictor Name of the geography column, for the results table.
+#' @param predictor Name of the cost-to-Manila column, for the results table.
 #' @param response  Name of the y column, for the results table.
 #' @param axis_name Name of the phylogenetic axis, for the results table.
 #' @param anc_label What Axis 1 measures, for the variance-partition labels.
 #' @param zeros     Zero-handling label ("removed"/"kept"), or NULL to omit the column.
-#' @return list(frame, pvr_geo_lm, vp, r2_full, rows).
-pure_phylo_fit <- function(frame, axis1, var_share, predictor, response,
+#' @return list(frame, pvr_geo_lm, vp, r2_full, rows, checks).
+pure_phylo_fit <- function(frame, axis1, geo, var_share, predictor, response,
                            axis_name = "phylo_axis1", anc_label = "phylogeny",
                            zeros = NULL) {
-  stopifnot("axis1 and frame differ in length." = length(axis1) == nrow(frame))
-  x <- frame$x_km / 1000                             # fit on Mm
+  stopifnot("axis1/geo and frame differ in length." =
+              length(axis1) == nrow(frame) && length(geo$signed) == nrow(frame))
+  x <- frame$x_km / 1000                             # cost to Manila, Mm
+  s <- geo$signed / 1000                             # signed geographic axis, Mm
   axis1 <- unname(axis1)
 
-  # Orient Axis 1 to rise with distance from Manila.
-  flipped <- cor(axis1, x) < 0
+  # Sign convention: Axis 1 runs the same way as the signed geographic axis.
+  axis1_raw <- axis1
+  flipped   <- cor(axis1, s) < 0
   if (flipped) axis1 <- -axis1
 
-  pvr_geo_lm <- lm(axis1 ~ x)
+  pvr_geo_lm <- lm(axis1 ~ s + x)
   r <- unname(resid(pvr_geo_lm))
+  frame$geo_signed_km      <- geo$signed
   frame$phylo_axis1        <- axis1
   frame$pure_phylogeny     <- r
   frame$pure_phylogeny_pos <- r - min(r)            # 0 -> + like geography; a constant shift, so no fit changes
-  stopifnot("pure_phylogeny is not orthogonal to geography." = abs(cor(r, x)) < 1e-8)
+  stopifnot("pure_phylogeny is not orthogonal to geography." =
+              abs(cor(r, x)) < 1e-8 && abs(cor(r, s)) < 1e-8)
 
-  d <- data.frame(y = frame$y, x = x, axis1 = axis1, pure = frame$pure_phylogeny_pos)
-  m_geo  <- lm(y ~ x,         data = d)
-  m_pure <- lm(y ~ pure,      data = d)
-  m_phy  <- lm(y ~ axis1,     data = d)
-  m_full <- lm(y ~ x + axis1, data = d)
+  d <- data.frame(y = frame$y, x = x, s = s, axis1 = axis1, pure = frame$pure_phylogeny_pos)
+  m_geo  <- lm(y ~ x,             data = d)
+  m_pure <- lm(y ~ pure,          data = d)
+  m_phy  <- lm(y ~ axis1,         data = d)
+  m_gblk <- lm(y ~ x + s,         data = d)          # the geography pure_phylogeny is scrubbed of
+  m_full <- lm(y ~ x + s + axis1, data = d)
 
-  R2_geo  <- summary(m_geo)$r.squared
+  R2_gblk <- summary(m_gblk)$r.squared
   R2_pure <- summary(m_pure)$r.squared
   R2_phy  <- summary(m_phy)$r.squared
   R2_full <- summary(m_full)$r.squared
   stopifnot("geography R^2 + pure-phylogeny R^2 != R^2(y ~ geography + axis 1)." =
-              isTRUE(all.equal(R2_geo + R2_pure, R2_full, tolerance = 1e-8)))
+              isTRUE(all.equal(R2_gblk + R2_pure, R2_full, tolerance = 1e-8)))
 
   # b is a difference of R^2, not a variance, and goes negative under suppression.
   vp <- tibble(
     component = c("a", "b", "c", "d"),
     meaning   = c("geography only", "shared", paste(anc_label, "only"), "unexplained"),
-    fraction  = c(R2_full - R2_phy, R2_geo + R2_phy - R2_full, R2_pure, 1 - R2_full)
+    fraction  = c(R2_full - R2_phy, R2_gblk + R2_phy - R2_full, R2_pure, 1 - R2_full)
   )
   stopifnot("Variance partition does not sum to 1." =
               isTRUE(all.equal(sum(vp$fraction), 1, tolerance = 1e-8)))
 
-  geo_lab <- paste0(predictor, " (per ", DISPLAY_UNIT_KM, " km)")
+  per     <- paste0(" (per ", DISPLAY_UNIT_KM, " km)")
   scl     <- DISPLAY_UNIT_KM / 1000
   rows <- bind_rows(
-    lm_row(pvr_geo_lm, "x",    "phylogeny_vs_geography", axis_name, geo_lab, scl),
-    lm_row(m_geo,      "x",    "A_y_vs_geography",       response,  geo_lab, scl),
+    lm_row(pvr_geo_lm, "s",    "phylogeny_vs_geography", axis_name, paste0("geo_axis1_signed", per), scl),
+    lm_row(pvr_geo_lm, "x",    "phylogeny_vs_geography", axis_name, paste0(predictor, per), scl),
+    lm_row(m_geo,      "x",    "A_y_vs_geography",       response,  paste0(predictor, per), scl),
     lm_row(m_pure,     "pure", "B_y_vs_pure_phylogeny",  response,  "pure_phylogeny_pos")
   ) |>
-    mutate(axis1_var_share = var_share, axis1_flipped = flipped, .after = n)
+    mutate(axis1_var_share = var_share, axis1_flipped = flipped,
+           geo_var_share = geo$var_share, .after = n)
   if (!is.null(zeros)) rows <- mutate(rows, zeros = zeros, .after = model)
 
-  list(frame = frame, pvr_geo_lm = pvr_geo_lm, vp = vp, r2_full = R2_full, rows = rows)
+  # Correlation at every stage; FLAG marks a geography or tree axis that is not doing its job.
+  checks <- bind_rows(
+    cor_check("geo: signed axis vs latitude",                     s, -frame$lat,  "positive"),
+    cor_check("geo: |signed axis| vs distance from Manila",      abs(s), x),     # < 1 where travel is east-west
+    cor_check("geo: signed axis vs distance from Manila",        s, x),
+    cor_check("align: tree axis vs signed axis (before sign)",   axis1_raw, s),
+    cor_check("align: tree axis vs signed axis (after sign)",    axis1, s,        "positive"),
+    cor_check("align: tree axis vs distance from Manila",        axis1, x),
+    cor_check("scrub: tree axis vs geography fit (multiple R)",  axis1, fitted(pvr_geo_lm), "positive"),
+    cor_check("scrub: pure vs signed axis",                      r, s,            "zero"),
+    cor_check("scrub: pure vs distance from Manila",             r, x,            "zero"),
+    cor_check("scrub: pure vs tree axis",                        r, axis1),
+    cor_check("y: y vs distance from Manila",                    frame$y, x),
+    cor_check("y: y vs pure",                                    frame$y, r)
+  )
+  if (!is.null(zeros)) checks <- mutate(checks, zeros = zeros, .before = 1)
+  flags <- checks$step[checks$status == "FLAG"]
+  if (length(flags)) message("!! alignment FLAG", if (!is.null(zeros)) paste0(" (zeros ", zeros, ")"),
+                             ": ", paste(flags, collapse = "; "))
+
+  list(frame = frame, pvr_geo_lm = pvr_geo_lm, vp = vp, r2_full = R2_full, rows = rows,
+       checks = checks)
 }
 
 
-#' Figure 1: geography and pure phylogeny profiles, languages ordered by distance from Manila.
+#' Figure 1: signed geography and pure phylogeny profiles, units ordered north to south.
 plot_profile <- function(fit, title, anc_label) {
   d <- fit$frame |>
-    arrange(x_km, pure_phylogeny_pos) |>
+    arrange(geo_signed_km, pure_phylogeny_pos) |>
     mutate(rank = row_number())
   expect <- -min(fit$frame$pure_phylogeny)           # level of pure_phylogeny_pos where pure_phylogeny = 0
 
-  p_geo <- ggplot(d, aes(rank, x_km / DISPLAY_UNIT_KM)) +
+  p_geo <- ggplot(d, aes(rank, geo_signed_km / DISPLAY_UNIT_KM)) +
+    geom_hline(yintercept = 0, linetype = "dashed", colour = "grey40") +
     geom_line(colour = "grey60", linewidth = 0.4) +
     geom_point(size = 1.6) +
     theme_bw() +
     theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
     labs(title = title, x = NULL,
-         y = sprintf("Distance from Manila (%d km)", DISPLAY_UNIT_KM))
+         y = sprintf("Signed distance from Manila (%d km)", DISPLAY_UNIT_KM))
 
   p_pure <- ggplot(d, aes(rank, pure_phylogeny_pos)) +
     geom_hline(yintercept = expect, linetype = "dashed", colour = "grey40") +
@@ -128,7 +207,7 @@ plot_profile <- function(fit, title, anc_label) {
                  colour = "grey60", linewidth = 0.4) +
     geom_point(size = 1.6) +
     theme_bw() +
-    labs(x = "Rank by distance from Manila", y = paste("Pure", anc_label))
+    labs(x = "Rank, north to south", y = paste("Pure", anc_label))
 
   p_geo / p_pure
 }
@@ -150,26 +229,47 @@ lm_panel <- function(d, xvar, yvar, xlab, ylab, ptitle) {
 }
 
 
-#' Figure 2: oriented Axis 1 and pure phylogeny against geography, with lm fits.
+#' Figure 2: oriented Axis 1 and pure phylogeny against signed geography, with lm fits.
 plot_scatter <- function(fit, title, anc_label, axis_label) {
-  d    <- fit$frame |> mutate(x_disp = x_km / DISPLAY_UNIT_KM)
-  xlab <- sprintf("Distance from Manila (%d km)", DISPLAY_UNIT_KM)
+  d    <- fit$frame |> mutate(x_disp = geo_signed_km / DISPLAY_UNIT_KM)
+  xlab <- sprintf("Signed distance from Manila (%d km, north - / south +)", DISPLAY_UNIT_KM)
   (lm_panel(d, "x_disp", "phylo_axis1", xlab, paste(axis_label, "(oriented)"), "Raw") |
      lm_panel(d, "x_disp", "pure_phylogeny_pos", xlab, paste("Pure", anc_label), "Pure")) +
     plot_annotation(title = title)
 }
 
 
-#' Figure 3: the Spanish signal against geography and against pure phylogeny, on a shared y-axis.
+#' Figure 3 panels: the Spanish signal against distance from Manila and against
+#' pure phylogeny, on a shared y-range.
+y_panels <- function(fit, anc_label, y_label) {
+  d    <- fit$frame |> mutate(x_disp = x_km / DISPLAY_UNIT_KM)
+  ylim <- coord_cartesian(ylim = range(d$y))
+  list(geography = lm_panel(d, "x_disp", "y", sprintf("Distance from Manila (%d km)", DISPLAY_UNIT_KM),
+                            y_label, "Geography") + ylim,
+       pure      = lm_panel(d, "pure_phylogeny_pos", "y", paste("Pure", anc_label), y_label,
+                            paste("Pure", anc_label)) + ylim)
+}
+
+
+#' Figure 3, combined: geography | pure phylogeny side by side.
 plot_y_scatter <- function(fit, title, anc_label, y_label) {
-  d <- fit$frame |> mutate(x_disp = x_km / DISPLAY_UNIT_KM)
-  (lm_panel(d, "x_disp", "y", sprintf("Distance from Manila (%d km)", DISPLAY_UNIT_KM),
-            y_label, "Geography") |
-     lm_panel(d, "pure_phylogeny_pos", "y", paste("Pure", anc_label), y_label,
-              paste("Pure", anc_label))) +
-    plot_layout(axes = "collect_y") +
-    plot_annotation(title = title) &
-    coord_cartesian(ylim = range(d$y))
+  p <- y_panels(fit, anc_label, y_label)
+  (p$geography | p$pure) + plot_layout(axes = "collect_y") + plot_annotation(title = title)
+}
+
+
+#' Write Figure 3 combined (<prefix>_y_scatter) and as two standalone panels
+#' (<prefix>_y_geography, <prefix>_y_pure), each followed by `sfx`.
+save_y_scatters <- function(fit, dir, prefix, name, anc_label, y_label, tag = NULL, sfx = "") {
+  p    <- y_panels(fit, anc_label, y_label)
+  full <- \(x) if (is.null(tag)) x else sprintf("%s (%s)", x, tag)
+  out  <- \(kind) file.path(dir, paste0(prefix, "_y_", kind, sfx, ".png"))
+  ggsave(out("scatter"), plot_y_scatter(fit, full(name), anc_label, y_label),
+         width = 10, height = 4.5, units = "in", dpi = 300)
+  ggsave(out("geography"), p$geography + labs(title = full(paste(name, "vs. geography"))),
+         width = 5.5, height = 4.5, units = "in", dpi = 300)
+  ggsave(out("pure"), p$pure + labs(title = full(paste(name, "vs. pure", anc_label))),
+         width = 5.5, height = 4.5, units = "in", dpi = 300)
 }
 
 

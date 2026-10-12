@@ -15,7 +15,7 @@
 #          data/genetic/Phil_2.24M_pca_results.eigenvec
 # Outputs: data/pvr_mem/GENETIC_pvr_spca_results.csv, data/pvr_mem/GENETIC_spca_scores.csv
 #          data/pvr_mem/base_plot_genetic_PVR_sPCA.rds
-#          figures/regression/genetic_pvr_spca_surface.png
+#          figures/regression/spatial/genetic_pvr_spca_surface.png
 # =============================================================================
 
 library(tidyverse)
@@ -155,7 +155,7 @@ write.csv(GENETIC_pvr_spca_results,
 
 
 # ── 9. Plot: sPCA point-symbol map (size = |sPC1|, colour = sign) ───────────
-dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression", "spatial"), recursive = TRUE, showWarnings = FALSE)
 
 world_map  <- map_data("world")
 map_subset <- world_map |> filter(region %in% c("Philippines", "Malaysia"))
@@ -196,6 +196,6 @@ p_surface <- ggplot() +
        subtitle = sprintf("p = %.3f, r^2 = %.3f", best$perm_p, summary(spca_fit)$r.squared))
 print(p_surface)
 
-ggsave(here("figures", "regression", "genetic_pvr_spca_surface.png"),
+ggsave(here("figures", "regression", "spatial", "genetic_pvr_spca_surface.png"),
        p_surface, width = 7.5, height = 6, units = "in", dpi = 300)
 saveRDS(p_surface, file = here("data", "pvr_mem", "base_plot_genetic_PVR_sPCA.rds"))

@@ -16,9 +16,10 @@
 # *_subgroup_lookup.csv and *_phylo_dist_matrix.csv and re-saves its tree
 # figure. Idempotent from the committed inputs, but it is not a no-op.
 #
-# Schema: three rows per fit (phylogeny_vs_geography, A_y_vs_geography,
-# B_y_vs_pure_phylogeny). Cognate and genetic fit twice, zeros removed and kept,
-# so they contribute 6 rows and carry a `zeros` column; phoneme and grammar get NA.
+# Schema: four rows per fit — phylogeny_vs_geography twice (one per term:
+# signed geographic axis, cost to Manila; F/p/R^2 are the joint model's),
+# A_y_vs_geography, B_y_vs_pure_phylogeny. Cognate and genetic fit twice, zeros
+# removed and kept, so they contribute 8 rows and carry a `zeros` column.
 # Genetic's `axis1_var_share` is NA (PC1 is not re-derived from a distance matrix).
 #
 # Inputs:  R/phoneme_analysis/[0]_CREANZA_RUHLENdatabase.R  (PART A)
@@ -26,6 +27,7 @@
 #          R/{phoneme,grammar,cognate}_analysis/[0]_Phylogenetic_Tree.R
 #          R/{phoneme,grammar,cognate,genetic}_analysis/[4]_*_PVR.R
 # Outputs: data/pvr/geo_vs_ancestry.csv
+#          data/pvr/pvr_alignment_checks.csv (correlation at each step; status FLAG = failed check)
 #          (the figures are written by the domain scripts)
 # =============================================================================
 
@@ -45,12 +47,16 @@ SCRIPTS <- list(
   genetic = list(here("R", "genetic_analysis", "[4]_GENETIC_PVR.R"))
 )
 
-rows <- lapply(names(SCRIPTS), function(domain) {
+envs <- lapply(setNames(names(SCRIPTS), names(SCRIPTS)), function(domain) {
   message("\n[", domain, "]")
-  env <- run_domain(SCRIPTS[[domain]])
-  harvest(env, "pvr_results_table", domain)
+  run_domain(SCRIPTS[[domain]])
 })
 
 geo_vs_ancestry <- write_consolidated(
-  rows, here("data", "pvr", "geo_vs_ancestry.csv")
+  lapply(names(envs), \(d) harvest(envs[[d]], "pvr_results_table", d)),
+  here("data", "pvr", "geo_vs_ancestry.csv")
+)
+pvr_alignment_checks <- write_consolidated(
+  lapply(names(envs), \(d) harvest(envs[[d]], "pvr_checks", d)),
+  here("data", "pvr", "pvr_alignment_checks.csv")
 )

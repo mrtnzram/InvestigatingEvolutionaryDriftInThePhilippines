@@ -14,7 +14,7 @@
 #          data/cognate/COGNATE_subgroup_lookup.csv (region column, from [0])
 # Outputs: data/pvr_mem/COGNATE_regional_pvr_mem_results.csv
 #          data/pvr_mem/COGNATE_regional_pvr_mem_scores.csv
-#          figures/regression/cognate_regional_pvr_mem_<region>.png
+#          figures/regression/spatial/cognate_regional_pvr_mem_<region>.png
 #          (one standalone file per region — not combined into a single figure,
 #          since each region's map has its own aspect ratio)
 # =============================================================================
@@ -171,7 +171,7 @@ stopifnot("No region produced scores — nothing to plot." = nrow(scores_all) > 
 
 
 # ── 3. Plot: one panel per region, legend normalized across all of them ─────
-dir.create(here("figures", "regression"), recursive = TRUE, showWarnings = FALSE)
+dir.create(here("figures", "regression", "spatial"), recursive = TRUE, showWarnings = FALSE)
 
 map_subset <- map_data("world") |> filter(region %in% c("Philippines", "Malaysia"))
 
@@ -226,7 +226,7 @@ names(panels) <- run_regions
 
 for (rg in run_regions) {
   print(panels[[rg]])
-  ggsave(here("figures", "regression",
+  ggsave(here("figures", "regression", "spatial",
               paste0("cognate_regional_pvr_mem_", tolower(rg), ".png")),
          panels[[rg]], width = 5.5, height = 6, units = "in", dpi = 300)
 }
