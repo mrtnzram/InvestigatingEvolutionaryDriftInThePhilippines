@@ -35,12 +35,18 @@ add_routes_and_capital <- function(base) {
     geom_point(data = capital_df, aes(x = x, y = y, shape = label), color = "red", size = 4) +
     scale_shape_manual(values = c("Capital" = 18)) +
     guides(shape = guide_legend(title = NULL)) +
-    theme(legend.position = "right")
+    theme(legend.position = "right",
+          panel.border = element_rect(fill = NA, color = "black", linewidth = 0.8))
 }
+
+title_theme <- theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13,
+                                               margin = margin(b = 8)))
 
 # ---- Figure A: cosine similarity + routes -----------------------------------
 base_plot_cosine  <- readRDS(here("data", "cosine_similarity", "base_plot_grammar_cosine.rds"))
-final_plot_cosine <- add_routes_and_capital(base_plot_cosine)
+final_plot_cosine <- add_routes_and_capital(base_plot_cosine) +
+  labs(title = "Cosine Similarity Distribution: Grammar") +
+  title_theme
 
 print(final_plot_cosine)
 
@@ -52,7 +58,8 @@ base_plot_feems  <- readRDS(here("data", "feems", "base_plot_grammar_FEEMS.rds")
 legend_strip     <- readRDS(here("data", "feems", "legend_strip_grammar_subgroup.rds"))
 
 final_plot_feems <- (add_routes_and_capital(base_plot_feems) | legend_strip) +
-  plot_layout(widths = c(5, 1.4))
+  plot_layout(widths = c(5, 1.4)) +
+  plot_annotation(title = "FEEMS migration surfaces: Grammar", theme = title_theme)
 
 print(final_plot_feems)
 
@@ -65,7 +72,8 @@ ggsave(here("figures", "mst_waypoints", "GA_weight_mst_feems.png"),
 base_plot_feems_null  <- readRDS(here("data", "feems", "base_plot_grammar_FEEMS_null.rds"))
 
 final_plot_feems_null <- (add_routes_and_capital(base_plot_feems_null) | legend_strip) +
-  plot_layout(widths = c(5, 1.4))
+  plot_layout(widths = c(5, 1.4)) +
+  plot_annotation(title = "Null FEEMS migration surfaces: Grammar", theme = title_theme)
 
 print(final_plot_feems_null)
 

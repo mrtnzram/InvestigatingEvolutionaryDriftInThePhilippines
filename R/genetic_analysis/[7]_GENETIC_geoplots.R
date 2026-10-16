@@ -50,6 +50,14 @@ add_routes_and_capital <- function(base) {
     theme(legend.position = "right")
 }
 
+add_frame <- function(p, title) {
+  p +
+    labs(title = title) +
+    theme(panel.border = element_rect(fill = NA, color = "black", linewidth = 0.8),
+          plot.title   = element_text(hjust = 0.5, face = "bold", size = 13,
+                                      margin = margin(b = 8)))
+}
+
 dir.create(here("figures", "mst_waypoints"),
            recursive = TRUE, showWarnings = FALSE)
 
@@ -98,7 +106,8 @@ base_plot_admx <- ggplot() +
         axis.title = element_blank(),
         axis.ticks = element_blank())
 
-final_plot_admx <- add_routes_and_capital(base_plot_admx)
+final_plot_admx <- add_frame(add_routes_and_capital(base_plot_admx),
+                             "Spanish Ancestry Distribution: Genetic")
 
 print(final_plot_admx)
 
@@ -107,7 +116,8 @@ ggsave(here("figures", "mst_waypoints", "GENETIC_span_admx_weighted.png"),
 
 # ---- Figure B: FEEMS surface + routes ----------------------------------------
 base_plot_feems  <- readRDS(here("data", "feems", "base_plot_genetic_FEEMS.rds"))
-final_plot_feems <- add_routes_and_capital(base_plot_feems)
+final_plot_feems <- add_frame(add_routes_and_capital(base_plot_feems),
+                              "FEEMS migration surfaces: Genetic")
 
 print(final_plot_feems)
 
@@ -118,7 +128,8 @@ ggsave(here("figures", "mst_waypoints", "GENETIC_weight_mst_feems.png"),
 # Geographic-shuffle null (100 permutations, from genetic_feems.py --permute), on
 # the same color scale as Figure B (set jointly in [6]) so the two are comparable.
 base_plot_feems_null  <- readRDS(here("data", "feems", "base_plot_genetic_FEEMS_null.rds"))
-final_plot_feems_null <- add_routes_and_capital(base_plot_feems_null)
+final_plot_feems_null <- add_frame(add_routes_and_capital(base_plot_feems_null),
+                                   "Null FEEMS migration surfaces: Genetic")
 
 print(final_plot_feems_null)
 

@@ -273,6 +273,81 @@ save_y_scatters <- function(fit, dir, prefix, name, anc_label, y_label, tag = NU
 }
 
 
+#' Scrub-sensitivity figure: one row per scrub variant (signed axis + distance from
+#' Manila, signed axis only, distance only) — the geography fit of Axis 1 | y ~ the
+#' resulting pure phylogeny.
+#'
+#' @param frame   A [4] analysis frame (`phylo_axis1`, `geo_signed_km`, `x_km`, `y`) plus
+#'                `focus`: the display name for highlighted rows, NA otherwise.
+#' @param focus   Named colour vector keyed by display name; the legend shows those present.
+#' @param y_label y-axis label for the Spanish-signal column.
+plot_scrub_sensitivity <- function(frame, focus, y_label) {
+  variants <- list("Signed axis + distance from Manila" = axis1 ~ s + h,
+                   "Signed axis only"                   = axis1 ~ s,
+                   "Distance from Manila only"          = axis1 ~ h)
+  base <- tibble(focus = frame$focus, axis1 = frame$phylo_axis1,
+                 s = frame$geo_signed_km / 100, h = frame$x_km / 100, y = frame$y)
+  present <- intersect(names(focus), base$focus)
+
+  th <- theme_bw(base_size = 11) +
+    theme(panel.grid.minor = element_blank(), plot.tag = element_text(face = "bold", size = 20))
+  stat_box <- function(label) annotate("label", x = Inf, y = -Inf, hjust = 1.05, vjust = -0.3,
+                                       size = 3.3, label = label)
+  focus_pts <- function(data, xv, yv, legend = FALSE) {
+    list(geom_point(data = data, aes(.data[[xv]], .data[[yv]], colour = focus), size = 3.2),
+         scale_colour_manual(values = focus, breaks = present, name = NULL,
+                             guide = if (legend) "legend" else "none"))
+  }
+
+  row_plots <- function(f, label, tags, legend) {
+    # Plot against the variable the variant fits on: distance from Manila when it is the only term.
+    xv   <- if (identical(all.vars(f)[-1], "h")) "h" else "s"
+    xlab <- if (xv == "h") "Distance from Manila (100 km)" else "Geographic Axis 1 (100 km, Manila = 0)"
+    m <- lm(f, data = base)
+    d <- base |> mutate(pred = fitted(m), pure = resid(m))
+    dfoc <- d |> filter(!is.na(focus)) |> distinct(focus, .keep_all = TRUE)
+    my <- summary(lm(y ~ pure, data = d))
+
+    p_fit <- ggplot(d, aes(.data[[xv]], axis1)) +
+      { if (xv == "s") geom_vline(xintercept = 0, linetype = "dashed", colour = "grey35") } +
+      geom_segment(aes(xend = .data[[xv]], yend = pred), colour = "grey75", linewidth = 0.4) +
+      geom_segment(data = dfoc, aes(xend = .data[[xv]], yend = pred), colour = focus[dfoc$focus],
+                   linewidth = 1.1) +
+      geom_line(data = arrange(d, .data[[xv]]), aes(y = pred), colour = "black", linewidth = 1.1) +
+      geom_point(aes(y = pred), colour = "black", size = 1.2) +
+      geom_point(colour = "grey55", size = 2, alpha = 0.7) +
+      focus_pts(dfoc, xv, "axis1", legend) +
+      stat_box(sprintf("r^2 = %.2f", summary(m)$r.squared)) +
+      th +
+      labs(x = xlab, y = "Phylogenetic Axis 1 (oriented)", tag = tags[1])
+    if (legend) {
+      p_fit <- p_fit + theme(legend.position = "inside", legend.position.inside = c(0.02, 0.98),
+                             legend.justification = c(0, 1), legend.key.size = unit(0.9, "lines"),
+                             legend.background = element_rect(colour = "black", linewidth = 0.3))
+    }
+
+    p_y <- ggplot(d, aes(pure, y)) +
+      geom_smooth(method = "lm", formula = y ~ x, colour = "black", fill = "grey60",
+                  alpha = 0.25, linewidth = 1.1) +
+      geom_point(colour = "grey55", size = 2, alpha = 0.7) +
+      focus_pts(dfoc, "pure", "y") +
+      stat_box(sprintf("r^2 = %.3f, p = %.3g", my$r.squared, my$coefficients["pure", "Pr(>|t|)"])) +
+      coord_cartesian(ylim = range(base$y)) +
+      th +
+      labs(x = "Pure phylogeny (residual)", y = y_label, tag = tags[2])
+
+    row_lab <- wrap_elements(full = grid::textGrob(label, rot = 90,
+                                                   gp = grid::gpar(fontface = "bold", fontsize = 13)))
+    list(row_lab, p_fit, p_y)
+  }
+
+  tags <- list(c("A", "B"), c("C", "D"), c("E", "F"))
+  rows <- map(seq_along(variants), \(i) row_plots(variants[[i]], names(variants)[i], tags[[i]],
+                                                  legend = i == 1))
+  wrap_plots(list_flatten(rows), ncol = 3, widths = c(0.07, 1, 1))
+}
+
+
 #' Variance-partition diagram: total variance is the full-width line, geography
 #' the bar above it (a + b) and ancestry the bar below (b + c), overlapping on b.
 vp_diagram <- function(vp, title, subtitle, anc_label) {
